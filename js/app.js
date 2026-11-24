@@ -99,6 +99,10 @@
     });
   }
 
+  function syncBodyMode() {
+    document.body.classList.toggle("is-playing", currentView === "playing");
+  }
+
   function launchSetGame(main, profile, grade, dlp) {
     const questions = App.QuestionEngine.getSetQuestions(
       profile.gradeId,
@@ -108,6 +112,7 @@
       dlp && selectedSubject.dlp
     );
     currentView = "playing";
+    syncBodyMode();
     App.Games.startSession({
       container: main,
       profile,
@@ -141,6 +146,7 @@
   }
 
   function renderMain() {
+    syncBodyMode();
     const main = document.getElementById("main-content");
     const state = App.Storage.getState();
     const profile = App.Storage.getActiveProfile();

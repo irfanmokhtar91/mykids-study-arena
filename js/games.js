@@ -82,9 +82,9 @@
             <div class="arena-hud fps-hud">
               <div class="hud-left">
                 <span class="boss-avatar">${bossEmoji}</span>
-                <div>
+                <div class="hud-title-wrap">
                   <strong>TARGET STRIKE</strong>
-                  <div class="hud-sub">Bos: ${escapeHtml(chapter.title)}</div>
+                  <div class="hud-sub hud-boss-name" title="${escapeHtml(chapter.title)}">Bos: ${escapeHtml(chapter.title)}</div>
                 </div>
               </div>
               <div class="boss-bar-wrap">
@@ -106,7 +106,7 @@
             .join("");
           modeBanner = `
             <div class="arena-hud runner-hud">
-              <div><strong>🦊 CRATE RUNNER</strong> <span class="hud-sub">Pecahkan peti jawapan tepat!</span></div>
+              <div><strong>🦊 CRATE RUNNER</strong></div>
               <div class="runner-track">${trackCells}</div>
             </div>`;
         } else if (mode === "puzzle") {
@@ -118,7 +118,7 @@
             .join("");
           modeBanner = `
             <div class="arena-hud puzzle-hud">
-              <div><strong>🧩 VAULT PUZZLE</strong> <span class="hud-sub">Nyalakan semua nod litar</span></div>
+              <div><strong>🧩 VAULT PUZZLE</strong></div>
               <div class="vault-nodes">${nodes}</div>
             </div>`;
         } else {
@@ -153,10 +153,15 @@
           })
           .join("");
 
+        const muted = App.Sound.isMuted();
+
         container.innerHTML = `
           <div class="game-shell mode-${mode}">
             <div class="game-topbar">
-              <button class="btn-ghost" id="btn-quit-game">← Keluar</button>
+              <div class="game-nav-actions">
+                <button class="btn-ghost btn-sm" id="btn-quit-game">← Keluar</button>
+                <button class="btn-ghost btn-sm" id="btn-game-sound" title="Bunyi">${muted ? "🔇" : "🔊"}</button>
+              </div>
               <div class="game-meta">
                 <span>${subject.icon} ${escapeHtml(subject.name)}</span>
                 <span>•</span>
@@ -195,6 +200,14 @@
           App.Sound.click();
           onExit();
         });
+
+        const gameSoundBtn = container.querySelector("#btn-game-sound");
+        if (gameSoundBtn) {
+          gameSoundBtn.addEventListener("click", () => {
+            App.Sound.setMuted(!App.Sound.isMuted());
+            gameSoundBtn.textContent = App.Sound.isMuted() ? "🔇" : "🔊";
+          });
+        }
 
         const btn5050 = container.querySelector("#btn-5050");
         if (btn5050) {
