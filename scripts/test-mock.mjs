@@ -174,5 +174,45 @@ eq("rescore with no marks keeps waiting", [rr.complete, rr.pct, rr.grade], [fals
 rr = M.rescoreRecord(record, full);
 eq("rescore after full marks: 12+20+60 = 92% -> A", [rr.complete, rr.pct, rr.grade], [true, 92, "A"]);
 
+// ======================= TINGKATAN 4 MATEMATIK KERTAS 2 (answer 1 of 2 in Bahagian C) =======================
+const S4 = require("../js/data/structured_t4_math.js");
+const t4bp = B.find("t4", "math");
+const t4verified = S4.ITEMS.map((i) => ({ ...i, status: "verified" }));
+const t4bank = { chapterIds: ["c1"], getQuestions: () => [], getStructured: () => t4verified };
+let p4 = M.buildPaper(t4bp, "k2", t4bank, "t4seed");
+eq("T4 K2: A has 10 items = 40 marks", [p4.sections[0].items.length, p4.sections[0].items.reduce((a, i) => a + i.marks, 0)], [10, 40]);
+eq("T4 K2: B has 5 items = 45 marks", [p4.sections[1].items.length, p4.sections[1].items.reduce((a, i) => a + i.marks, 0)], [5, 45]);
+eq("T4 K2: C has 2 items of 15 marks, choose 1 of 2", [p4.sections[2].items.length, p4.sections[2].items.map((i) => i.marks), p4.sections[2].choose, p4.sections[2].of], [2, [15, 15], 1, 2]);
+eq("T4 K2: no item repeated, parts respected", new Set(p4.sections.flatMap((x) => x.items.map((i) => i.id))).size === 17 && p4.sections[0].items.every((i) => i.id.includes("-A")) && p4.sections[2].items.every((i) => i.id.includes("-C")), true);
+const mark = (it, picks) => { const o = {}; it.parts.forEach((pt, i) => (o[i] = picks(pt))); return o; };
+const allSteps = (pt) => pt.steps.map((_, k) => k);
+let pm4 = {};
+p4.sections.forEach((sec) => sec.items.forEach((it) => (pm4[it.id] = mark(it, allSteps))));
+let sc4 = M.scorePaper(p4, {}, pm4);
+eq("T4 K2: answering both C items fully still counts only 15 (best 1 of 2)", [sc4.sections[2].earned, sc4.sections[2].possible], [15, 15]);
+eq("T4 K2: full marks = 40 + 45 + 15 = 100 -> 100%, complete", [sc4.sections[0].earned + sc4.sections[1].earned + sc4.sections[2].earned, sc4.complete, sc4.pct], [100, true, 100]);
+// one C answered (8 of 15), the other left unanswered (explicit 0): earned = 8, not 8 + 0 averaged
+const c1 = p4.sections[2].items[0], c2 = p4.sections[2].items[1];
+pm4[c1.id] = mark(c1, (pt) => []);
+pm4[c2.id] = mark(c2, (pt, k) => pt.steps.slice(0, 4).map((_, j) => j));
+sc4 = M.scorePaper(p4, {}, pm4);
+const c2earned = M.earnedForItem(c2, pm4[c2.id]);
+eq("T4 K2: best-of-1 uses the answered question", sc4.sections[2].earned, Math.min(c2earned, 15));
+// the other way round gives the same total (order does not matter)
+const pmSwap = { ...pm4, [c1.id]: pm4[c2.id] && mark(c1, (pt) => pt.steps.slice(0, 4).map((_, j) => j)), [c2.id]: mark(c2, () => []) };
+eq("T4 K2: swapping which C item was answered gives a comparable section score", M.scorePaper(p4, {}, pmSwap).sections[2].earned > 0, true);
+// an unreviewed C item keeps the section pending
+const pmPending = { ...pm4 }; delete pmPending[c2.id];
+eq("T4 K2: an unreviewed C item keeps Bahagian C menunggu and blocks the grade", [M.scorePaper(p4, {}, pmPending).sections[2].state, M.scorePaper(p4, {}, pmPending).grade], ["menunggu", null]);
+// stored record rescoring honours choose
+const rec4 = { gradeId: "t4", paperMarks: 100, sections: p4.sections.map((x) => ({ id: x.id, state: "menunggu", earned: null, possible: x.marks, structured: true, choose: x.choose || null, items: x.items })) };
+const rr4 = M.rescoreRecord(rec4, (() => { const o = {}; p4.sections.forEach((sec) => sec.items.forEach((it) => (o[it.id] = mark(it, allSteps)))); return o; })());
+eq("T4 K2: rescoreRecord applies best-1-of-2 and gives 100% and an SPM grade", [rr4.complete, rr4.pct, rr4.grade], [true, 100, "A+"]);
+// draft T4 items are never drawn
+const pd4 = M.buildPaper(t4bp, "k2", { chapterIds: [], getQuestions: () => [], getStructured: () => S4.ITEMS }, "x");
+eq("T4 K2: while items are still draft nothing is drawn", pd4.sections.every((x) => x.items.length === 0 || S4.ITEMS.every((i) => i.status === "verified")), true);
+// Mesin is excluded from Darjah 6 graded mock papers
+eq("D6 Sains Mesin is excluded from mock banks", M.MOCK_EXCLUDE["d6:sains"], ["mesin"]);
+
 console.log(failed === 0 ? "MOCK_TESTS_PASSED" : `MOCK_TESTS_FAILED (${failed})`);
 process.exit(failed === 0 ? 0 : 1);

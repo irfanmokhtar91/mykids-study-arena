@@ -67,8 +67,9 @@
 
   function getBank(subject) {
     const gradeId = ctx.profile.gradeId;
+    const excluded = (App.MockExam.MOCK_EXCLUDE || {})[`${gradeId}:${subject.id}`] || [];
     return {
-      chapterIds: subject.chapters.map((c) => c.id),
+      chapterIds: subject.chapters.map((c) => c.id).filter((id) => !excluded.includes(id)),
       getStructured: (pool) => {
         const p = App.Data && App.Data.structured && App.Data.structured[pool];
         return p ? p.ITEMS : [];
@@ -291,7 +292,7 @@
         </div>
         <div class="mock-tabs">${tabs}</div>
         <div class="mock-qcard">
-          <div class="mock-qno">Soalan ${session.cur.idx + 1} / ${sec.items.length}${isStructured ? ` • ${item.marks} markah` : ""}</div>
+          <div class="mock-qno">Soalan ${session.cur.idx + 1} / ${sec.items.length}${isStructured ? ` • ${item.marks} markah` : ""}${sec.choose ? ` • Jawab ${sec.choose} daripada ${sec.of || sec.items.length} soalan` : ""}</div>
           ${
             isStructured
               ? `${item.stem ? `<p class="mock-q">${esc(item.stem).replace(/\n/g, "<br>")}</p>` : ""}
@@ -399,6 +400,8 @@
         const sec = scoped.sections.find((s) => s.id === x.id);
         if (sec && sec.structured && sec.items.length) {
           base.structured = true;
+          base.choose = sec.choose || null;
+          base.of = sec.of || null;
           base.items = sec.items.map((it) => ({
             id: it.id,
             chapterId: it.chapterId,

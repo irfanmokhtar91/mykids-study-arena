@@ -54,14 +54,14 @@
             ["Khabar angin", "Berita yang belum tentu sahih / gosip", "'Khabar angin' ialah cerita yang belum disahkan kebenarannya."],
             ["Bulat kata", "Sepakat membuat keputusan bersama", "'Bulat kata' bererti mencapai persetujuan bersama."],
             ["Buah tangan", "Hadiah atau cenderamata yang dibawa ketika melawat", "'Buah tangan' ialah ole-ole atau hadiah kepada tuan rumah."],
-            ["Cangkul angin", "Membuat kerja yang sia-sia tanpa hasil", "'Cangkul angin' menggambarkan usaha yang tidak membawa hasil."],
+            ["Menggantang asap", "Melakukan kerja yang sia-sia", "'Menggantang asap' bermaksud melakukan pekerjaan yang sia-sia."],
             ["Hati batu", "Degil / tidak mahu mendengar nasihat", "'Hati batu' bermaksud keras kepala atau degil."],
             ["Besar kepala", "Sombong dan tidak mahu mengalah", "'Besar kepala' ialah sikap angkuh atau keras kepala."],
             ["Pasang telinga", "Mendengar dengan penuh teliti", "'Pasang telinga' bererti menumpukan perhatian ketika mendengar."],
             ["Ikat perut", "Mengurangkan makan kerana berjimat atau susah", "'Ikat perut' bererti menahan lapar untuk berjimat."],
             ["Mandi peluh", "Bekerja dengan sangat tekun dan bersungguh-sungguh", "'Mandi peluh' menggambarkan kerja keras hingga berpeluh."],
             ["Bagai tikus membaiki labu", "Cuba membaiki sesuatu tetapi makin merosakkannya", "Orang yang tiada kemahiran membaiki barang akhirnya merosakkannya lagi."],
-            ["Bagai aur di atas bukit", "Berserah kepada nasib tanpa kepastian", "Hidup dalam keadaan terdedah tanpa tempat bergantung."],
+            ["Bagai aur dengan tebing", "Hidup saling bergantung dan tolong-menolong", "'Bagai aur dengan tebing' bermaksud hubungan yang saling memerlukan."],
             ["Seperti ular kena palu", "Bengkang-bengkok dan tidak lurus (jalan)", "Menggambarkan laluan atau garisan yang berliku-liku."]
           ],
           (r) => `Apakah maksud ungkapan '${r[0]}'?`,
@@ -79,7 +79,7 @@
             ["agung", "mulia", "'Agung' bermaksud tinggi darjat atau mulia."],
             ["pantas", "laju", "'Pantas' seerti dengan laju dan cepat."],
             ["damai", "aman", "'Damai' bermaksud tenang dan aman sentosa."],
-            ["hebat", "unggul", "'Hebat' membawa maksud luar biasa atau unggul."],
+            ["murung", "sedih", "'Murung' bermaksud sedih dan muram."],
             ["setia", "patuh", "'Setia' bermaksud taat dan teguh berpegang janji."],
             ["cemerlang", "gemilang", "'Cemerlang' seerti dengan kejayaan yang gemilang."],
             ["berani", "perkasa", "'Berani' bermaksud tidak takut dan perkasa."],
@@ -255,7 +255,7 @@
             ["Al-Qadir", "Allah Maha Berkuasa", "Allah berkuasa melakukan segala sesuatu mengikut kehendak-Nya."],
             ["Al-Ghafur", "Allah Maha Pengampun", "Allah mengampunkan dosa hamba-Nya yang bertaubat nasuha."]
           ],
-          (r) => `Apakah maksud atau tugas bagi '${r[0]}' dalam Akidah Islam?`,
+          (r) => `Apakah penjelasan yang betul tentang “${r[0]}” dalam Akidah Islam?`,
           (r) => r[1],
           (r) => r[2]
         )
@@ -580,7 +580,7 @@
         ibadah: buildFromTuples(
           [
             ["Miqat Makani jemaah Malaysia (penerbangan ke Jeddah)", "Yalamlam atau Qarnul Manazil (mengikut laluan pesawat)", "Jemaah berniat ihram Haji/Umrah sebelum melintasi sempadan Miqat."],
-            ["Tawaf Ifadah (Tawaf Rukun)", "Mengelilingi Kaabah sebanyak 7 pusingan dengan syarat sahnya (wajib selepas wukuf)", "Rukun Haji yang membolehkan jemaah bebas daripada semua larangan ihram selepas tahallul."],
+            ["Tawaf Ifadah (Tawaf Rukun)", "Mengelilingi Kaabah sebanyak 7 pusingan dengan syarat sahnya (rukun haji selepas wukuf)", "Rukun Haji yang membolehkan jemaah bebas daripada semua larangan ihram selepas tahallul."],
             ["Ibadat Sa'i", "Berjalan ulang-alik dari Bukit Safa ke Bukit Marwah sebanyak 7 kali", "Mengenang pengorbanan Siti Hajar mencari air untuk Nabi Ismail a.s."],
             ["Tahallul Awal", "Tercapai apabila jemaah selesai 2 daripada 3 perkara: melontar Jamrah Kubra, bercukur, dan Tawaf Ifadah", "Membebaskan jemaah daripada larangan ihram kecuali berkaitan nikah/jima'."],
             ["Mabit di Muzdalifah", "Bermalam di Muzdalifah selepas maghrib 9 Zulhijjah dan mengutip batu kecil", "Termasuk dalam wajib Haji sebelum bergerak ke Mina."],
@@ -592,7 +592,7 @@
             ["Akad Takaful (Insurans Islam)", "Sistem perlindungan bersama berteraskan tabarru' (derma ikhlas) bebas riba dan gharar", "Menggantikan insurans konvensional dalam muamalat Islam."],
             ["Larangan Riba al-Nasiah", "Pertambahan bayaran disebabkan penangguhan tempoh bayaran hutang", "Riba adalah haram secara mutlak dalam Al-Quran."]
           ],
-          (r) => `Apakah hukum atau maksud '${r[0]}' dalam Ibadah & Muamalat Tingkatan 4?`,
+          (r) => `Apakah penjelasan yang betul tentang “${r[0]}” dalam Ibadah & Muamalat Tingkatan 4?`,
           (r) => r[1],
           (r) => r[2]
         )

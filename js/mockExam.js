@@ -42,7 +42,15 @@
    */
   const STRUCTURED_MAP = {
     "t2:math:k1:B": { pool: "t2_math", part: "B" },
-    "t2:math:k1:C": { pool: "t2_math", part: "C" }
+    "t2:math:k1:C": { pool: "t2_math", part: "C" },
+    "t4:math:k2:A": { pool: "t4_math", part: "A" },
+    "t4:math:k2:B": { pool: "t4_math", part: "B" },
+    "t4:math:k2:C": { pool: "t4_math", part: "C" }
+  };
+
+  /** Chapters that must NOT feed graded mock papers (outside the year's DSKP body). Practice sets still use them. */
+  const MOCK_EXCLUDE = {
+    "d6:sains": ["mesin"] // machines appear only in the level-wide Tahap II table, not the Tahun 6 body (DSKP check 25/Nov/2026)
   };
 
   function hashSeed(str) {
@@ -213,6 +221,11 @@
     });
     return earned;
   }
+  /** Sum of the best `choose` item scores (answer N of M); all items when choose is empty. */
+  function sectionEarned(items, pm, choose) {
+    const scores = items.map((it) => earnedForItem(it, pm[it.id])).sort((a, b) => b - a);
+    return (choose ? scores.slice(0, choose) : scores).reduce((a, x) => a + x, 0);
+  }
   function isItemMarked(item, marked) {
     return !!marked && item.parts.every((p, i) => Array.isArray(marked[i]));
   }
@@ -235,8 +248,8 @@
           const done = s.items.filter((it) => isItemMarked(it, pm[it.id])).length;
           return { id: s.id, label: s.label, state: "menunggu", earned: null, possible: s.marks, structured: true, marked: done, total: s.items.length };
         }
-        const earned = s.items.reduce((a, it) => a + earnedForItem(it, pm[it.id]), 0);
-        return { id: s.id, label: s.label, state: "ditanda", earned, possible: s.marks, structured: true, marked: s.items.length, total: s.items.length };
+        const earned = sectionEarned(s.items, pm, s.choose);
+        return { id: s.id, label: s.label, state: "ditanda", earned, possible: s.marks, structured: true, choose: s.choose || null, marked: s.items.length, total: s.items.length };
       }
       let earned = 0;
       let correct = 0;
@@ -281,7 +294,7 @@
       if (!allMarked) {
         return { ...s, state: "menunggu", earned: null, marked: items.filter((it) => isItemMarked(it, pm[it.id])).length };
       }
-      return { ...s, state: "ditanda", earned: items.reduce((a, it) => a + earnedForItem(it, pm[it.id]), 0), marked: items.length };
+      return { ...s, state: "ditanda", earned: sectionEarned(items, pm, s.choose), marked: items.length };
     });
     const complete = sections.every((x) => x.state === "ditanda");
     const earned = sections.filter((x) => x.state === "ditanda").reduce((a, x) => a + x.earned, 0);
@@ -310,5 +323,5 @@
     return recs;
   }
 
-  return { OBJECTIVE_MAP, STRUCTURED_MAP, isSupported, buildPaper, scorePaper, rescoreRecord, earnedForItem, isItemMarked, itemRecords };
+  return { OBJECTIVE_MAP, STRUCTURED_MAP, MOCK_EXCLUDE, isSupported, buildPaper, scorePaper, rescoreRecord, earnedForItem, isItemMarked, itemRecords };
 });

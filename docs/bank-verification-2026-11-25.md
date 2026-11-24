@@ -37,3 +37,27 @@ Champa / Kedaulatan Raja overlap removed; planet question restated as "farthest 
 - Subjects/chapters outside the checked scope above still need the same blind check before any paper that uses them is graded.
 - Syllabus fit (is each question in the DSKP chapter?) was flagged by the solvers for some Darjah 6 Sains items that look like
   Tingkatan 1-3 content (nervous system, human reproduction, air pressure). Needs a teacher or DSKP check.
+
+---
+# Update 25/Nov/2026: remaining subjects, scope checks and Tingkatan 4 Matematik
+
+## Remaining 669 static/fact-table questions (BM, BI, Pendidikan Islam, RBT, Matematik Tambahan; Darjah 6, Tingkatan 2, Tingkatan 4)
+Same method (shuffled, 7 blind solvers). 669 answered; 662 agree with the key; 2 disagree; 5 had a second defensible option.
+- **Wrong key found and fixed:** "Apakah rukun Islam yang keempat?" was keyed as zakat (zakat is the third; puasa is the fourth), and its
+  explanation listed "3. Puasa, 4. Zakat". Corrected.
+- **Second correct option removed:** hebat/agung synonyms; "Mulai/Pada hari ini"; "Every students" (Every -> All also fixes it);
+  double intensifiers (sangat/terlalu ... sekali); beliau/baginda; committee has/have; data was/are; pepsin/trypsin overlap.
+- **Non-standard peribahasa replaced:** "Bagai aur di atas bukit" -> "Bagai aur dengan tebing"; "Cangkul angin" -> "Menggantang asap".
+- **Religious accuracy:** Tawaf Ifadah is a rukun (not merely wajib); Akidah/Ibadah question templates no longer say "tugas" for names of Allah.
+- 54 edited questions were re-checked blind; the last round found no wrong key and no second correct option except one weak distractor, then fixed.
+- Remaining quality notes (not wrong keys): many fact-table distractors are borrowed from other rows and are too easy; some "ayat/frasa" labels.
+
+## Syllabus fit (no teacher available, so checked against DSKP text found online; mirrors, not bpk.moe.gov.my)
+- Darjah 6 Sains: nervous system and reproduction ARE in the Tahun 6 DSKP (2.1 Pembiakan, 2.2 Sistem Saraf). "Mesin" is only in the level-wide
+  Tahap II table, so Mesin is excluded from Darjah 6 graded mock papers (still available for practice).
+- Tingkatan 2 Matematik (18 structured items): no part out of scope. Medium confidence: C08(c) expected number, B02 difference of two squares, C03(c) semicircle.
+- Tingkatan 4 Matematik (23 structured items): first draft had simple/compound interest (Tingkatan 3) and completing the square / roots-to-equation
+  (Additional Mathematics); these were replaced by factorisation-based and financial-planning items, then re-checked: no part out of scope.
+
+## Tingkatan 4 Matematik Kertas 2 pool: 23 items (A 12, B 7, C 4), all verified (code recomputation + blind solve + scope).
+Answer 1 of 2 in Bahagian C is scored as the best answered question. Browser test scripts/browser/mock-t4-k2.mjs passes.

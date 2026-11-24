@@ -72,7 +72,10 @@
               </div>`;
           })
           .join("");
-        return `<section class="mk-section"><h3>Bahagian ${esc(sec.id)} (${sec.possible} markah)</h3>${items}</section>`;
+        const chooseNote = sec.choose
+          ? `<p class="mk-note">Murid menjawab ${sec.choose} daripada ${sec.of || (sec.items || []).length} soalan. Tanda soalan yang dijawab; untuk soalan yang tidak dijawab pilih "0 markah". Markah terbaik dikira.</p>`
+          : "";
+        return `<section class="mk-section"><h3>Bahagian ${esc(sec.id)} (${sec.possible} markah)</h3>${chooseNote}${items}</section>`;
       })
       .join("");
 
