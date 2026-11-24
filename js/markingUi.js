@@ -25,6 +25,22 @@
     return (profile.mockResults || []).filter((r) => (r.sections || []).some((s) => s.state === "menunggu"));
   }
 
+  /** Full-size photo viewer: scrollable, tap the picture to switch between fit-to-screen and zoomed. */
+  function openViewer(src) {
+    const old = document.getElementById("photo-viewer");
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+    const v = document.createElement("div");
+    v.id = "photo-viewer";
+    v.className = "photo-viewer";
+    v.innerHTML = `<div class="pv-bar"><button type="button" class="btn-ghost btn-sm" id="pv-zoom">🔍 Zum</button><button type="button" class="btn-ghost btn-sm" id="pv-close">✕ Tutup</button></div><div class="pv-scroll"><img id="pv-img" src="${src}" alt="Foto jawapan" /></div>`;
+    document.body.appendChild(v);
+    const img = document.getElementById("pv-img");
+    const toggle = () => img.classList.toggle("is-zoomed");
+    document.getElementById("pv-zoom").addEventListener("click", toggle);
+    img.addEventListener("click", toggle);
+    document.getElementById("pv-close").addEventListener("click", () => v.parentNode && v.parentNode.removeChild(v));
+  }
+
   /** Open the marking overlay for one stored result record. */
   function open(profile, record, onSaved) {
     const old = document.getElementById("mark-modal");
@@ -49,7 +65,11 @@
                 return `
                 <div class="mk-part" data-item="${esc(slim.id)}" data-part="${i}">
                   <div class="mk-q"><strong>${esc(p.label)}</strong> ${esc(p.q).replace(/\n/g, "<br>")}</div>
-                  <div class="mk-child"><em>Jawapan anak:</em> ${ans ? esc(ans).replace(/\n/g, "<br>") : "<span class=\"mk-none\">(tiada jawapan ditaip)</span>"}</div>
+                  <div class="mk-child"><em>Jawapan anak:</em>
+                    <div class="mk-photos" data-photos="${esc(slim.id)}|${i}"></div>
+                    ${ans ? `<div>${esc(ans).replace(/\n/g, "<br>")}</div>` : ""}
+                    ${!ans && !(record.photos && record.photos[slim.id] && record.photos[slim.id][i] && record.photos[slim.id][i].length) ? "<span class=\"mk-none\">(tiada jawapan: tiada foto dan tiada tulisan)</span>" : ""}
+                  </div>
                   <div class="mk-model"><em>Jawapan model:</em> <strong>${esc(p.answer)}</strong></div>
                   <ul class="mk-steps">
                     ${p.steps
@@ -96,6 +116,19 @@
         </div>
       </div>`;
     document.body.appendChild(wrap);
+
+    wrap.querySelectorAll("[data-photos]").forEach(async (box) => {
+      const [itemId, part] = box.getAttribute("data-photos").split("|");
+      const ids = (record.photos && record.photos[itemId] && record.photos[itemId][part]) || [];
+      if (ids.length) box.innerHTML = "<small>Memuatkan foto...</small>";
+      const cells = [];
+      for (const id of ids) {
+        const url = await App.PhotoStore.getURL(id);
+        if (url) cells.push(`<button type="button" class="mk-photo-open" data-src="${url}"><img src="${url}" alt="Foto jawapan anak" /></button>`);
+      }
+      box.innerHTML = cells.length ? cells.join("") : ids.length ? "<small class=\"mk-none\">Foto tidak ditemui pada telefon ini.</small>" : "";
+      box.querySelectorAll(".mk-photo-open").forEach((b) => b.addEventListener("click", () => openViewer(b.getAttribute("data-src"))));
+    });
 
     const partState = (el) => {
       const steps = Array.from(el.querySelectorAll("input[data-step]:checked"));

@@ -1971,6 +1971,14 @@
     }
     currentView = "accounts";
     renderAll();
+    // Photos no result or paused exam refers to any more are deleted (keeps the phone's storage small).
+    global.setTimeout(() => {
+      try {
+        if (App.PhotoStore && App.MockUI) App.PhotoStore.purgeExcept(App.MockUI.keepPhotoIds()).catch(() => {});
+      } catch (e) {
+        /* never block the app */
+      }
+    }, 4000);
   }
 
   global.addEventListener("resize", syncViewportMetrics);

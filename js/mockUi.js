@@ -264,6 +264,87 @@
     return lastPaper.sections.find((s) => s.id === session.cur.sec);
   }
 
+  function photoList(itemId, part) {
+    session.photos = session.photos || {};
+    session.photos[itemId] = session.photos[itemId] || {};
+    session.photos[itemId][part] = session.photos[itemId][part] || [];
+    return session.photos[itemId][part];
+  }
+
+  async function renderThumbs(main, item, part) {
+    const box = main.querySelector(`[data-thumbs="${part}"]`);
+    if (!box) return;
+    const ids = photoList(item.id, part);
+    const cells = [];
+    for (const id of ids) {
+      const rec = await App.PhotoStore.get(id);
+      const url = rec && rec.blob ? URL.createObjectURL(rec.blob) : null;
+      if (!url) continue;
+      const kb = Math.max(1, Math.round(rec.blob.size / 1024));
+      cells.push(`<div class="mock-thumb"><img src="${url}" alt="Foto jawapan" /><button type="button" class="mock-thumb-del" data-del="${esc(id)}" aria-label="Buang gambar">✕</button><small>${kb} KB</small></div>`);
+    }
+    box.innerHTML = cells.join("");
+    box.querySelectorAll("[data-del]").forEach((b) =>
+      b.addEventListener("click", async () => {
+        const id = b.getAttribute("data-del");
+        const list = photoList(item.id, part);
+        const at = list.indexOf(id);
+        if (at >= 0) list.splice(at, 1);
+        await App.PhotoStore.remove(id);
+        saveSession();
+        renderThumbs(main, item, part);
+      })
+    );
+    main.querySelectorAll(`.mock-photo-input[data-part="${part}"]`).forEach((inp) => (inp.disabled = ids.length >= App.PhotoStore.MAX_PER_PART));
+  }
+
+  function wirePhotos(main, item) {
+    item.parts.forEach((p, part) => renderThumbs(main, item, part));
+    main.querySelectorAll(".mock-photo-input").forEach((inp) =>
+      inp.addEventListener("change", async () => {
+        const part = Number(inp.getAttribute("data-part"));
+        const status = main.querySelector(`[data-photo-status="${part}"]`);
+        const files = Array.from(inp.files || []);
+        inp.value = "";
+        for (const file of files) {
+          const list = photoList(item.id, part);
+          if (list.length >= App.PhotoStore.MAX_PER_PART) {
+            if (status) status.textContent = `Maksimum ${App.PhotoStore.MAX_PER_PART} gambar bagi bahagian ini.`;
+            break;
+          }
+          if (!/^image\//.test(file.type)) {
+            if (status) status.textContent = "Sila pilih fail gambar.";
+            continue;
+          }
+          try {
+            if (status) status.textContent = "Memampatkan gambar...";
+            const out = await App.PhotoStore.compress(file);
+            const id = App.PhotoStore.photoId(ctx.profile.id, session.seed, item.id, part, `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`);
+            await App.PhotoStore.put(id, out.blob, { w: out.width, h: out.height, bytes: out.bytes });
+            list.push(id);
+            saveSession();
+            if (status) status.textContent = `Disimpan: ${Math.round(out.originalBytes / 1024)} KB dimampatkan kepada ${Math.round(out.bytes / 1024)} KB (${out.width}×${out.height}).`;
+          } catch (e) {
+            if (status) status.textContent = "Gambar tidak dapat disimpan. Cuba ambil semula.";
+          }
+        }
+        renderThumbs(main, item, part);
+      })
+    );
+  }
+
+  /** Every photo id referenced by a stored result or a paused exam: everything else can be deleted. */
+  function keepPhotoIds() {
+    const keep = [];
+    const profiles = (App.Storage.getState().profiles || []);
+    profiles.forEach((p) => {
+      (p.mockResults || []).forEach((r) => Object.values(r.photos || {}).forEach((byPart) => Object.values(byPart).forEach((ids) => keep.push(...ids))));
+      const sess = loadSession(p.id);
+      if (sess && sess.photos) Object.values(sess.photos).forEach((byPart) => Object.values(byPart).forEach((ids) => keep.push(...ids)));
+    });
+    return keep;
+  }
+
   function renderRun(main) {
     const sec = currentSection();
     const item = sec.items[session.cur.idx];
@@ -301,11 +382,19 @@
                      (p, i) => `
                    <div class="mock-sub">
                      <p class="mock-q">${p.label ? `<strong>${esc(p.label)}</strong> ` : ""}${esc(p.q).replace(/\n/g, "<br>")} <small>[${p.marks} markah]</small></p>
-                     <textarea class="mock-work" data-part="${i}" rows="4" placeholder="Tulis jalan kerja dan jawapan di sini">${esc((session.answers[item.id] || {})[i] || "")}</textarea>
+                     <div class="mock-photo">
+                       <div class="mock-photo-actions">
+                         <label class="btn-tactile btn-true btn-sm mock-photo-btn">📷 Ambil foto jawapan<input type="file" accept="image/*" capture="environment" class="mock-photo-input" data-part="${i}" hidden /></label>
+                         <label class="btn-secondary btn-sm mock-photo-btn">🖼️ Pilih gambar<input type="file" accept="image/*" class="mock-photo-input" data-part="${i}" hidden /></label>
+                       </div>
+                       <div class="mock-thumbs" data-thumbs="${i}"></div>
+                       <small class="mock-note mock-photo-status" data-photo-status="${i}">Tulis jawapan di atas kertas, kemudian ambil foto. Gambar dimampatkan secara automatik supaya jimat data dan tulisan masih jelas. Maksimum ${App.PhotoStore.MAX_PER_PART} gambar.</small>
+                     </div>
+                     <textarea class="mock-work" data-part="${i}" rows="3" placeholder="Atau taip jawapan di sini (pilihan)">${esc((session.answers[item.id] || {})[i] || "")}</textarea>
                    </div>`
                    )
                    .join("")}
-                 <p class="mock-note">Jalan kerja ditanda oleh ibu bapa selepas kertas dihantar.</p>`
+                 <p class="mock-note">Jalan kerja (foto atau taip) ditanda oleh ibu bapa selepas kertas dihantar.</p>`
               : `<p class="mock-q">${esc(item.q)}</p><div class="mock-opts">${opts}</div>`
           }
         </div>
@@ -316,6 +405,7 @@
           <button type="button" class="btn-tactile btn-true btn-sm" id="mock-submit">Hantar</button>
         </div>
       </section>`;
+    if (isStructured) wirePhotos(main, item);
     main.querySelectorAll(".mock-work").forEach((ta) =>
       ta.addEventListener("input", () => {
         const cur = session.answers[item.id] && typeof session.answers[item.id] === "object" ? session.answers[item.id] : {};
@@ -386,6 +476,20 @@
       paperId: session.paperId,
       mode: session.mode,
       paperMarks: scoped.marks,
+      photos: (() => {
+        const out = {};
+        scoped.sections.forEach((sec) =>
+          sec.items.forEach((it) => {
+            const byPart = session.photos && session.photos[it.id];
+            if (it.type === "structured" && byPart) {
+              const keep = {};
+              Object.keys(byPart).forEach((k) => { if (byPart[k].length) keep[k] = byPart[k].slice(); });
+              if (Object.keys(keep).length) out[it.id] = keep;
+            }
+          })
+        );
+        return out;
+      })(),
       typed: (() => {
         const t = {};
         scoped.sections.forEach((s) =>
@@ -504,6 +608,7 @@
       ctx = context;
       render(main);
     },
-    stop: stopTimer
+    stop: stopTimer,
+    keepPhotoIds
   };
 })(window);
