@@ -128,6 +128,7 @@
       totalSpeedBonus: 0,
       history: [],
       mistakeLog: [],
+      tasks: [],
       setBest: {},
       updatedAt: new Date().toISOString()
     };
@@ -162,6 +163,10 @@
 
   function normalizeProfileFields(p) {
     let changed = false;
+    if (!Array.isArray(p.tasks)) {
+      p.tasks = [];
+      changed = true;
+    }
     if (!p.id) {
       p.id = `kid_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
       changed = true;
@@ -998,6 +1003,11 @@
         if (p.mistakeLog.length > 300) p.mistakeLog.length = 300;
       }
 
+      if (App.Tasks) {
+        const tr = App.Tasks.refresh(p, Date.now());
+        if (tr.changed) p.tasks = tr.tasks;
+      }
+
       save();
       return {
         earnedXp,
@@ -1009,6 +1019,18 @@
       };
     },
     getFocusReport,
+    refreshTasks: (profileId) => {
+      const p = state.profiles.find((x) => x.id === profileId);
+      if (!p || !App.Tasks) return [];
+      normalizeProfileFields(p);
+      const tr = App.Tasks.refresh(p, Date.now());
+      if (tr.changed) {
+        p.tasks = tr.tasks;
+        p.updatedAt = new Date().toISOString();
+        save();
+      }
+      return p.tasks;
+    },
     buildAiPromptForKid,
     buildAiPromptAllKids,
     exportJson: () => JSON.stringify(state, null, 2),

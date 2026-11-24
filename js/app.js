@@ -1247,6 +1247,51 @@
                     </div>`
                   : `<div class="weak-box weak-clear">ℹ️ Anak belum mencuba latihan lagi.</div>`;
 
+              const kidTasks = App.Storage.refreshTasks(p.id);
+              const openTasks = kidTasks.filter((t) => t.status === "aktif" || t.status === "rujuk_guru").slice(0, 4);
+              const doneTasks = kidTasks.filter((t) => t.status === "selesai" || t.status === "tamat").slice(-3).reverse();
+              const resultLbl = { baik: "✅ Bertambah baik", sama: "➖ Tiada perubahan", teruk: "⚠️ Menurun" };
+              const taskCardHtml = (t) => {
+                const g = App.Tasks.guidance(t);
+                const since = App.Tasks.attemptsSince(p, t);
+                const overdue = App.Tasks.isOverdue(t);
+                const referral = t.status === "rujuk_guru";
+                return `
+                  <div class="task-card ${referral ? "is-referral" : ""}">
+                    <div class="task-title">${referral ? "💬" : "📌"} ${esc(t.subjectName || t.subjectId)} • ${esc(t.chapterTitle)}</div>
+                    <div class="task-meta">Kitaran ${t.cycle}/${App.Tasks.CYCLE_LIMIT} • Markah semasa ${t.baseline}% • Sasaran ${t.target}% dalam ${t.need} percubaan • Tarikh akhir ${App.Storage.fmtDate(t.dueTs)}${overdue ? " ⏰ lewat" : ""}</div>
+                    <div class="task-progress">Percubaan baharu: ${Math.min(since.count, t.need)}/${t.need}${since.count ? ` • purata ${since.pct}%` : ""}</div>
+                    <p class="task-diag">${esc(g.diagnosis)}</p>
+                    <strong>Buat hari ini (10 minit):</strong>
+                    <ol>${g.steps.map((x) => `<li>${esc(x)}</li>`).join("")}</ol>
+                    <strong>Tanya anak:</strong>
+                    <ul>${g.questions.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
+                    ${referral ? `<p class="task-diag">Sudah ${t.cycle} kitaran tanpa mencapai sasaran. Cadangan: rujuk guru mata pelajaran.</p>` : ""}
+                    <div class="task-actions">
+                      <button type="button" class="btn-tactile btn-true btn-sm" data-task-action="practice" data-pid="${p.id}" data-task-id="${esc(t.id)}">▶ Mula latihan</button>
+                      <button type="button" class="btn-secondary btn-sm" data-task-action="share" data-pid="${p.id}" data-task-id="${esc(t.id)}">📤 Kongsi WhatsApp</button>
+                      ${referral ? `<button type="button" class="btn-secondary btn-sm" data-task-action="teacher" data-pid="${p.id}" data-task-id="${esc(t.id)}">💬 Mesej cikgu</button>` : ""}
+                    </div>
+                  </div>`;
+              };
+              const tasksHtml =
+                openTasks.length || doneTasks.length
+                  ? `<div class="tasks-box">
+                      <h4>📋 Tugasan Untuk Ibu Bapa</h4>
+                      ${openTasks.map(taskCardHtml).join("")}
+                      ${
+                        doneTasks.length
+                          ? `<div class="task-done"><strong>Keputusan tugasan terdahulu:</strong>${doneTasks
+                              .map(
+                                (t) =>
+                                  `<div>${esc(t.chapterTitle)} (kitaran ${t.cycle}): ${resultLbl[t.result] || "-"}${typeof t.sincePct === "number" ? ` • ${t.sincePct}%` : ""}</div>`
+                              )
+                              .join("")}</div>`
+                          : ""
+                      }
+                    </div>`
+                  : "";
+
               const mistakesHtml =
                 report.recentMistakes.length > 0
                   ? `<div class="mistake-log">
@@ -1290,6 +1335,7 @@
                     <button class="btn-secondary btn-rename" data-pid="${p.id}">Simpan</button>
                   </div>
                   ${chapterStatusHtml}
+                  ${tasksHtml}
                   <h4>📝 Kesilapan Terkini Untuk Dibimbing:</h4>
                   ${mistakesHtml}
                   <h4>Aktiviti Terkini:</h4>
@@ -1628,6 +1674,47 @@
         URL.revokeObjectURL(url);
       });
     }
+
+    main.querySelectorAll("[data-task-action]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        App.Sound.click();
+        const prof = (App.Storage.getState().profiles || []).find((x) => x.id === btn.getAttribute("data-pid"));
+        const task = prof && (prof.tasks || []).find((t) => t.id === btn.getAttribute("data-task-id"));
+        if (!prof || !task) return;
+        const action = btn.getAttribute("data-task-action");
+        const name = App.Storage.getDisplayName(prof);
+        if (action === "practice") {
+          const grade = App.GRADES[prof.gradeId];
+          const subject = grade && grade.subjects.find((s) => s.id === task.subjectId);
+          const chapter = subject && subject.chapters.find((c) => c.id === task.chapterId);
+          if (!subject || !chapter) return;
+          const useDlp = !!(App.Storage.getState().dlpEnabled && subject.dlp);
+          const setCount = App.QuestionEngine.getChapterSetCount(prof.gradeId, subject.id, chapter.id, useDlp);
+          const np = App.Tasks.nextPractice(prof, task, setCount);
+          App.Storage.setActiveProfile(prof.id);
+          selectedSubject = subject;
+          selectedChapter = chapter;
+          selectedSetNum = np.setNum || 1;
+          parentUnlocked = false;
+          shopMsg = "";
+          currentView = "sets";
+          renderAll();
+          return;
+        }
+        let text;
+        if (action === "teacher") {
+          text = App.Tasks.teacherMessage(name, task, task.sincePct);
+        } else {
+          const g = App.Tasks.guidance(task);
+          text =
+            `Tugasan belajar untuk ${name}\n${task.subjectName} - ${task.chapterTitle}\n` +
+            `Sasaran: ${task.target}% dalam ${task.need} percubaan sebelum ${App.Storage.fmtDate(task.dueTs)}\n` +
+            `${g.diagnosis}\nBuat hari ini:\n` +
+            g.steps.map((x, i) => `${i + 1}. ${x}`).join("\n");
+        }
+        global.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener");
+      });
+    });
 
     main.querySelectorAll(".btn-rename").forEach((btn) => {
       btn.addEventListener("click", () => {

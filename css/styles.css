@@ -3518,3 +3518,14 @@ html, body {
 .wk-chapter { margin: 4px 0 0 4px; font-size: 0.88rem; overflow-wrap: anywhere; }
 .wk-chapter small { display: block; color: var(--muted); }
 .wk-note { display: block; color: var(--muted); margin-top: 6px; }
+
+/* Parent task cards */
+.tasks-box { margin: 12px 0; }
+.task-card { background: #fffbeb; border: 2px solid var(--ink); border-radius: 14px; padding: 12px; margin: 10px 0; overflow-wrap: anywhere; }
+.task-card.is-referral { background: #fef2f2; }
+.task-title { font-weight: 800; }
+.task-meta, .task-progress { font-size: 0.82rem; color: var(--muted); margin-top: 2px; }
+.task-diag { margin: 8px 0; font-weight: 600; }
+.task-card ol, .task-card ul { margin: 4px 0 8px; padding-left: 20px; }
+.task-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.task-done { font-size: 0.85rem; color: var(--muted); margin-top: 8px; }
