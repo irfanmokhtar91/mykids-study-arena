@@ -57,3 +57,21 @@ Core purpose: help **parents** see each child's weaknesses and how to fix them. 
 
 ## Needs from Irfan
 T4 subject list; Google OAuth Client ID (guided); personal Cloudflare login at Phase 2; DeepSeek key later via secure prompt.
+
+## Round 6 decisions (Irfan, 24/Nov/2026)
+### Grade bands (supplied by Irfan; verified against 20 grades on two real Tingkatan 1/3 UASA slips, all match)
+- Darjah 4-6 and Tingkatan 1-3 (UASA): A 82-100 Cemerlang, B 66-81 Kepujian, C 50-65 Baik, D 35-49 Memuaskan, E 20-34 Mencapai Tahap Minimum, F 0-19 Belum Mencapai Tahap Minimum. Tahun 1-3 use PBD TP1-TP6 (no UASA).
+- Tingkatan 4-5 (school exam, SPM-style scale; UNVERIFIED against a real slip): A+ 90-100, A 80-89, A- 70-79, B+ 65-69, B 60-64, C+ 55-59, C 50-54, D 45-49, E 40-44, G 0-39.
+- Show % always; show the grade with its band descriptor.
+
+### Actionable parent task cards
+- Each weak chapter -> card: diagnosis (from mistake types), "do this today" (10 min: exact practice set + 2 guiding questions), target + re-test (e.g. >= 70% on 3 sets within 7 days), result tracking (Improved / Same / Worse), and escalation after 3 unsuccessful cycles (suggest asking the teacher, ready-made message). Phase 1: generic by mistake type + auto-linked practice set; chapter-specific coaching notes added as content is verified. Share-to-WhatsApp button (no backend needed).
+- Weakness layers: (1) chapter, exam part, mistake type, speed, trend; (2) difficulty level where derivable (official 5:3:2 mix); (3) skill tags on all NEW content. Each report states which layers it used.
+
+### Mock Exam
+- Modes: Penuh (real duration, pause/resume) and Mini (one section, 15-20 min, resumable). Papers draw from chapter banks; no repeat inside one paper.
+- Objective parts auto-marked. Structured/essay parts: child answers, then sees model answer + method steps (M1/A1 style); parent marks per step in the Parent Panel. Premium (Phase 2): AI-suggested marks (DeepSeek), always labelled and parent-confirmed.
+- Original questions only. Commercial/school papers (e.g. SBP Pra-SPM Matematik T4 collection, a 2023 PAT Matematik T4) inform FORMAT only; no question text copied.
+
+### Question generation policy
+- More practice via two routes only: (a) rule-based generators run live in the app (answer computed by code); (b) AI-written questions generated OFFLINE into the bank and shipped only after an independent second-model verification + review. Live on-the-fly AI questions are NOT shown to children in the free tier (no verification step). Could be a labelled premium option later.
