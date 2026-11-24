@@ -99,16 +99,19 @@
   }
 
   App.MiniGames.maze = {
-    mount: function ({ canvas, controlsEl, qObj, playerAvatar, onAnswer }) {
+    mount: function ({ canvas, qObj, playerAvatar, isBossRound, equippedEffect, onAnswer }) {
       const ctx = canvas.getContext("2d");
       const cm = App.GameUtil.setupCanvas(canvas);
       const gp = App.GameUtil.createGamepadReader();
+      const fxColors = App.GameUtil.getEffectColors ? App.GameUtil.getEffectColors(equippedEffect) : ["#2563eb", "#34d399", "#fde047"];
 
       let paused = false;
       let answered = false;
       let destroyed = false;
       let rafId = null;
       let time = 0;
+      const trail = [];
+      const popups = [];
 
       const grid = generateMaze();
       // Player position in grid coordinate units (center of cell = gx + 0.5, gy + 0.5)
@@ -116,12 +119,12 @@
       let py = 3.5;
       let autoPath = [];
       const heldKeys = new Set();
-      let dpadDir = { x: 0, y: 0 };
 
       const portals = PORTAL_SLOTS.map((slot, idx) => ({
         ...slot,
         idx,
         text: qObj.options[idx],
+        eliminated: false,
         hitState: null,
         cardRect: { x: 0, y: 0, w: 120, h: 48 }
       }));
@@ -266,6 +269,7 @@
         const y = dragOrigin.y;
 
         for (const p of portals) {
+          if (p.eliminated) continue;
           const r = p.cardRect;
           if (x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h) {
             glideDir = { x: 0, y: 0 };
@@ -369,13 +373,25 @@
             }
           }
 
+          // Record smooth player motion trail
+          if (trail.length === 0 || Math.hypot(px - trail[trail.length - 1].x, py - trail[trail.length - 1].y) > 0.14) {
+            trail.push({ x: px, y: py, life: 0.7 });
+            if (trail.length > 20) trail.shift();
+          }
+          for (let i = trail.length - 1; i >= 0; i--) {
+            trail[i].life -= dt;
+            if (trail[i].life <= 0) trail.splice(i, 1);
+          }
+
           // Check portal collision
           for (const p of portals) {
+            if (p.eliminated) continue;
             if (Math.hypot(px - (p.gx + 0.5), py - (p.gy + 0.5)) < 0.44) {
               answered = true;
               const isCorrect = p.idx === qObj.correctIndex;
               p.hitState = isCorrect ? "ok" : "bad";
               App.Sound.coin();
+              App.Sound.vibrate(isCorrect ? 15 : [25, 30, 25]);
               onAnswer(p.idx);
               break;
             }
@@ -447,6 +463,14 @@
           const cy = lay.mazeY + (p.gy + 0.5) * lay.tile;
           const rad = lay.tile * 0.38;
           ctx.save();
+          if (p.eliminated) {
+            ctx.fillStyle = "#94a3b8";
+            ctx.beginPath();
+            ctx.arc(cx, cy, rad * 0.85, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+            return;
+          }
           ctx.fillStyle = p.color;
           ctx.strokeStyle = "#18181b";
           ctx.lineWidth = 2;
@@ -460,6 +484,17 @@
           ctx.beginPath();
           ctx.arc(cx, cy, rad * 0.55, time * 4, time * 4 + Math.PI * 1.35);
           ctx.stroke();
+          ctx.restore();
+        });
+
+        // Draw equipped motion trail
+        trail.forEach((tr, ti) => {
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, tr.life * 0.55);
+          ctx.fillStyle = fxColors[ti % fxColors.length];
+          ctx.beginPath();
+          ctx.arc(lay.mazeX + tr.x * lay.tile, lay.mazeY + tr.y * lay.tile, Math.max(3, lay.tile * 0.17), 0, Math.PI * 2);
+          ctx.fill();
           ctx.restore();
         });
 
@@ -483,6 +518,19 @@
         // Draw 4 Answer Signboard Cards
         portals.forEach((p) => {
           const r = p.cardRect;
+          if (p.eliminated) {
+            ctx.save();
+            ctx.globalAlpha = 0.28;
+            App.GameUtil.drawWrappedCard(ctx, r.x, r.y, r.w, r.h, "✖ DIBUANG", {
+              bg: "#e2e8f0",
+              border: "#64748b",
+              shadowColor: "#64748b",
+              maxFont: 11,
+              minFont: 9
+            });
+            ctx.restore();
+            return;
+          }
           const bg =
             p.hitState === "ok"
               ? "#dcfce7"
@@ -552,6 +600,9 @@
           ctx.restore();
         }
 
+        if (App.GameUtil.drawFloatingPopups) {
+          App.GameUtil.drawFloatingPopups(ctx, popups, paused ? 0 : dt);
+        }
         rafId = global.requestAnimationFrame(tick);
       }
 
@@ -560,6 +611,16 @@
       return {
         setPaused: (p) => {
           paused = !!p;
+        },
+        eliminateTwo: () => {
+          const wrongs = portals.filter((p) => p.idx !== qObj.correctIndex && !p.eliminated);
+          let removed = 0;
+          wrongs.slice(0, 2).forEach((p) => {
+            p.eliminated = true;
+            removed++;
+          });
+          popups.push({ x: cm.getSize().w / 2, y: 60, text: "🛡️ 50/50!", color: "#2563eb", life: 0.9, maxLife: 0.9 });
+          return removed > 0;
         },
         showOutcome: (chosenIdx, isCorrect) => {
           if (portals[chosenIdx]) portals[chosenIdx].hitState = isCorrect ? "ok" : "bad";

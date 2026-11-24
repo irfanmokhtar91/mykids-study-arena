@@ -8,10 +8,11 @@
   App.MiniGames = App.MiniGames || {};
 
   App.MiniGames.runner = {
-    mount: function ({ canvas, qObj, playerAvatar, onAnswer }) {
+    mount: function ({ canvas, qObj, playerAvatar, isBossRound, equippedEffect, onAnswer }) {
       const ctx = canvas.getContext("2d");
       const cm = App.GameUtil.setupCanvas(canvas);
       const gp = App.GameUtil.createGamepadReader();
+      const fxColors = App.GameUtil.getEffectColors ? App.GameUtil.getEffectColors(equippedEffect) : ["#38bdf8", "#fde047", "#34d399"];
 
       let paused = false;
       let answered = false;
@@ -25,10 +26,12 @@
       let crateProgress = 0; // 0 = top, 1 = player collision line
       let shakeTime = 0;
       const particles = [];
+      const popups = [];
 
       const crates = qObj.options.map((text, lane) => ({
         lane,
         text,
+        eliminated: false,
         hitState: null,
         cardRect: { x: 0, y: 0, w: 80, h: 60 }
       }));
@@ -82,9 +85,14 @@
         const cy = h * 0.76;
 
         App.Sound.smash();
+        App.Sound.vibrate(isCorrect ? 16 : [25, 35, 25]);
         shakeTime = 0.18;
+        if (isCorrect) {
+          if (isBossRound) App.Sound.bossHit();
+          popups.push({ x: cx, y: cy - 18, text: isBossRound ? "💥 BOSS SMASH!" : "✨ +1!", color: "#34d399", life: 0.85, maxLife: 0.85 });
+        }
         spawnBurst(cx, cy, isCorrect ? "#10b981" : "#ef4444", 26);
-        if (isCorrect) spawnBurst(cx, cy, "#fde047", 14);
+        if (isCorrect) spawnBurst(cx, cy, fxColors[1] || "#fde047", 14);
         onAnswer(lane);
       }
 
@@ -261,11 +269,21 @@
         }
 
         const bg = ctx.createLinearGradient(0, 0, 0, h);
-        bg.addColorStop(0, "#14532d");
-        bg.addColorStop(0.35, "#166534");
+        bg.addColorStop(0, isBossRound ? "#3b0764" : "#14532d");
+        bg.addColorStop(0.35, isBossRound ? "#581c87" : "#166534");
         bg.addColorStop(1, "#78350f");
         ctx.fillStyle = bg;
         ctx.fillRect(0, 0, w, h);
+
+        // Parallax scrolling roadside markers along left/right edges
+        const edgeOffset = (time * 140) % 56;
+        ctx.fillStyle = isBossRound ? "#a855f7" : "#22c55e";
+        for (let ey = -56 + edgeOffset; ey < h; ey += 56) {
+          ctx.beginPath();
+          ctx.arc(6, ey, 5, 0, Math.PI * 2);
+          ctx.arc(w - 6, ey + 28, 5, 0, Math.PI * 2);
+          ctx.fill();
+        }
 
         // Wooden plank track bed
         const trackX = 12;
@@ -358,6 +376,20 @@
           // Draw wide cards after stems so cards always sit cleanly on top
           crates.forEach((c) => {
             const r = c.cardRect;
+            if (c.eliminated) {
+              ctx.save();
+              ctx.globalAlpha = 0.25;
+              App.GameUtil.drawWrappedCard(ctx, r.x, r.y, r.w, r.h, "✖ DIBUANG", {
+                bg: "#e2e8f0",
+                border: "#64748b",
+                textColor: "#64748b",
+                shadowColor: "#78350f",
+                maxFont: 11,
+                minFont: 9
+              });
+              ctx.restore();
+              return;
+            }
             const bgCard =
               c.hitState === "ok"
                 ? "#dcfce7"
@@ -404,6 +436,20 @@
             ctx.stroke();
 
             // Inner answer card on crate
+            if (c.eliminated) {
+              ctx.save();
+              ctx.globalAlpha = 0.25;
+              App.GameUtil.drawWrappedCard(ctx, cx + 4, cy + 4, crateW - 8, crateH - 8, "✖ DIBUANG", {
+                bg: "#e2e8f0",
+                border: "#64748b",
+                textColor: "#64748b",
+                shadowColor: "#78350f",
+                maxFont: 11,
+                minFont: 9
+              });
+              ctx.restore();
+              return;
+            }
             const bgCard =
               c.hitState === "ok"
                 ? "#dcfce7"
@@ -439,7 +485,10 @@
         ctx.ellipse(px, h * 0.88, 22, 8, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Player badge
+        // Player badge with equipped trail glow
+        ctx.save();
+        ctx.shadowColor = fxColors[0];
+        ctx.shadowBlur = 12;
         ctx.fillStyle = "#fde047";
         ctx.strokeStyle = "#18181b";
         ctx.lineWidth = 2.5;
@@ -447,13 +496,14 @@
         ctx.arc(px, py, 22, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
+        ctx.restore();
 
         ctx.font = "28px 'Segoe UI Emoji', sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(playerAvatar || "🦊", px, py + 1);
 
-        // Particles
+        // Particles & Popups
         for (const p of particles) {
           ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
           ctx.fillStyle = p.color;
@@ -462,6 +512,9 @@
           ctx.fill();
         }
         ctx.globalAlpha = 1;
+        if (App.GameUtil.drawFloatingPopups) {
+          App.GameUtil.drawFloatingPopups(ctx, popups, paused ? 0 : dt);
+        }
 
         // Subtle gesture hint at bottom before first touch
         if (!hasInteracted && !answered) {
@@ -488,6 +541,21 @@
       return {
         setPaused: (p) => {
           paused = !!p;
+        },
+        eliminateTwo: () => {
+          const wrongs = crates.filter((c) => c.lane !== qObj.correctIndex && !c.eliminated);
+          let removed = 0;
+          wrongs.slice(0, 2).forEach((c) => {
+            c.eliminated = true;
+            const r = c.cardRect;
+            spawnBurst(r.x + r.w / 2, r.y + r.h / 2, "#94a3b8", 12);
+            removed++;
+          });
+          if (crates[targetLane]?.eliminated) {
+            const safeIdx = crates.findIndex((c) => !c.eliminated);
+            if (safeIdx >= 0) targetLane = safeIdx;
+          }
+          return removed > 0;
         },
         showOutcome: (chosenIdx, isCorrect) => {
           if (crates[chosenIdx]) crates[chosenIdx].hitState = isCorrect ? "ok" : "bad";

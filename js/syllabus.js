@@ -6,8 +6,8 @@
 (function (global) {
   const App = (global.App = global.App || {});
 
-  App.SETS_PER_CHAPTER = 12; // >10 sets per chapter
-  App.QUESTIONS_PER_SET = 10;
+  App.SETS_PER_CHAPTER = 12; // max unique sets for generator chapters
+  App.QUESTIONS_PER_SET = 5; // Bite-sized 5-question Duolingo-style sets
 
   App.GRADES = {
     d6: {
@@ -15,6 +15,7 @@
       name: "Darjah 6",
       subtitle: "KSSR Semakan (2027)",
       badge: "Year 6",
+      themeClass: "theme-d6",
       color: "#10b981",
       subjects: [
         {
@@ -132,6 +133,7 @@
       name: "Tingkatan 2",
       subtitle: "KSSM (2027)",
       badge: "Form 2",
+      themeClass: "theme-t2",
       color: "#3b82f6",
       subjects: [
         {
@@ -265,6 +267,7 @@
       name: "Tingkatan 4",
       subtitle: "KSSM Aliran STEM (2027)",
       badge: "Form 4 STEM",
+      themeClass: "theme-t4",
       color: "#8b5cf6",
       subjects: [
         {

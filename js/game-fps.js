@@ -7,10 +7,11 @@
   App.MiniGames = App.MiniGames || {};
 
   App.MiniGames.fps = {
-    mount: function ({ canvas, qObj, bossEmoji, bossHp, onAnswer }) {
+    mount: function ({ canvas, qObj, bossEmoji, bossHp, isBossRound, equippedEffect, onAnswer }) {
       const ctx = canvas.getContext("2d");
       const cm = App.GameUtil.setupCanvas(canvas);
       const gp = App.GameUtil.createGamepadReader();
+      const fxColors = App.GameUtil.getEffectColors ? App.GameUtil.getEffectColors(equippedEffect) : ["#38bdf8", "#fde047", "#34d399"];
 
       let paused = false;
       let answered = false;
@@ -21,6 +22,13 @@
       let bossHitFlash = 0;
       let laser = null; // { x1, y1, x2, y2, life, color }
       const particles = [];
+      const popups = [];
+      const stars = Array.from({ length: 28 }, (_, i) => ({
+        x: ((i * 73) % 100) / 100,
+        y: ((i * 41) % 60) / 100,
+        r: (i % 3) + 0.8,
+        spd: 0.015 + (i % 4) * 0.008
+      }));
 
       const keys = new Set();
       let aimX = 0.5; // normalized 0..1
@@ -41,6 +49,7 @@
           y: 0,
           w: 140,
           h: 60,
+          eliminated: false,
           hitState: null // 'ok' | 'bad' | null
         };
       });
@@ -69,11 +78,13 @@
         const ty = h - 22;
 
         App.Sound.shoot();
-        laser = { x1: tx, y1: ty - 14, x2: px, y2: py, life: 0.18, color: "#38bdf8" };
+        App.Sound.vibrate(14);
+        laser = { x1: tx, y1: ty - 14, x2: px, y2: py, life: 0.18, color: fxColors[0] };
         shakeTime = 0.14;
 
-        // Check hit on any drone card
+        // Check hit on any active drone card
         for (const d of drones) {
+          if (d.eliminated) continue;
           if (px >= d.x && px <= d.x + d.w && py >= d.y && py <= d.y + d.h) {
             answered = true;
             const isCorrect = d.idx === qObj.correctIndex;
@@ -81,8 +92,10 @@
             laser.color = isCorrect ? "#34d399" : "#ef4444";
             if (isCorrect) {
               bossHitFlash = 0.35;
+              if (isBossRound) App.Sound.bossHit();
+              popups.push({ x: px, y: py - 10, text: isBossRound ? "💥 BOSS HIT!" : "✨ +1!", color: "#34d399", life: 0.85, maxLife: 0.85 });
               spawnParticles(px, py, "#34d399", 24);
-              spawnParticles(w * 0.5, 42, "#fde047", 14);
+              spawnParticles(w * 0.5, 42, fxColors[1] || "#fde047", 16);
             } else {
               spawnParticles(px, py, "#ef4444", 18);
             }
@@ -91,7 +104,7 @@
           }
         }
         // Missed shot spark
-        spawnParticles(px, py, "#38bdf8", 8);
+        spawnParticles(px, py, fxColors[0], 8);
       }
 
       function getPointerPos(e) {
@@ -255,11 +268,21 @@
 
         // Background cyber shooting range
         const grad = ctx.createLinearGradient(0, 0, 0, h);
-        grad.addColorStop(0, "#0f172a");
-        grad.addColorStop(0.65, "#1e1b4b");
+        grad.addColorStop(0, isBossRound ? "#2e1065" : "#0f172a");
+        grad.addColorStop(0.65, isBossRound ? "#4c1d95" : "#1e1b4b");
         grad.addColorStop(1, "#090d16");
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, w, h);
+
+        // Parallax drifting starfield
+        stars.forEach((st) => {
+          const sx = ((st.x + time * st.spd) % 1) * w;
+          const sy = st.y * h;
+          ctx.fillStyle = `rgba(255, 255, 255, ${0.35 + 0.35 * Math.sin(time * 3 + st.x * 10)})`;
+          ctx.beginPath();
+          ctx.arc(sx, sy, st.r, 0, Math.PI * 2);
+          ctx.fill();
+        });
 
         // Perspective grid lines on floor
         ctx.strokeStyle = "rgba(56, 189, 248, 0.18)";
@@ -307,9 +330,23 @@
         const px = aimX * w;
         const py = aimY * h;
         for (const d of drones) {
+          if (d.eliminated) {
+            ctx.save();
+            ctx.globalAlpha = 0.25;
+            App.GameUtil.drawWrappedCard(ctx, d.x, d.y, d.w, d.h, "✖ DIBUANG", {
+              bg: "#334155",
+              border: "#64748b",
+              textColor: "#cbd5e1",
+              shadowColor: "#090d16",
+              maxFont: 12,
+              minFont: 9
+            });
+            ctx.restore();
+            continue;
+          }
           const hovered = hasPointer && px >= d.x && px <= d.x + d.w && py >= d.y && py <= d.y + d.h;
           // Drone wing bars
-          ctx.fillStyle = hovered ? "#ef4444" : "#38bdf8";
+          ctx.fillStyle = hovered ? "#ef4444" : fxColors[0];
           ctx.fillRect(d.x - 7, d.y + d.h * 0.35, 7, d.h * 0.3);
           ctx.fillRect(d.x + d.w, d.y + d.h * 0.35, 7, d.h * 0.3);
 
@@ -357,7 +394,7 @@
           ctx.restore();
         }
 
-        // Particles
+        // Particles & Floating Popups
         for (const p of particles) {
           ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
           ctx.fillStyle = p.color;
@@ -366,6 +403,9 @@
           ctx.fill();
         }
         ctx.globalAlpha = 1;
+        if (App.GameUtil.drawFloatingPopups) {
+          App.GameUtil.drawFloatingPopups(ctx, popups, paused ? 0 : dt);
+        }
 
         // Blaster Turret at bottom center
         const tx = w * 0.5;
@@ -436,6 +476,16 @@
       return {
         setPaused: (p) => {
           paused = !!p;
+        },
+        eliminateTwo: () => {
+          const wrongs = drones.filter((d) => d.idx !== qObj.correctIndex && !d.eliminated);
+          let removed = 0;
+          wrongs.slice(0, 2).forEach((d) => {
+            d.eliminated = true;
+            spawnParticles(d.x + d.w / 2, d.y + d.h / 2, "#94a3b8", 16);
+            removed++;
+          });
+          return removed > 0;
         },
         showOutcome: (chosenIdx, isCorrect) => {
           if (drones[chosenIdx]) {

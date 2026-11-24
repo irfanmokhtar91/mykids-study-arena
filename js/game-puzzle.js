@@ -8,16 +8,18 @@
   App.MiniGames = App.MiniGames || {};
 
   App.MiniGames.puzzle = {
-    mount: function ({ canvas, qObj, onAnswer }) {
+    mount: function ({ canvas, qObj, isBossRound, equippedEffect, onAnswer }) {
       const ctx = canvas.getContext("2d");
       const cm = App.GameUtil.setupCanvas(canvas);
       const gp = App.GameUtil.createGamepadReader();
+      const fxColors = App.GameUtil.getEffectColors ? App.GameUtil.getEffectColors(equippedEffect) : ["#3b82f6", "#10b981", "#fde047"];
 
       let paused = false;
       let answered = false;
       let destroyed = false;
       let rafId = null;
       let time = 0;
+      let shakeTime = 0;
       let selectedIdx = 0;
       let draggingIdx = -1;
       let dragOffX = 0;
@@ -31,6 +33,7 @@
       let lastTapIdx = -1;
       let lastTapTime = 0;
       const particles = [];
+      const popups = [];
 
       const cores = qObj.options.map((text, idx) => ({
         idx,
@@ -44,6 +47,7 @@
         w: 140,
         h: 58,
         initialized: false,
+        eliminated: false,
         hitState: null
       }));
 
@@ -92,6 +96,11 @@
         c.y = sock.cy - c.h / 2;
 
         App.Sound.unlock();
+        App.Sound.vibrate(isCorrect ? 15 : [25, 30, 25]);
+        shakeTime = 0.16;
+        if (isCorrect) {
+          popups.push({ x: sock.cx, y: sock.y - 10, text: isBossRound ? "💥 REAKTOR BOSS!" : "⚡ +1!", color: "#10b981", life: 0.85, maxLife: 0.85 });
+        }
         spawnShockwave(sock.cx, sock.cy, isCorrect ? "#10b981" : "#ef4444", 24);
         onAnswer(idx);
       }
@@ -108,6 +117,7 @@
         const pos = getPointerPos(e);
         for (let i = cores.length - 1; i >= 0; i--) {
           const c = cores[i];
+          if (c.eliminated) continue;
           if (pos.x >= c.x && pos.x <= c.x + c.w && pos.y >= c.y && pos.y <= c.y + c.h) {
             e.preventDefault();
             selectedIdx = i;
@@ -237,6 +247,7 @@
         if (!paused) {
           time += dt;
           if (padCooldown > 0) padCooldown -= dt;
+          if (shakeTime > 0) shakeTime = Math.max(0, shakeTime - dt);
 
           const pad = gp.read();
           if (padCooldown <= 0) {
@@ -280,9 +291,13 @@
 
         // Draw Workshop Background
         cm.beginFrame(ctx);
+        ctx.save();
+        if (shakeTime > 0) {
+          ctx.translate((Math.random() - 0.5) * 7, (Math.random() - 0.5) * 7);
+        }
         const bg = ctx.createLinearGradient(0, 0, 0, h);
-        bg.addColorStop(0, "#eff6ff");
-        bg.addColorStop(1, "#dbeafe");
+        bg.addColorStop(0, isBossRound ? "#f5f3ff" : "#eff6ff");
+        bg.addColorStop(1, isBossRound ? "#ede9fe" : "#dbeafe");
         ctx.fillStyle = bg;
         ctx.fillRect(0, 0, w, h);
 
@@ -327,8 +342,8 @@
         // Tether beam while dragging near socket
         if (activeCore) {
           ctx.save();
-          ctx.strokeStyle = nearSock ? "#10b981" : "#3b82f6";
-          ctx.lineWidth = 3;
+          ctx.strokeStyle = nearSock ? "#10b981" : fxColors[0];
+          ctx.lineWidth = 3.5;
           ctx.setLineDash([6, 5]);
           ctx.beginPath();
           ctx.moveTo(activeCore.x + activeCore.w / 2, activeCore.y + activeCore.h / 2);
@@ -341,6 +356,20 @@
         const order = cores.map((_, i) => i).sort((a, b) => (a === draggingIdx ? 1 : b === draggingIdx ? -1 : 0));
         for (const i of order) {
           const c = cores[i];
+          if (c.eliminated) {
+            ctx.save();
+            ctx.globalAlpha = 0.25;
+            App.GameUtil.drawWrappedCard(ctx, c.x, c.y, c.w, c.h, "✖ DIBUANG", {
+              bg: "#e2e8f0",
+              border: "#94a3b8",
+              textColor: "#64748b",
+              shadowColor: "#94a3b8",
+              maxFont: 12,
+              minFont: 9
+            });
+            ctx.restore();
+            continue;
+          }
           const isSel = i === selectedIdx && draggingIdx < 0;
           const bgCard =
             c.hitState === "ok"
@@ -368,7 +397,7 @@
           });
         }
 
-        // Particles
+        // Particles & Floating Popups
         for (const p of particles) {
           ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
           ctx.fillStyle = p.color;
@@ -377,6 +406,10 @@
           ctx.fill();
         }
         ctx.globalAlpha = 1;
+        if (App.GameUtil.drawFloatingPopups) {
+          App.GameUtil.drawFloatingPopups(ctx, popups, paused ? 0 : dt);
+        }
+        ctx.restore();
 
         rafId = global.requestAnimationFrame(tick);
       }
@@ -386,6 +419,20 @@
       return {
         setPaused: (p) => {
           paused = !!p;
+        },
+        eliminateTwo: () => {
+          const wrongs = cores.filter((c) => c.idx !== qObj.correctIndex && !c.eliminated);
+          let removed = 0;
+          wrongs.slice(0, 2).forEach((c) => {
+            c.eliminated = true;
+            spawnShockwave(c.x + c.w / 2, c.y + c.h / 2, "#94a3b8", 12);
+            removed++;
+          });
+          if (cores[selectedIdx]?.eliminated) {
+            const firstOk = cores.findIndex((c) => !c.eliminated);
+            if (firstOk >= 0) selectedIdx = firstOk;
+          }
+          return removed > 0;
         },
         showOutcome: (chosenIdx, isCorrect) => {
           if (cores[chosenIdx]) cores[chosenIdx].hitState = isCorrect ? "ok" : "bad";

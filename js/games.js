@@ -1,27 +1,31 @@
 /**
- * Game Arena Shell & Shared Canvas Utilities (`App.GameUtil`)
- * Hosts 4 real interactive Canvas mini-games (zero A/B/C/D buttons):
- * - fps: Target Strike (FPS Arena)
- * - runner: Crate Rush (4-Lane Runner)
- * - maze: Maze Runner (Top-Down Maze)
- * - puzzle: Reactor Puzzle (Drag-and-Drop Physics)
+ * Game Arena Shell & Shared Canvas Utilities (`App.GameUtil`, `App.Games`)
+ * Hosts 9 play modes:
+ * - mix: 🎲 Campuran Pintar (auto-mix of all interactive + arcade games)
+ * - 4 True Interactive Touch Mechanics (`swipe`, `match`, `sort`, `builder`)
+ * - 4 Studio-Polished Canvas Arcade Games (`fps`, `runner`, `maze`, `puzzle`)
  *
- * Includes 10-second Speed Mark timer (<=10s = 1.0 mark, >10s = 0.5 mark),
- * 3 Hearts (Practice Save at 0 so kids finish all questions), and a
- * <=10-second auto-countdown Learning Overlay on wrong answers.
+ * Includes 10-second Speed Bonus timer (separate counter), Power-Ups (50/50 + Freeze),
+ * 3 Hearts (Practice Save at 0), Boss Q5 stage, Animated Mascot reactions, and Learning Overlay.
  */
 (function (global) {
   const App = (global.App = global.App || {});
   App.MiniGames = App.MiniGames || {};
 
   App.GAME_MODES = [
-    { id: "fps", name: "Target Strike", icon: "🎯", desc: "Tembak dron jawapan tepat di arena!" },
-    { id: "runner", name: "Crate Rush", icon: "🦊", desc: "Lari 4 lorong & rempuh peti jawapan tepat!" },
-    { id: "maze", name: "Maze Runner", icon: "🧭", desc: "Navigasi pagar sesat ke portal jawapan tepat!" },
-    { id: "puzzle", name: "Reactor Puzzle", icon: "🧲", desc: "Seret & pasangkan teras jawapan ke reaktor!" }
+    { id: "mix", category: "mix", name: "Campuran Pintar", icon: "🎲", desc: "Gabungan automatik 8 permainan — setiap soalan berlainan!" },
+    { id: "swipe", category: "interactive", name: "Leret Fakta", icon: "👆", desc: "Leret kanan jika tepat, leret kiri jika salah!" },
+    { id: "match", category: "interactive", name: "Sambung Pasangan", icon: "🔌", desc: "Tarik kabel sambung soalan dengan jawapan tepat!" },
+    { id: "sort", category: "interactive", name: "Isih Pantas", icon: "📦", desc: "Leret kad ke tong TEPAT atau tong BUKAN!" },
+    { id: "builder", category: "interactive", name: "Bina Jawapan", icon: "🧱", desc: "Susun kepingan kata atau rumus menjadi jawapan!" },
+    { id: "fps", category: "arcade", name: "Target Strike", icon: "🎯", desc: "Tembak dron jawapan tepat di arena!" },
+    { id: "runner", category: "arcade", name: "Crate Rush", icon: "🦊", desc: "Lari 4 lorong & rempuh peti jawapan tepat!" },
+    { id: "maze", category: "arcade", name: "Maze Runner", icon: "🧭", desc: "Navigasi pagar sesat ke portal jawapan tepat!" },
+    { id: "puzzle", category: "arcade", name: "Reactor Puzzle", icon: "🧲", desc: "Seret atau leret teras jawapan ke reaktor!" }
   ];
 
   const SPEED_BONUS_SEC = 10;
+  const FREEZE_MS = 6000;
   const BOSS_EMOJIS = ["👾", "🤖", "🐉", "🦖", "🐙"];
 
   function pickBossEmoji(chapterId) {
@@ -59,7 +63,37 @@
       .replace(/"/g, "&quot;");
   }
 
-  // ==================== SHARED CANVAS & INPUT UTILITIES ====================
+  function getEffectColors(effectId) {
+    if (effectId === "fx_rainbow") return ["#ef4444", "#f59e0b", "#10b981", "#38bdf8", "#a855f7"];
+    if (effectId === "fx_lightning") return ["#facc15", "#38bdf8", "#fef08a"];
+    if (effectId === "fx_fire") return ["#ef4444", "#f97316", "#fde047"];
+    if (effectId === "fx_plasma") return ["#a855f7", "#ec4899", "#38bdf8"];
+    return ["#38bdf8", "#fde047", "#34d399"];
+  }
+
+  function drawFloatingPopups(ctx, popups, dt) {
+    for (let i = popups.length - 1; i >= 0; i--) {
+      const p = popups[i];
+      p.life -= dt;
+      p.y -= 36 * dt;
+      if (p.life <= 0) {
+        popups.splice(i, 1);
+        continue;
+      }
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, Math.min(1, p.life / p.maxLife));
+      ctx.font = "800 15px 'Fredoka', 'Plus Jakarta Sans', sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.lineWidth = 3.5;
+      ctx.strokeStyle = "#18181b";
+      ctx.strokeText(p.text, p.x, p.y);
+      ctx.fillStyle = p.color || "#fde047";
+      ctx.fillText(p.text, p.x, p.y);
+      ctx.restore();
+    }
+  }
+
   function drawRoundedRect(ctx, x, y, w, h, r) {
     const rad = Math.min(r, w / 2, h / 2);
     ctx.beginPath();
@@ -89,7 +123,6 @@
         if (ctx.measureText(w).width <= maxW) {
           current = w;
         } else {
-          // Break very long single word cleanly
           let chunk = "";
           for (const ch of w) {
             if (ctx.measureText(chunk + ch).width <= maxW) {
@@ -119,13 +152,11 @@
     const availW = Math.max(24, w - padX * 2);
     const availH = Math.max(16, h - padY * 2);
 
-    // Shadow
     ctx.save();
     ctx.fillStyle = shadowColor;
     drawRoundedRect(ctx, x, y + 3, w, h, 10);
     ctx.fill();
 
-    // Card fill & border
     ctx.fillStyle = bg;
     ctx.strokeStyle = border;
     ctx.lineWidth = 2.2;
@@ -133,7 +164,6 @@
     ctx.fill();
     ctx.stroke();
 
-    // Auto-fit font size & wrap
     let fontSize = maxFont;
     let lines = [];
     let lineH = fontSize * 1.22;
@@ -145,7 +175,6 @@
       fontSize -= 0.5;
     }
 
-    // Clamp lines if still slightly tall
     const maxLines = Math.max(1, Math.floor(availH / lineH));
     if (lines.length > maxLines) {
       lines = lines.slice(0, maxLines);
@@ -234,28 +263,66 @@
     setupCanvas,
     drawRoundedRect,
     drawWrappedCard,
-    createGamepadReader
+    createGamepadReader,
+    getEffectColors,
+    drawFloatingPopups
   };
 
-  // ==================== GAME SESSION CONTROLLER ====================
+  function resolveModeForQuestion(selectedMode, setNum, idx, totalQ, gradeId, subjectId, chapterId, qObj, dlp) {
+    if (selectedMode !== "mix") {
+      return App.MiniGames[selectedMode] ? selectedMode : "fps";
+    }
+    // Mix Interactive + Arcade smoothly across Q1..Q5
+    const seqEven = ["swipe", "fps", "builder", "match", "runner"];
+    const seqOdd = ["match", "runner", "sort", "puzzle", "fps"];
+    const baseSeq = setNum % 2 === 0 ? seqEven : seqOdd;
+    let chosen = baseSeq[(idx + setNum) % baseSeq.length];
+    if (idx === totalQ - 1) {
+      // Q5 Boss Finale: action-focused finish
+      chosen = setNum % 3 === 0 ? "runner" : setNum % 2 === 0 ? "fps" : "sort";
+    }
+    if (chosen === "match" && App.QuestionEngine.getMatchPairsForQuestion) {
+      const pairs = App.QuestionEngine.getMatchPairsForQuestion(gradeId, subjectId, chapterId, qObj, !!dlp, setNum * 13 + idx);
+      if (!pairs) chosen = "builder";
+    }
+    return App.MiniGames[chosen] ? chosen : "swipe";
+  }
+
   App.Games = {
-    startSession: function ({ container, profile, grade, subject, chapter, setNum, mode, questions, onComplete, onExit }) {
+    startSession: function ({
+      container,
+      profile,
+      grade,
+      subject,
+      chapter,
+      setNum,
+      mode,
+      questions,
+      dlp = false,
+      isRevision = false,
+      onComplete,
+      onExit
+    }) {
       let idx = 0;
       let score = 0;
       let speedBonus = 0;
       let streak = 0;
       let maxStreak = 0;
       let hearts = 3;
+      let charges5050 = 1;
+      let chargesFreeze = 1;
+      let frozenMsRemaining = 0;
+      let activeElapsedMs = 0;
+      let lastTimerTickMs = 0;
+      let used5050OnCurrent = false;
+
       let activeMini = null;
       let timerInterval = null;
       let overlayInterval = null;
       let advanceTimeout = null;
-      let qStartMs = 0;
       let destroyed = false;
       const answers = [];
       const bossEmoji = pickBossEmoji(chapter.id);
-
-      const safeMode = App.MiniGames[mode] ? mode : "fps";
 
       function clearTimers() {
         if (timerInterval) {
@@ -297,11 +364,9 @@
 
       function renderHeartsHtml() {
         if (hearts <= 0) {
-          return `<span class="pill pill-practice" title="Nyawa habis — teruskan dalam Mod Latihan">🛡️ Mod Latihan</span>`;
+          return `<span class="pill pill-practice" title="Nyawa habis — teruskan dalam Mod Latihan">🛡️ Latihan</span>`;
         }
-        const filled = "❤️".repeat(hearts);
-        const empty = "🖤".repeat(3 - hearts);
-        return `<span class="pill pill-hearts">${filled}${empty}</span>`;
+        return `<span class="pill pill-hearts">${"❤️".repeat(hearts)}${"🖤".repeat(3 - hearts)}</span>`;
       }
 
       function renderQuestion() {
@@ -309,6 +374,9 @@
         clearTimers();
         destroyMini();
         overlayDismissFn = null;
+        used5050OnCurrent = false;
+        frozenMsRemaining = 0;
+        activeElapsedMs = 0;
 
         if (idx >= questions.length) {
           cleanupAll();
@@ -320,34 +388,35 @@
         }
 
         const qObj = questions[idx];
+        const isBossRound = idx === questions.length - 1;
+        const activeMode = resolveModeForQuestion(mode, setNum, idx, questions.length, grade.id, subject.id, chapter.id, qObj, dlp);
+        const miniDef = App.MiniGames[activeMode] || App.MiniGames.fps;
+        const modeInfo = App.GAME_MODES.find((m) => m.id === activeMode) || App.GAME_MODES[0];
         const progressPct = Math.round((idx / questions.length) * 100);
         const bossHp = Math.max(0, Math.round(((questions.length - score) / questions.length) * 100));
         const muted = App.Sound.isMuted();
-        const modeInfo = App.GAME_MODES.find((m) => m.id === safeMode) || App.GAME_MODES[0];
 
         container.innerHTML = `
-          <div class="game-shell mode-${safeMode}">
+          <div class="game-shell mode-${activeMode} ${isBossRound ? "is-boss-round" : ""}">
             <div class="game-topbar">
               <div class="game-nav-actions">
                 <button type="button" class="btn-ghost btn-sm" id="btn-quit-game">← Keluar</button>
                 <button type="button" class="btn-ghost btn-sm" id="btn-game-sound" title="Bunyi">${muted ? "🔇" : "🔊"}</button>
-                <span class="pill pill-qcount">S${idx + 1}/${questions.length}</span>
+                <span class="pill pill-qcount ${isBossRound ? "pill-boss" : ""}">${isBossRound ? `👑 BOSS S${idx + 1}/${questions.length}` : `S${idx + 1}/${questions.length}`}</span>
                 <span class="pill pill-mode">${modeInfo.icon} ${escapeHtml(modeInfo.name)}</span>
               </div>
 
               <div class="game-meta">
-                <span>${subject.icon} ${escapeHtml(subject.name)}</span>
+                <span>${subject.icon} ${escapeHtml(dlp && subject.dlp ? subject.nameEn : subject.name)}</span>
                 <span>•</span>
-                <span>Set ${setNum}</span>
-                <span>•</span>
-                <span>S${idx + 1}/${questions.length}</span>
+                <span>${isRevision ? "⚡ Kilat" : `Set ${setNum}`}</span>
               </div>
 
               <div class="game-stats">
                 ${renderHeartsHtml()}
                 <span class="pill pill-timer" id="speed-timer-pill">⚡ 10.0s</span>
                 <span class="pill pill-score" id="live-score-pill">Skor: ${score}</span>
-                <span class="pill pill-bonus" id="live-bonus-pill" title="Bonus Pantas (≤10s) — kiraan berasingan">⚡ +${speedBonus}</span>
+                <span class="pill pill-bonus" id="live-bonus-pill" title="Bonus Pantas (≤10s)">⚡ +${speedBonus}</span>
                 <span class="pill pill-streak">🔥 ${streak}</span>
               </div>
             </div>
@@ -356,18 +425,26 @@
               <div class="progress-track" title="Kemajuan Set">
                 <div class="progress-fill" style="width:${progressPct}%"></div>
               </div>
-              <div class="speed-track" title="Jawab dalam 10 saat untuk mendapat +1 Bonus Pantas (kiraan berasingan)">
+              <div class="speed-track" title="Jawab dalam 10s untuk Bonus Pantas (+1)">
                 <div class="speed-fill" id="speed-bar-fill" style="width:100%"></div>
+              </div>
+              <div class="powerup-strip">
+                <button type="button" class="powerup-btn" id="btn-pw-5050" ${charges5050 <= 0 ? "disabled" : ""} title="Buang 2 pilihan salah (cas semula setiap streak 3)">
+                  🛡️ 50/50 <span class="pw-cnt">${charges5050}</span>
+                </button>
+                <button type="button" class="powerup-btn" id="btn-pw-freeze" ${chargesFreeze <= 0 ? "disabled" : ""} title="Bekukan masa bonus 6 saat">
+                  ❄️ Beku <span class="pw-cnt">${chargesFreeze}</span>
+                </button>
               </div>
             </div>
 
-            <div class="question-banner">
-              <span class="question-num">S${idx + 1}</span>
+            <div class="question-banner ${isBossRound ? "boss-banner" : ""}">
+              <span class="question-num">${isBossRound ? "👑" : `S${idx + 1}`}</span>
               <div class="question-text">${escapeHtml(qObj.q)}</div>
             </div>
 
-            <div class="canvas-stage" id="canvas-stage">
-              <canvas id="game-canvas"></canvas>
+            <div class="canvas-stage ${miniDef.isDomGame ? "is-dom-stage" : ""}" id="canvas-stage">
+              ${miniDef.isDomGame ? `<div id="interactive-stage" class="interactive-stage"></div>` : `<canvas id="game-canvas"></canvas>`}
               <div class="toast-banner hidden" id="game-toast"></div>
               <div class="learning-overlay hidden" id="learning-overlay"></div>
             </div>
@@ -386,47 +463,114 @@
           soundBtn.textContent = App.Sound.isMuted() ? "🔇" : "🔊";
         });
 
-        // Start 10.0s Speed Bonus timer (accuracy mark stays 1 regardless)
-        qStartMs = performance.now();
         const timerPill = container.querySelector("#speed-timer-pill");
         const speedFill = container.querySelector("#speed-bar-fill");
+        const pw5050Btn = container.querySelector("#btn-pw-5050");
+        const pwFreezeBtn = container.querySelector("#btn-pw-freeze");
+
+        lastTimerTickMs = performance.now();
 
         const updateTimerDisplay = () => {
-          const elapsed = (performance.now() - qStartMs) / 1000;
-          const rem = Math.max(0, SPEED_BONUS_SEC - elapsed);
-          const narrow = global.innerWidth <= 640;
-          if (rem > 0) {
-            timerPill.textContent = narrow ? `⚡ ${rem.toFixed(1)}s` : `⚡ Bonus ${rem.toFixed(1)}s`;
-            timerPill.classList.remove("half-mark");
-            speedFill.style.width = `${Math.round((rem / SPEED_BONUS_SEC) * 100)}%`;
-            speedFill.classList.remove("half-mark");
+          const now = performance.now();
+          const dtMs = Math.max(0, now - lastTimerTickMs);
+          lastTimerTickMs = now;
+
+          if (frozenMsRemaining > 0) {
+            frozenMsRemaining = Math.max(0, frozenMsRemaining - dtMs);
           } else {
-            timerPill.textContent = narrow ? `⏱️ Biasa` : `⏱️ Masa Biasa (+1)`;
-            timerPill.classList.add("half-mark");
-            speedFill.style.width = "100%";
-            speedFill.classList.add("half-mark");
+            activeElapsedMs += dtMs;
+          }
+
+          const rem = Math.max(0, SPEED_BONUS_SEC - activeElapsedMs / 1000);
+          const narrow = global.innerWidth <= 640;
+
+          if (frozenMsRemaining > 0) {
+            timerPill.textContent = `❄️ ${(frozenMsRemaining / 1000).toFixed(1)}s`;
+            timerPill.classList.add("is-frozen");
+            speedFill.classList.add("is-frozen");
+          } else {
+            timerPill.classList.remove("is-frozen");
+            speedFill.classList.remove("is-frozen");
+            if (rem > 0) {
+              timerPill.textContent = narrow ? `⚡ ${rem.toFixed(1)}s` : `⚡ Bonus ${rem.toFixed(1)}s`;
+              timerPill.classList.remove("half-mark");
+              speedFill.style.width = `${Math.round((rem / SPEED_BONUS_SEC) * 100)}%`;
+              speedFill.classList.remove("half-mark");
+            } else {
+              timerPill.textContent = narrow ? `⏱️ Biasa` : `⏱️ Masa Biasa (+1)`;
+              timerPill.classList.add("half-mark");
+              speedFill.style.width = "100%";
+              speedFill.classList.add("half-mark");
+            }
           }
         };
         updateTimerDisplay();
         timerInterval = setInterval(updateTimerDisplay, 100);
 
-        const canvasEl = container.querySelector("#game-canvas");
+        pw5050Btn.addEventListener("click", () => {
+          if (charges5050 <= 0 || used5050OnCurrent || !activeMini || !activeMini.eliminateTwo) return;
+          const ok = activeMini.eliminateTwo();
+          if (ok) {
+            used5050OnCurrent = true;
+            charges5050--;
+            pw5050Btn.disabled = true;
+            pw5050Btn.querySelector(".pw-cnt").textContent = String(charges5050);
+            App.Sound.powerup();
+            App.Sound.vibrate(20);
+          }
+        });
 
-        activeMini = App.MiniGames[safeMode].mount({
-          canvas: canvasEl,
+        pwFreezeBtn.addEventListener("click", () => {
+          if (chargesFreeze <= 0 || frozenMsRemaining > 0) return;
+          chargesFreeze--;
+          frozenMsRemaining = FREEZE_MS;
+          pwFreezeBtn.disabled = true;
+          pwFreezeBtn.querySelector(".pw-cnt").textContent = String(chargesFreeze);
+          App.Sound.powerup();
+          App.Sound.vibrate(20);
+          updateTimerDisplay();
+        });
+
+        const mountOpts = {
+          canvas: container.querySelector("#game-canvas"),
+          stageEl: container.querySelector("#interactive-stage"),
           controlsEl: null,
           qObj,
+          gradeId: grade.id,
+          subjectId: subject.id,
+          chapterId: chapter.id,
+          setNum,
+          dlp,
+          isBossRound,
+          equippedEffect: profile.equippedEffect || "default",
+          seed: setNum * 31 + idx,
           playerAvatar: profile.avatar || "🦊",
           bossEmoji,
           bossHp,
-          onAnswer: (chosenIdx) => {
+          onAnswer: (outcome) => {
             if (destroyed) return;
             if (timerInterval) {
               clearInterval(timerInterval);
               timerInterval = null;
             }
-            const elapsedSec = (performance.now() - qStartMs) / 1000;
-            const isCorrect = chosenIdx === qObj.correctIndex;
+            const elapsedSec = activeElapsedMs / 1000;
+            const trueAnswer = qObj.options[qObj.correctIndex];
+
+            let isCorrect = false;
+            let chosenIdx = -1;
+            let chosenText = "-";
+            let correctText = trueAnswer;
+
+            if (typeof outcome === "number") {
+              chosenIdx = outcome;
+              isCorrect = chosenIdx === qObj.correctIndex;
+              chosenText = qObj.options[chosenIdx] || "-";
+            } else if (outcome && typeof outcome === "object") {
+              isCorrect = !!outcome.isCorrect;
+              chosenText = outcome.chosenText || (isCorrect ? trueAnswer : "-");
+              correctText = outcome.correctText || trueAnswer;
+              chosenIdx = qObj.options.indexOf(chosenText);
+            }
 
             if (activeMini && activeMini.showOutcome) {
               activeMini.showOutcome(chosenIdx, isCorrect);
@@ -438,9 +582,34 @@
               if (gotBonus) speedBonus += 1;
               streak++;
               if (streak > maxStreak) maxStreak = streak;
-              setTimeout(() => App.Sound.correct(streak), 60);
 
-              answers.push({ qObj, selectedIndex: chosenIdx, isCorrect: true, gotBonus, elapsedSec });
+              // Streak 3+ recharges a power-up!
+              let rechargedMsg = "";
+              if (streak > 0 && streak % 3 === 0) {
+                if (charges5050 < 1) {
+                  charges5050 = 1;
+                  rechargedMsg = " • 🛡️ +50/50!";
+                } else if (chargesFreeze < 1) {
+                  chargesFreeze = 1;
+                  rechargedMsg = " • ❄️ +Beku!";
+                } else {
+                  charges5050++;
+                  rechargedMsg = " • 🛡️ +50/50!";
+                }
+                setTimeout(() => App.Sound.streakUp(streak), 90);
+              } else {
+                setTimeout(() => App.Sound.correct(streak), 60);
+              }
+
+              answers.push({
+                qObj,
+                selectedIndex: chosenIdx,
+                chosenText,
+                correctText,
+                isCorrect: true,
+                gotBonus,
+                elapsedSec
+              });
 
               const scorePill = container.querySelector("#live-score-pill");
               if (scorePill) scorePill.textContent = `Skor: ${score}`;
@@ -448,12 +617,15 @@
               if (bonusPill) bonusPill.textContent = `⚡ +${speedBonus}`;
 
               const toast = container.querySelector("#game-toast");
+              const miniMascot = App.Mascot ? App.Mascot.render(profile.gradeId, streak >= 2 ? "cheering" : "happy", 34) : "";
               if (toast) {
                 toast.classList.remove("hidden");
                 toast.className = `toast-banner ${gotBonus ? "toast-full" : "toast-half"}`;
-                toast.textContent = gotBonus
-                  ? `✨ TEPAT! +1 Markah • ⚡ +1 Bonus (${elapsedSec.toFixed(1)}s)`
-                  : `✅ TEPAT! +1 Markah (${elapsedSec.toFixed(1)}s)`;
+                toast.innerHTML = `${miniMascot}<span>${
+                  gotBonus
+                    ? `✨ TEPAT! +1 • ⚡ +1 Bonus (${elapsedSec.toFixed(1)}s)${rechargedMsg}`
+                    : `✅ TEPAT! +1 (${elapsedSec.toFixed(1)}s)${rechargedMsg}`
+                }</span>`;
               }
 
               advanceTimeout = setTimeout(() => {
@@ -464,14 +636,21 @@
               streak = 0;
               hearts = Math.max(0, hearts - 1);
               setTimeout(() => App.Sound.wrong(), 60);
+              App.Sound.vibrate([30, 35, 30]);
 
-              answers.push({ qObj, selectedIndex: chosenIdx, isCorrect: false, gotBonus: false, elapsedSec });
+              answers.push({
+                qObj,
+                selectedIndex: chosenIdx,
+                chosenText,
+                correctText,
+                isCorrect: false,
+                gotBonus: false,
+                elapsedSec
+              });
 
               if (activeMini && activeMini.setPaused) activeMini.setPaused(true);
 
-              const wrongChosen = qObj.options[chosenIdx] || "-";
-              const trueAnswer = qObj.options[qObj.correctIndex];
-              const studyTip = getStudyGuidance(subject.id, chapter.title);
+              const studyTip = getStudyGuidance(subject.id, dlp && subject.dlp ? chapter.titleEn : chapter.title);
               const overlay = container.querySelector("#learning-overlay");
               let secLeft = 10;
               let countdownPaused = false;
@@ -488,20 +667,25 @@
               };
               overlayDismissFn = proceedNext;
 
+              const mascotSvg = App.Mascot ? App.Mascot.render(profile.gradeId, "encouraging", 44) : "";
+
               overlay.classList.remove("hidden");
               overlay.innerHTML = `
                 <div class="learning-card">
                   <div class="learning-head">
-                    <strong>${hearts === 0 ? "🛡️ Mod Latihan — Teruskan!" : "❌ Kurang Tepat (-1 ❤️)"}</strong>
+                    <div class="learning-head-left">
+                      ${mascotSvg}
+                      <strong>${hearts === 0 ? "🛡️ Mod Latihan — Teruskan!" : "❌ Kurang Tepat (-1 ❤️)"}</strong>
+                    </div>
                     <span class="countdown-pill" id="overlay-cd">10s</span>
                   </div>
                   <div class="learning-wrong">
-                    <span>Kenapa salah — jawapan yang kamu pilih:</span>
-                    <strong>❌ ${escapeHtml(wrongChosen)}</strong>
+                    <span>Jawapan yang kamu pilih:</span>
+                    <strong>❌ ${escapeHtml(chosenText)}</strong>
                   </div>
                   <div class="learning-answer">
                     <span>Jawapan tepat yang sebenar:</span>
-                    <strong>✅ ${escapeHtml(trueAnswer)}</strong>
+                    <strong>✅ ${escapeHtml(correctText)}</strong>
                   </div>
                   <p class="learning-exp"><strong>💡 Penerangan:</strong> ${escapeHtml(qObj.explanation)}</p>
                   <div class="learning-tip">
@@ -509,7 +693,7 @@
                   </div>
                   <div class="learning-actions">
                     <button type="button" class="btn-secondary" id="btn-overlay-pause">⏸️ Henti Masa</button>
-                    <button type="button" class="btn-primary" id="btn-overlay-continue">
+                    <button type="button" class="btn-tactile btn-true" id="btn-overlay-continue">
                       Teruskan (<span id="btn-cd-num">10</span>s) →
                     </button>
                   </div>
@@ -539,7 +723,9 @@
               }, 1000);
             }
           }
-        });
+        };
+
+        activeMini = miniDef.mount(mountOpts);
       }
 
       renderQuestion();

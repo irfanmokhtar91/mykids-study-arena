@@ -1,13 +1,38 @@
 /**
  * Persistent storage for 3 kid profiles, scores, separate 10s speed bonuses,
- * full question/mistake logs, Parent PIN, AI Prompt Generator,
- * plus JSON Export/Import and File System Access API (OneDrive / Google Drive sync).
+ * Coins & Rewards Shop, 7-day Streak Calendar, Weekly Sibling Leaderboard,
+ * full question/mistake logs, Parent PIN, AI Study Plan Generator,
+ * plus 1-Tap Backup & Smart Auto-Merge across multiple devices.
  */
 (function (global) {
   const App = (global.App = global.App || {});
   const STORAGE_KEY = "mykids_study_arena_v1";
 
   App.AVATARS = ["🦊", "🐯", "🦁", "🐼", "🐨", "🐸", "🦄", "🦖", "🚀", "🎮", "⭐", "⚡"];
+
+  App.SHOP_ITEMS = [
+    // Unlockable Premium Avatars
+    { id: "av_dragon", type: "avatar", value: "🐉", name: "Naga Sakti", desc: "Avatar naga api legenda", price: 60 },
+    { id: "av_eagle", type: "avatar", value: "🦅", name: "Helang Juara", desc: "Pantas & fokus di udara", price: 50 },
+    { id: "av_bot", type: "avatar", value: "🤖", name: "Robot siber", desc: "Pengira pantas tanpa silap", price: 60 },
+    { id: "av_ninja", type: "avatar", value: "🥷", name: "Ninja Ilmu", desc: "Tangkas menewaskan soalan", price: 80 },
+    { id: "av_wizard", type: "avatar", value: "🧙", name: "Ahli Sihir", desc: "Pakar rumus dan sains", price: 90 },
+    { id: "av_shark", type: "avatar", value: "🦈", name: "Jerung Laju", desc: "Raja cabaran masa pantas", price: 70 },
+    { id: "av_crown", type: "avatar", value: "👑", name: "Juara Mahkota", desc: "Khas untuk pelajar cemerlang", price: 120 },
+    { id: "av_ufo", type: "avatar", value: "🛸", name: "Kapal Angkasa", desc: "Jelajah semua bab 2027", price: 100 },
+
+    // Avatar Frames
+    { id: "frame_gold", type: "frame", value: "frame_gold", name: "Bingkai Emas", desc: "Kilauan emas juara mingguan", price: 45 },
+    { id: "frame_neon", type: "frame", value: "frame_neon", name: "Bingkai Neon", desc: "Cahaya siber biru-ungu", price: 60 },
+    { id: "frame_fire", type: "frame", value: "frame_fire", name: "Bingkai Api", desc: "Aura semangat membara", price: 85 },
+    { id: "frame_galaxy", type: "frame", value: "frame_galaxy", name: "Bingkai Galaksi", desc: "Bingkai kosmik peringkat tertinggi", price: 140 },
+
+    // In-Game Trail / Laser Visual Effects
+    { id: "fx_rainbow", type: "effect", value: "fx_rainbow", name: "Jejak Pelangi", desc: "Laser & percikan warna pelangi", price: 50 },
+    { id: "fx_lightning", type: "effect", value: "fx_lightning", name: "Kuasa Kilat", desc: "Kesan elektrik kuning terang", price: 75 },
+    { id: "fx_fire", type: "effect", value: "fx_fire", name: "Jejak Api", desc: "Kesan tembakan & rempuhan berapi", price: 95 },
+    { id: "fx_plasma", type: "effect", value: "fx_plasma", name: "Plasma Ungu", desc: "Pancaran tenaga futuristik", price: 150 }
+  ];
 
   const LEGACY_GUESSED_NAMES = new Set([
     "Adik (Darjah 6)",
@@ -16,6 +41,7 @@
   ]);
 
   const MONTHS_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const DAYS_MY = ["Aha", "Isn", "Sel", "Rab", "Kha", "Jum", "Sab"];
 
   let fileHandle = null;
 
@@ -28,77 +54,163 @@
     return `${dd}/${mon}/${yyyy}`;
   }
 
+  function toLocalDateKey(dateInput) {
+    const d = dateInput ? new Date(dateInput) : new Date();
+    if (isNaN(d.getTime())) return null;
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  function getIsoWeekKey(dateInput) {
+    const src = dateInput ? new Date(dateInput) : new Date();
+    if (isNaN(src.getTime())) return "2026-W01";
+    const d = new Date(Date.UTC(src.getFullYear(), src.getMonth(), src.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    const weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+    return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, "0")}`;
+  }
+
+  function shiftDateKey(baseDate, offsetDays) {
+    const d = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate() + offsetDays);
+    return toLocalDateKey(d);
+  }
+
+  function computeDailyStreak(activeDays) {
+    if (!Array.isArray(activeDays) || activeDays.length === 0) return 0;
+    const daySet = new Set(activeDays);
+    const now = new Date();
+    const todayKey = toLocalDateKey(now);
+    const yesterdayKey = shiftDateKey(now, -1);
+
+    let offset = 0;
+    if (daySet.has(todayKey)) {
+      offset = 0;
+    } else if (daySet.has(yesterdayKey)) {
+      offset = -1;
+    } else {
+      return 0;
+    }
+
+    let streak = 0;
+    while (streak < 400) {
+      const k = shiftDateKey(now, offset - streak);
+      if (daySet.has(k)) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+    return streak;
+  }
+
+  function defaultProfile(id, gradeId, avatar) {
+    return {
+      id,
+      name: "",
+      gradeId,
+      avatar,
+      xp: 0,
+      coins: 0,
+      dailyStreak: 0,
+      activeDays: [],
+      weeklyStats: {},
+      unlockedItems: [],
+      equippedFrame: "default",
+      equippedEffect: "default",
+      lastPlayed: null,
+      streakBest: 0,
+      totalSpeedBonus: 0,
+      history: [],
+      mistakeLog: [],
+      setBest: {}
+    };
+  }
+
   function defaultState() {
     return {
-      version: 2,
+      version: 3,
       parentPin: "1234",
       dlpEnabled: false,
       activeProfileId: "kid_d6",
       profiles: [
-        {
-          id: "kid_d6",
-          name: "",
-          gradeId: "d6",
-          avatar: "🦊",
-          xp: 0,
-          streakBest: 0,
-          totalSpeedBonus: 0,
-          history: [],
-          mistakeLog: [],
-          setBest: {}
-        },
-        {
-          id: "kid_t2",
-          name: "",
-          gradeId: "t2",
-          avatar: "🚀",
-          xp: 0,
-          streakBest: 0,
-          totalSpeedBonus: 0,
-          history: [],
-          mistakeLog: [],
-          setBest: {}
-        },
-        {
-          id: "kid_t4",
-          name: "",
-          gradeId: "t4",
-          avatar: "⚡",
-          xp: 0,
-          streakBest: 0,
-          totalSpeedBonus: 0,
-          history: [],
-          mistakeLog: [],
-          setBest: {}
-        }
+        defaultProfile("kid_d6", "d6", "🦊"),
+        defaultProfile("kid_t2", "t2", "🚀"),
+        defaultProfile("kid_t4", "t4", "⚡")
       ]
     };
+  }
+
+  function normalizeProfileFields(p) {
+    let changed = false;
+    if (typeof p.name === "string" && LEGACY_GUESSED_NAMES.has(p.name.trim())) {
+      p.name = "";
+      changed = true;
+    }
+    if (typeof p.xp !== "number") {
+      p.xp = 0;
+      changed = true;
+    }
+    if (typeof p.coins !== "number") {
+      p.coins = 0;
+      changed = true;
+    }
+    if (typeof p.totalSpeedBonus !== "number") {
+      p.totalSpeedBonus = 0;
+      changed = true;
+    }
+    if (!Array.isArray(p.activeDays)) {
+      p.activeDays = [];
+      changed = true;
+    }
+    if (!p.weeklyStats || typeof p.weeklyStats !== "object") {
+      p.weeklyStats = {};
+      changed = true;
+    }
+    if (!Array.isArray(p.unlockedItems)) {
+      p.unlockedItems = [];
+      changed = true;
+    }
+    if (typeof p.equippedFrame !== "string") {
+      p.equippedFrame = "default";
+      changed = true;
+    }
+    if (typeof p.equippedEffect !== "string") {
+      p.equippedEffect = "default";
+      changed = true;
+    }
+    if (p.lastPlayed === undefined) {
+      p.lastPlayed = null;
+      changed = true;
+    }
+    if (!Array.isArray(p.mistakeLog)) {
+      p.mistakeLog = [];
+      changed = true;
+    }
+    if (!Array.isArray(p.history)) {
+      p.history = [];
+      changed = true;
+    }
+    if (!p.setBest || typeof p.setBest !== "object") {
+      p.setBest = {};
+      changed = true;
+    }
+    const recomputedStreak = computeDailyStreak(p.activeDays);
+    if (p.dailyStreak !== recomputedStreak) {
+      p.dailyStreak = recomputedStreak;
+      changed = true;
+    }
+    return changed;
   }
 
   function normalizeProfiles(parsed) {
     let changed = false;
     if (parsed && Array.isArray(parsed.profiles)) {
       parsed.profiles.forEach((p) => {
-        if (typeof p.name === "string" && LEGACY_GUESSED_NAMES.has(p.name.trim())) {
-          p.name = "";
-          changed = true;
-        }
-        if (typeof p.totalSpeedBonus !== "number") {
-          p.totalSpeedBonus = 0;
-          changed = true;
-        }
-        if (!Array.isArray(p.mistakeLog)) {
-          p.mistakeLog = [];
-          changed = true;
-        }
-        if (!Array.isArray(p.history)) {
-          p.history = [];
-          changed = true;
-        }
-        if (!p.setBest || typeof p.setBest !== "object") {
-          p.setBest = {};
-          changed = true;
-        }
+        if (normalizeProfileFields(p)) changed = true;
       });
     }
     return changed;
@@ -162,6 +274,73 @@
       subjectName: subj ? subj.name : subjectId.toUpperCase(),
       chapterTitle: ch ? ch.title : chapterId
     };
+  }
+
+  function getLast7DaysStatus(profile) {
+    const daySet = new Set(Array.isArray(profile && profile.activeDays) ? profile.activeDays : []);
+    const now = new Date();
+    const out = [];
+    for (let offset = -6; offset <= 0; offset++) {
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + offset);
+      const key = toLocalDateKey(d);
+      out.push({
+        dateKey: key,
+        dayLabel: DAYS_MY[d.getDay()],
+        active: daySet.has(key),
+        isToday: offset === 0
+      });
+    }
+    return out;
+  }
+
+  function getSiblingLeaderboard() {
+    const wk = getIsoWeekKey();
+    return state.profiles
+      .map((p) => {
+        const grade = App.GRADES && App.GRADES[p.gradeId];
+        const wStats = (p.weeklyStats && p.weeklyStats[wk]) || { marks: 0, sets: 0, bonus: 0, xp: 0 };
+        return {
+          id: p.id,
+          name: getDisplayName(p),
+          hasCustomName: !!(p.name && p.name.trim()),
+          gradeId: p.gradeId,
+          gradeName: grade ? grade.name : p.gradeId,
+          avatar: p.avatar || "🦊",
+          equippedFrame: p.equippedFrame || "default",
+          weeklyMarks: Number(wStats.marks) || 0,
+          weeklySets: Number(wStats.sets) || 0,
+          weeklyBonus: Number(wStats.bonus) || 0,
+          weeklyXp: Number(wStats.xp) || 0,
+          xp: Number(p.xp) || 0,
+          dailyStreak: computeDailyStreak(p.activeDays)
+        };
+      })
+      .sort((a, b) => b.weeklyMarks - a.weeklyMarks || b.weeklyXp - a.weeklyXp || b.xp - a.xp);
+  }
+
+  function buyOrEquipItem(profileId, itemId) {
+    const p = state.profiles.find((x) => x.id === profileId);
+    const item = App.SHOP_ITEMS.find((x) => x.id === itemId);
+    if (!p || !item) return { ok: false, reason: "Item tidak dijumpai." };
+    normalizeProfileFields(p);
+
+    const isOwned = p.unlockedItems.includes(item.id) || item.price === 0;
+    let action = "equipped";
+    if (!isOwned) {
+      if ((p.coins || 0) < item.price) {
+        return { ok: false, reason: `Syiling tidak cukup! Perlukan ${item.price} 🪙.` };
+      }
+      p.coins -= item.price;
+      p.unlockedItems.push(item.id);
+      action = "bought";
+    }
+
+    if (item.type === "avatar") p.avatar = item.value;
+    else if (item.type === "frame") p.equippedFrame = item.value;
+    else if (item.type === "effect") p.equippedEffect = item.value;
+
+    save();
+    return { ok: true, action, item, coins: p.coins };
   }
 
   function getFocusReport(profile) {
@@ -246,6 +425,7 @@
       totalQuestions,
       totalSpeedBonus: Number(profile.totalSpeedBonus) || 0,
       weakChapters,
+      allChapters,
       recentMistakes: mistakeLog.slice(0, 15)
     };
   }
@@ -297,12 +477,12 @@
     return [
       `# Permintaan Projek Mini-App Latihan Interaktif (${today})`,
       "",
-      `Sila reka dan bina satu **aplikasi permainan HTML5 Canvas interaktif** (bukan kuiz objektif A/B/C/D statik, mesra telefon & PC, sifar kesilapan fakta) khusus untuk membantu **${displayName}** menguasai topik lemah berdasarkan data prestasi sebenar di bawah (Silibus KSSR Semakan / KSSM Malaysia 2027).`,
+      `Sila reka dan bina satu **aplikasi permainan HTML5 interaktif** (mesra sentuhan telefon & PC, sifar kesilapan fakta) khusus untuk membantu **${displayName}** menguasai topik lemah berdasarkan data prestasi sebenar di bawah (Silibus KSSR Semakan / KSSM Malaysia 2027).`,
       "",
       buildKidSection(profile),
       "",
       "## Keperluan Aplikasi Seterusnya:",
-      "1. Fokuskan aktiviti permainan (contoh: seret & padan, bina langkah pengiraan, simulasi makmal/garis masa, atau penembak sasaran konsep) tepat pada bab keutamaan & jenis kesilapan di atas.",
+      "1. Fokuskan aktiviti permainan interaktif (contoh: leret benar/palsu, sambung pasangan, isih kategori, bina formula/ayat, atau aksi arked) tepat pada bab keutamaan & jenis kesilapan di atas.",
       "2. Apabila anak tersilap, terangkan secara jelas **mengapa jawapan itu salah** dan **langkah mudah untuk memahaminya** sebelum cuba semula.",
       "3. Gunakan pengiraan deterministik / semakan jawapan yang disahkan 100% tepat tanpa tekaan.",
       "4. Paparkan markah ketepatan (1 markah setiap jawapan tepat) dan kiraan bonus pantas (<=10 saat) secara berasingan, serta log keputusan."
@@ -315,7 +495,7 @@
     return [
       `# Permintaan Projek Aplikasi Pemulihan Interaktif Keluarga (${today})`,
       "",
-      "Sila bantu rancang dan bina aplikasi/modul permainan HTML5 interaktif baharu (bukan soalan A/B/C/D statik, sifar kesilapan jawapan, mesra telefon & PC) untuk membaiki kelemahan ketiga-tiga anak berdasarkan log sebenar di bawah (Silibus Malaysia 2027):",
+      "Sila bantu rancang dan bina aplikasi/modul permainan HTML5 interaktif baharu (sifar kesilapan jawapan, mesra skrin sentuh telefon & PC) untuk membaiki kelemahan ketiga-tiga anak berdasarkan log sebenar di bawah (Silibus Malaysia 2027):",
       "",
       sections,
       "",
@@ -326,10 +506,151 @@
     ].join("\n");
   }
 
+  function mergeBackup(text) {
+    let parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch (e) {
+      throw new Error("Fail ini bukan fail rekod belajar yang sah.");
+    }
+    if (!parsed || !Array.isArray(parsed.profiles)) {
+      throw new Error("Fail ini bukan fail rekod belajar yang sah.");
+    }
+    normalizeProfiles(parsed);
+
+    let addedHistory = 0;
+    let addedMistakes = 0;
+    let updatedSets = 0;
+
+    parsed.profiles.forEach((inc) => {
+      let local = state.profiles.find((p) => p.id === inc.id);
+      if (!local && inc.gradeId) {
+        local = state.profiles.find((p) => p.gradeId === inc.gradeId);
+      }
+      if (!local) return;
+      normalizeProfileFields(local);
+
+      const incName = typeof inc.name === "string" ? inc.name.trim() : "";
+      const locName = typeof local.name === "string" ? local.name.trim() : "";
+      if (!locName && incName && !LEGACY_GUESSED_NAMES.has(incName)) {
+        local.name = incName;
+      }
+
+      local.xp = Math.max(Number(local.xp) || 0, Number(inc.xp) || 0);
+      local.coins = Math.max(Number(local.coins) || 0, Number(inc.coins) || 0);
+      local.streakBest = Math.max(Number(local.streakBest) || 0, Number(inc.streakBest) || 0);
+      local.totalSpeedBonus = Math.max(Number(local.totalSpeedBonus) || 0, Number(inc.totalSpeedBonus) || 0);
+
+      const itemSet = new Set([...(local.unlockedItems || []), ...(inc.unlockedItems || [])]);
+      local.unlockedItems = Array.from(itemSet);
+
+      const daySet = new Set([...(local.activeDays || []), ...(inc.activeDays || [])]);
+      local.activeDays = Array.from(daySet).sort().slice(-180);
+      local.dailyStreak =
+        local.activeDays.length > 0
+          ? computeDailyStreak(local.activeDays)
+          : Math.max(Number(local.dailyStreak) || 0, Number(inc.dailyStreak) || 0);
+
+      // Merge weeklyStats
+      const allWeeks = new Set([...Object.keys(local.weeklyStats || {}), ...Object.keys(inc.weeklyStats || {})]);
+      allWeeks.forEach((wk) => {
+        const lw = (local.weeklyStats && local.weeklyStats[wk]) || { marks: 0, sets: 0, bonus: 0, xp: 0 };
+        const iw = (inc.weeklyStats && inc.weeklyStats[wk]) || { marks: 0, sets: 0, bonus: 0, xp: 0 };
+        local.weeklyStats[wk] = {
+          marks: Math.max(Number(lw.marks) || 0, Number(iw.marks) || 0),
+          sets: Math.max(Number(lw.sets) || 0, Number(iw.sets) || 0),
+          bonus: Math.max(Number(lw.bonus) || 0, Number(iw.bonus) || 0),
+          xp: Math.max(Number(lw.xp) || 0, Number(iw.xp) || 0)
+        };
+      });
+
+      // Merge setBest
+      const allSetKeys = new Set([...Object.keys(local.setBest || {}), ...Object.keys(inc.setBest || {})]);
+      allSetKeys.forEach((k) => {
+        const ls = local.setBest[k];
+        const is = inc.setBest && inc.setBest[k];
+        if (!is) return;
+        if (!ls) {
+          local.setBest[k] = { ...is };
+          updatedSets++;
+        } else {
+          const prevScore = Number(ls.bestScore) || 0;
+          const nextScore = Math.max(prevScore, Number(is.bestScore) || 0);
+          const nextBonus = Math.max(Number(ls.bestBonus) || 0, Number(is.bestBonus) || 0);
+          const nextAtt = Math.max(Number(ls.attempts) || 0, Number(is.attempts) || 0);
+          const latestPlay =
+            String(is.lastPlayed || "") > String(ls.lastPlayed || "") ? is.lastPlayed : ls.lastPlayed;
+          if (nextScore > prevScore || nextBonus > (ls.bestBonus || 0) || nextAtt > (ls.attempts || 0)) {
+            updatedSets++;
+          }
+          local.setBest[k] = {
+            bestScore: nextScore,
+            bestBonus: nextBonus,
+            total: is.total || ls.total,
+            attempts: nextAtt,
+            lastPlayed: latestPlay
+          };
+        }
+      });
+
+      // Deduplicate & merge history
+      const histMap = new Map();
+      (local.history || []).forEach((h) => {
+        histMap.set(`${h.ts}|${h.subjectId}|${h.chapterId}|${h.setNum}|${h.score}`, h);
+      });
+      (inc.history || []).forEach((h) => {
+        const hk = `${h.ts}|${h.subjectId}|${h.chapterId}|${h.setNum}|${h.score}`;
+        if (!histMap.has(hk)) {
+          histMap.set(hk, h);
+          addedHistory++;
+        }
+      });
+      local.history = Array.from(histMap.values())
+        .sort((a, b) => String(b.ts || "").localeCompare(String(a.ts || "")))
+        .slice(0, 150);
+      for (let i = 80; i < local.history.length; i++) {
+        delete local.history[i].questionLogs;
+      }
+
+      // Deduplicate & merge mistakeLog
+      const misMap = new Map();
+      (local.mistakeLog || []).forEach((m) => {
+        misMap.set(`${m.ts}|${m.subjectId}|${m.chapterId}|${m.q}`, m);
+      });
+      (inc.mistakeLog || []).forEach((m) => {
+        const mk = `${m.ts}|${m.subjectId}|${m.chapterId}|${m.q}`;
+        if (!misMap.has(mk)) {
+          misMap.set(mk, m);
+          addedMistakes++;
+        }
+      });
+      local.mistakeLog = Array.from(misMap.values())
+        .sort((a, b) => String(b.ts || "").localeCompare(String(a.ts || "")))
+        .slice(0, 300);
+
+      if (!local.lastPlayed && inc.lastPlayed) {
+        local.lastPlayed = inc.lastPlayed;
+      }
+      if (local.equippedFrame === "default" && inc.equippedFrame && inc.equippedFrame !== "default") {
+        local.equippedFrame = inc.equippedFrame;
+      }
+      if (local.equippedEffect === "default" && inc.equippedEffect && inc.equippedEffect !== "default") {
+        local.equippedEffect = inc.equippedEffect;
+      }
+    });
+
+    save();
+    return { addedHistory, addedMistakes, updatedSets };
+  }
+
   App.Storage = {
     getState: () => state,
     save,
     fmtDate,
+    getCurrentWeekKey: () => getIsoWeekKey(),
+    getLast7DaysStatus,
+    getSiblingLeaderboard,
+    buyOrEquipItem,
     getActiveProfile: () =>
       state.profiles.find((p) => p.id === state.activeProfileId) || state.profiles[0],
     getDisplayName,
@@ -364,44 +685,63 @@
     verifyParentPin: (pin) => pin === state.parentPin,
     recordAttempt: (
       profileId,
-      { gradeId, subjectId, subjectName, chapterId, chapterTitle, setNum, score, total, speedBonus, maxStreak, mode, answers }
+      { gradeId, subjectId, subjectName, chapterId, chapterTitle, setNum, score, total, speedBonus, maxStreak, mode, answers, isRevision }
     ) => {
       const p = state.profiles.find((x) => x.id === profileId);
       if (!p) return;
-      if (typeof p.totalSpeedBonus !== "number") p.totalSpeedBonus = 0;
-      if (!Array.isArray(p.mistakeLog)) p.mistakeLog = [];
-      if (!Array.isArray(p.history)) p.history = [];
-      if (!p.setBest) p.setBest = {};
+      normalizeProfileFields(p);
 
       const cleanScore = Math.max(0, Math.round(Number(score) || 0));
       const bonus = Math.max(0, Math.round(Number(speedBonus) || 0));
       const pct = total > 0 ? Math.round((cleanScore / total) * 100) : 0;
-      const earnedXp = cleanScore * 15 + bonus * 5 + (pct >= 80 ? 40 : 0) + maxStreak * 5;
+      const earnedXp = cleanScore * 15 + bonus * 5 + (pct >= 80 ? 30 : 0) + maxStreak * 5;
+      const earnedCoins = cleanScore * 10 + bonus * 5 + (pct === 100 ? 25 : pct >= 80 ? 10 : 0);
 
       p.xp = (p.xp || 0) + earnedXp;
+      p.coins = (p.coins || 0) + earnedCoins;
       p.totalSpeedBonus += bonus;
       if (maxStreak > (p.streakBest || 0)) p.streakBest = maxStreak;
+
+      const todayKey = toLocalDateKey(new Date());
+      if (todayKey && !p.activeDays.includes(todayKey)) {
+        p.activeDays.push(todayKey);
+        p.activeDays.sort();
+        if (p.activeDays.length > 180) p.activeDays = p.activeDays.slice(-180);
+      }
+      p.dailyStreak = computeDailyStreak(p.activeDays);
+
+      const wk = getIsoWeekKey();
+      const prevWk = p.weeklyStats[wk] || { marks: 0, sets: 0, bonus: 0, xp: 0 };
+      p.weeklyStats[wk] = {
+        marks: (Number(prevWk.marks) || 0) + cleanScore,
+        sets: (Number(prevWk.sets) || 0) + 1,
+        bonus: (Number(prevWk.bonus) || 0) + bonus,
+        xp: (Number(prevWk.xp) || 0) + earnedXp
+      };
 
       const info = lookupChapterInfo(gradeId, subjectId, chapterId);
       const sName = subjectName || info.subjectName;
       const cTitle = chapterTitle || info.chapterTitle;
       const nowIso = new Date().toISOString();
 
-      const key = `${subjectId}:${chapterId}:${setNum}`;
-      const prev = p.setBest[key];
-      p.setBest[key] = {
-        bestScore: prev ? Math.max(prev.bestScore, cleanScore) : cleanScore,
-        bestBonus: prev ? Math.max(prev.bestBonus || 0, bonus) : bonus,
-        total,
-        attempts: (prev ? prev.attempts : 0) + 1,
-        lastPlayed: nowIso
-      };
+      if (!isRevision) {
+        const key = `${subjectId}:${chapterId}:${setNum}`;
+        const prev = p.setBest[key];
+        p.setBest[key] = {
+          bestScore: prev ? Math.max(prev.bestScore, cleanScore) : cleanScore,
+          bestBonus: prev ? Math.max(prev.bestBonus || 0, bonus) : bonus,
+          total,
+          attempts: (prev ? prev.attempts : 0) + 1,
+          lastPlayed: nowIso
+        };
+        p.lastPlayed = { subjectId, chapterId, setNum, mode };
+      }
 
       const questionLogs = Array.isArray(answers)
         ? answers.map((a) => ({
             q: a.qObj.q,
-            chosen: a.qObj.options[a.selectedIndex] || "",
-            correct: a.qObj.options[a.qObj.correctIndex] || "",
+            chosen: a.chosenText !== undefined ? a.chosenText : a.qObj.options[a.selectedIndex] || "",
+            correct: a.correctText !== undefined ? a.correctText : a.qObj.options[a.qObj.correctIndex] || "",
             isCorrect: !!a.isCorrect,
             gotBonus: !!a.gotBonus,
             elapsedSec: Math.round((Number(a.elapsedSec) || 0) * 10) / 10
@@ -415,13 +755,14 @@
         subjectName: sName,
         chapterId,
         chapterTitle: cTitle,
-        setNum,
+        setNum: isRevision ? "Kilat" : setNum,
         score: cleanScore,
         total,
         speedBonus: bonus,
         pct,
         mode,
         earnedXp,
+        earnedCoins,
         questionLogs
       });
 
@@ -443,10 +784,10 @@
               subjectName: sName,
               chapterId,
               chapterTitle: cTitle,
-              setNum,
+              setNum: isRevision ? "Kilat" : setNum,
               q: a.qObj.q,
-              chosen: a.qObj.options[a.selectedIndex] || "",
-              correct: a.qObj.options[a.qObj.correctIndex] || "",
+              chosen: a.chosenText !== undefined ? a.chosenText : a.qObj.options[a.selectedIndex] || "",
+              correct: a.correctText !== undefined ? a.correctText : a.qObj.options[a.qObj.correctIndex] || "",
               explanation: a.qObj.explanation || "",
               elapsedSec: Math.round((Number(a.elapsedSec) || 0) * 10) / 10
             });
@@ -456,16 +797,28 @@
       }
 
       save();
-      return { earnedXp, pct, score: cleanScore, speedBonus: bonus };
+      return {
+        earnedXp,
+        earnedCoins,
+        pct,
+        score: cleanScore,
+        speedBonus: bonus,
+        dailyStreak: p.dailyStreak
+      };
     },
     getFocusReport,
     buildAiPromptForKid,
     buildAiPromptAllKids,
     exportJson: () => JSON.stringify(state, null, 2),
+    exportBackupFileName: () => {
+      const stamp = fmtDate(new Date().toISOString()).replace(/\//g, "");
+      return `Rekod-MyKids-${stamp}.json`;
+    },
+    mergeBackup,
     importJson: (text) => {
       const parsed = JSON.parse(text);
       if (!parsed || !Array.isArray(parsed.profiles)) {
-        throw new Error("Invalid backup file format.");
+        throw new Error("Fail ini bukan fail rekod belajar yang sah.");
       }
       normalizeProfiles(parsed);
       state = parsed;
@@ -475,33 +828,27 @@
     supportsCloudFileSync: () => typeof global.showSaveFilePicker === "function",
     linkCloudFileSave: async () => {
       if (typeof global.showSaveFilePicker !== "function") {
-        throw new Error("Browser does not support direct file linking. Use Export/Import JSON instead.");
+        throw new Error("Pelayar ini menyokong Simpan Rekod terus.");
       }
       fileHandle = await global.showSaveFilePicker({
-        suggestedName: "mykids-study-scores.json",
-        types: [{ description: "JSON Backup", accept: { "application/json": [".json"] } }]
+        suggestedName: "Rekod-MyKids.json",
+        types: [{ description: "Fail Rekod Belajar", accept: { "application/json": [".json"] } }]
       });
       await syncToLinkedFile();
       return fileHandle.name;
     },
     loadFromCloudFile: async () => {
       if (typeof global.showOpenFilePicker !== "function") {
-        throw new Error("Browser does not support direct file opening. Use Import JSON instead.");
+        throw new Error("Gunakan butang Pulihkan & Gabung Rekod di sebelah.");
       }
       const [handle] = await global.showOpenFilePicker({
-        types: [{ description: "JSON Backup", accept: { "application/json": [".json"] } }]
+        types: [{ description: "Fail Rekod Belajar", accept: { "application/json": [".json"] } }]
       });
       const file = await handle.getFile();
       const text = await file.text();
-      const parsed = JSON.parse(text);
-      if (!parsed || !Array.isArray(parsed.profiles)) {
-        throw new Error("Selected file is not a valid Study Arena backup.");
-      }
-      normalizeProfiles(parsed);
+      const summary = mergeBackup(text);
       fileHandle = handle;
-      state = parsed;
-      save();
-      return handle.name;
+      return { fileName: handle.name, ...summary };
     },
     getLinkedFileName: () => (fileHandle ? fileHandle.name : null)
   };

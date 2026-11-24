@@ -1,22 +1,27 @@
 /**
- * Main Application Controller: Profile selection, inline name/avatar setup,
- * Subject/Chapter/Set 1-12 browser, DLP toggle, Game Mode launcher,
- * Results & Answer Review, and PIN-locked Parent Dashboard.
+ * Main Application Controller (v3.0 Duolingo + Kahoot Hybrid):
+ * - Self-service 3-kid profiles with adaptive themes (theme-d6 / theme-t2 / theme-t4)
+ * - Animated Mascot reactions, 7-day Streak Calendar, Weekly Sibling Leaderboard
+ * - Winding Adventure Chapter Path (honest non-repeating Sets 1..K + Flash Revision)
+ * - 9 Play Modes (Campuran Pintar + 4 Interactive Touch + 4 Arcade)
+ * - Coin & Rewards Shop (Avatars, Frames, Trail Effects)
+ * - Jargon-Free Parent Panel with 1-Tap Save/Share Backup & Smart Auto-Merge
  */
 (function (global) {
   const App = (global.App = global.App || {});
 
-  let currentView = "home"; // 'home' | 'chapters' | 'sets' | 'playing' | 'results' | 'parent'
+  let currentView = "home"; // 'home' | 'chapters' | 'sets' | 'shop' | 'playing' | 'results' | 'parent'
   let selectedSubject = null;
   let selectedChapter = null;
   let selectedSetNum = 1;
-  let selectedMode = "runner";
+  let selectedMode = "mix";
   let lastResult = null;
   let parentUnlocked = false;
   let editingProfile = false;
   let draftAvatar = null;
   let activeAiPromptTitle = "";
   let activeAiPromptText = "";
+  let shopMsg = "";
 
   function esc(str) {
     return String(str || "")
@@ -24,6 +29,33 @@
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
+  }
+
+  function syncViewportMetrics() {
+    const vv = global.visualViewport;
+    const h = vv ? Math.round(vv.height) : global.innerHeight;
+    const top = vv ? Math.max(0, Math.round(vv.offsetTop)) : 0;
+    document.documentElement.style.setProperty("--app-height", `${h}px`);
+    document.documentElement.style.setProperty("--vv-top", `${top}px`);
+  }
+
+  function syncBodyMode() {
+    const profile = App.Storage.getActiveProfile();
+    const grade = profile && App.GRADES ? App.GRADES[profile.gradeId] : null;
+    document.body.classList.remove("theme-d6", "theme-t2", "theme-t4");
+    document.body.classList.add(grade && grade.themeClass ? grade.themeClass : "theme-d6");
+    document.body.classList.toggle("is-playing", currentView === "playing");
+    syncViewportMetrics();
+    if (currentView === "playing") {
+      global.scrollTo(0, 0);
+    }
+  }
+
+  function getPlayableAvatars(profile) {
+    const unlockedPremium = (App.SHOP_ITEMS || [])
+      .filter((it) => it.type === "avatar" && profile.unlockedItems && profile.unlockedItems.includes(it.id))
+      .map((it) => it.value);
+    return Array.from(new Set([...(App.AVATARS || []), ...unlockedPremium]));
   }
 
   function renderTopBar() {
@@ -35,9 +67,10 @@
       .map((p) => {
         const displayName = App.Storage.getDisplayName(p);
         const unnamed = !(p.name && p.name.trim());
+        const frameCls = p.equippedFrame && p.equippedFrame !== "default" ? `frame-${p.equippedFrame}` : "";
         return `
           <button class="profile-chip ${p.id === profile.id ? "active" : ""}" data-profile-id="${p.id}">
-            <span class="chip-avatar">${p.avatar}</span>
+            <span class="chip-avatar ${frameCls}">${p.avatar}</span>
             <span>${esc(displayName)}</span>
             ${unnamed ? `<span class="chip-dot" title="Belum isi nama">Isi Nama</span>` : ""}
           </button>`;
@@ -49,16 +82,16 @@
         <span class="brand-logo">🚀</span>
         <div>
           <div class="brand-title">MyKids Study Arena</div>
-          <div class="brand-sub">KSSR & KSSM 2027 • Zero-Mistake Verified</div>
+          <div class="brand-sub">KSSR & KSSM 2027 • Sifar Ralat</div>
         </div>
       </div>
 
       <div class="profile-switcher">${profileChips}</div>
 
       <div class="topbar-actions">
-        <label class="dlp-toggle" title="Tukar bahasa Matematik & Sains kepada Bahasa Inggeris (DLP)">
+        <label class="dlp-toggle" title="Tukar bahasa Matematik & Sains kepada Bahasa Inggeris">
           <input type="checkbox" id="chk-dlp" ${state.dlpEnabled ? "checked" : ""} />
-          <span>DLP (EN)</span>
+          <span>🌐 BM / EN</span>
         </label>
         <button class="btn-ghost" id="btn-sound" title="Bunyi">${muted ? "🔇" : "🔊"}</button>
         <button class="btn-parent" id="btn-parent-dash">👨‍👩‍👧‍👦 Ibu Bapa</button>
@@ -80,6 +113,7 @@
         selectedChapter = null;
         editingProfile = false;
         draftAvatar = null;
+        shopMsg = "";
         renderAll();
       });
     });
@@ -101,30 +135,24 @@
     });
   }
 
-  function syncViewportMetrics() {
-    const vv = global.visualViewport;
-    const h = vv ? Math.round(vv.height) : global.innerHeight;
-    const top = vv ? Math.max(0, Math.round(vv.offsetTop)) : 0;
-    document.documentElement.style.setProperty("--app-height", `${h}px`);
-    document.documentElement.style.setProperty("--vv-top", `${top}px`);
-  }
+  function launchSetGame(main, profile, grade, dlp, isRevision = false) {
+    const useDlp = !!(dlp && selectedSubject.dlp);
+    const questions = isRevision
+      ? App.QuestionEngine.getEndlessRevisionSet(
+          profile.gradeId,
+          selectedSubject.id,
+          selectedChapter.id,
+          useDlp,
+          Math.floor(Date.now() / 1000) % 10000
+        )
+      : App.QuestionEngine.getSetQuestions(
+          profile.gradeId,
+          selectedSubject.id,
+          selectedChapter.id,
+          selectedSetNum,
+          useDlp
+        );
 
-  function syncBodyMode() {
-    document.body.classList.toggle("is-playing", currentView === "playing");
-    syncViewportMetrics();
-    if (currentView === "playing") {
-      global.scrollTo(0, 0);
-    }
-  }
-
-  function launchSetGame(main, profile, grade, dlp) {
-    const questions = App.QuestionEngine.getSetQuestions(
-      profile.gradeId,
-      selectedSubject.id,
-      selectedChapter.id,
-      selectedSetNum,
-      dlp && selectedSubject.dlp
-    );
     currentView = "playing";
     syncBodyMode();
     App.Games.startSession({
@@ -136,13 +164,15 @@
       setNum: selectedSetNum,
       mode: selectedMode,
       questions,
+      dlp: useDlp,
+      isRevision,
       onExit: () => {
         currentView = "sets";
         renderMain();
       },
       onComplete: (res) => {
-        const subjName = dlp && selectedSubject.dlp ? selectedSubject.nameEn : selectedSubject.name;
-        const chTitle = dlp && selectedSubject.dlp ? selectedChapter.titleEn : selectedChapter.title;
+        const subjName = useDlp ? selectedSubject.nameEn : selectedSubject.name;
+        const chTitle = useDlp ? selectedChapter.titleEn : selectedChapter.title;
         const reward = App.Storage.recordAttempt(profile.id, {
           gradeId: profile.gradeId,
           subjectId: selectedSubject.id,
@@ -155,14 +185,36 @@
           speedBonus: res.speedBonus || 0,
           maxStreak: res.maxStreak,
           mode: selectedMode,
-          answers: res.answers
+          answers: res.answers,
+          isRevision
         });
-        lastResult = { ...res, earnedXp: reward ? reward.earnedXp : 0 };
+        lastResult = {
+          ...res,
+          earnedXp: reward ? reward.earnedXp : 0,
+          earnedCoins: reward ? reward.earnedCoins : 0,
+          isRevision
+        };
         currentView = "results";
         renderTopBar();
         renderMain();
       }
     });
+  }
+
+  function resolveResumeTarget(profile, grade, dlp) {
+    if (profile.lastPlayed) {
+      const subj = grade.subjects.find((s) => s.id === profile.lastPlayed.subjectId);
+      const ch = subj && subj.chapters.find((c) => c.id === profile.lastPlayed.chapterId);
+      if (subj && ch) {
+        const count = App.QuestionEngine.getChapterSetCount(grade.id, subj.id, ch.id, !!(dlp && subj.dlp));
+        const nextSet =
+          profile.lastPlayed.setNum < count ? profile.lastPlayed.setNum + 1 : profile.lastPlayed.setNum;
+        return { subj, ch, setNum: Math.max(1, Math.min(count, nextSet)) };
+      }
+    }
+    const firstSubj = grade.subjects[0];
+    const firstCh = firstSubj.chapters[0];
+    return { subj: firstSubj, ch: firstCh, setNum: 1 };
   }
 
   function renderMain() {
@@ -177,27 +229,68 @@
 
     if (currentView === "home") {
       const totalSetsPlayed = Object.keys(profile.setBest || {}).length;
+      const mascotInfo = App.Mascot ? App.Mascot.getInfo(grade.id) : { name: "Koko", tagline: "" };
+      const mascotHtml = App.Mascot ? App.Mascot.render(grade.id, hasCustomName ? "happy" : "idle", 76) : "";
+      const weekDays = App.Storage.getLast7DaysStatus(profile);
+      const leaderboard = App.Storage.getSiblingLeaderboard();
+      const resumeTarget = resolveResumeTarget(profile, grade, dlp);
+
+      const streakCalHtml = weekDays
+        .map(
+          (d) => `
+          <div class="streak-day ${d.active ? "is-active" : ""} ${d.isToday ? "is-today" : ""}" title="${d.dateKey}">
+            <span class="sd-dot">${d.active ? "🔥" : "·"}</span>
+            <span class="sd-lbl">${d.dayLabel}</span>
+          </div>`
+        )
+        .join("");
+
+      const leaderboardHtml = leaderboard
+        .map((row, i) => {
+          const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉";
+          const frameCls = row.equippedFrame && row.equippedFrame !== "default" ? `frame-${row.equippedFrame}` : "";
+          const isMe = row.id === profile.id;
+          return `
+            <div class="lb-row ${isMe ? "lb-me" : ""}">
+              <span class="lb-rank">${medal}</span>
+              <span class="lb-avatar ${frameCls}">${row.avatar}</span>
+              <div class="lb-info">
+                <strong>${esc(row.name)} <small>(${esc(row.gradeName)})</small></strong>
+                <span>🔥 ${row.dailyStreak} hari • ${row.weeklySets} set minggu ini</span>
+              </div>
+              <div class="lb-pts">
+                <strong>${row.weeklyMarks}⭐</strong>
+                <small>${row.xp} XP</small>
+              </div>
+            </div>`;
+        })
+        .join("");
+
       const cards = grade.subjects
         .map((subj) => {
           const chCount = subj.chapters.length;
-          const totalSets = chCount * App.SETS_PER_CHAPTER;
+          const useDlp = !!(dlp && subj.dlp);
+          let totalUniqueSets = 0;
           let completed = 0;
           subj.chapters.forEach((ch) => {
-            for (let s = 1; s <= App.SETS_PER_CHAPTER; s++) {
+            const cSets = App.QuestionEngine.getChapterSetCount(grade.id, subj.id, ch.id, useDlp);
+            totalUniqueSets += cSets;
+            for (let s = 1; s <= cSets; s++) {
               if (profile.setBest[`${subj.id}:${ch.id}:${s}`]) completed++;
             }
           });
-          const subjName = dlp && subj.dlp ? subj.nameEn : subj.name;
+          const subjName = useDlp ? subj.nameEn : subj.name;
+          const pct = totalUniqueSets > 0 ? Math.min(100, Math.round((completed / totalUniqueSets) * 100)) : 0;
           return `
             <div class="subject-card" data-subj="${subj.id}">
               <div class="subj-icon">${subj.icon}</div>
               <div class="subj-info">
                 <h3>${esc(subjName)}</h3>
-                <p>${chCount} Bab • ${totalSets} Set Latihan</p>
+                <p>${chCount} Bab • ${totalUniqueSets} Set Unik</p>
                 <div class="mini-progress">
-                  <div class="mini-fill" style="width:${Math.round((completed / totalSets) * 100)}%"></div>
+                  <div class="mini-fill" style="width:${pct}%"></div>
                 </div>
-                <span class="subj-stat">${completed}/${totalSets} set selesai</span>
+                <span class="subj-stat">${completed}/${totalUniqueSets} set selesai</span>
               </div>
             </div>`;
         })
@@ -205,7 +298,7 @@
 
       const showEditor = !hasCustomName || editingProfile;
       const activeAvatar = draftAvatar || profile.avatar;
-      const avatarButtons = (App.AVATARS || ["🦊", "🚀", "⚡"])
+      const avatarButtons = getPlayableAvatars(profile)
         .map(
           (av) => `
           <button type="button" class="avatar-pick ${av === activeAvatar ? "selected" : ""}" data-avatar="${av}">
@@ -218,7 +311,7 @@
         ? `
           <div class="profile-setup-card">
             <div class="setup-head">
-              <strong>✏️ Isi Nama & Pilih Avatar Kamu (${esc(grade.name)})</strong>
+              <strong>✏️ Isi Nama & Pilih Avatar (${esc(grade.name)})</strong>
               ${hasCustomName ? `<button type="button" class="btn-ghost btn-sm" id="btn-cancel-edit">Batal</button>` : ""}
             </div>
             <div class="setup-input-row">
@@ -229,33 +322,65 @@
                 placeholder="Taip nama kamu di sini..."
                 value="${esc(profile.name || "")}"
               />
-              <button type="button" class="btn-primary" id="btn-save-kid-name">Simpan</button>
+              <button type="button" class="btn-tactile btn-true" id="btn-save-kid-name">Simpan</button>
             </div>
             <div class="avatar-grid">${avatarButtons}</div>
           </div>`
         : `
           <div class="hero-greet-row">
-            <h1>Hai, ${esc(displayName)}! ${profile.avatar}</h1>
-            <button type="button" class="btn-secondary btn-sm" id="btn-edit-profile">✏️ Tukar Nama & Avatar</button>
-          </div>
-          <p>Pilih subjek di bawah, pilih bab, dan main salah satu daripada 4 mod permainan!</p>`;
+            <div>
+              <h1>Hai, ${esc(displayName)}! <span class="hero-av frame-${profile.equippedFrame || "default"}">${profile.avatar}</span></h1>
+              <p class="mascot-line"><strong>${esc(mascotInfo.name)}:</strong> "${esc(mascotInfo.tagline)}"</p>
+            </div>
+            <div class="hero-cta-group">
+              <button type="button" class="btn-tactile btn-true" id="btn-quick-resume">▶ Sambung Latihan</button>
+              <button type="button" class="btn-secondary btn-sm" id="btn-edit-profile">✏️ Profil</button>
+            </div>
+          </div>`;
 
       main.innerHTML = `
-        <section class="hero-banner grade-${grade.id}" style="--accent:${grade.color}">
-          <div class="hero-left">
-            <span class="grade-pill">${esc(grade.name)} • ${esc(grade.subtitle)}</span>
-            ${heroBodyHtml}
+        <section class="hero-banner grade-${grade.id}">
+          <div class="hero-top-row">
+            <div class="hero-mascot-col">${mascotHtml}</div>
+            <div class="hero-left">
+              <span class="grade-pill">${esc(grade.name)} • ${esc(grade.subtitle)}</span>
+              ${heroBodyHtml}
+            </div>
           </div>
-          <div class="hero-stats">
-            <div class="stat-box"><strong>${profile.xp || 0}</strong><span>Jumlah XP</span></div>
-            <div class="stat-box"><strong>${profile.streakBest || 0} 🔥</strong><span>Rekod Streak</span></div>
-            <div class="stat-box"><strong>${totalSetsPlayed}</strong><span>Set Selesai</span></div>
+
+          <div class="hero-bottom-bar">
+            <div class="hero-stats">
+              <div class="stat-box"><strong>${profile.xp || 0}</strong><span>XP</span></div>
+              <div class="stat-box stat-coin"><strong>${profile.coins || 0} 🪙</strong><span>Syiling</span></div>
+              <div class="stat-box"><strong>${profile.dailyStreak || 0} 🔥</strong><span>Streak Hari</span></div>
+              <div class="stat-box"><strong>${totalSetsPlayed}</strong><span>Set Selesai</span></div>
+              <button type="button" class="btn-tactile btn-shop-cta" id="btn-open-shop">🛍️ Kedai Ganjaran</button>
+            </div>
+            <div class="streak-calendar">
+              <span class="sc-title">Kalendar 7 Hari:</span>
+              <div class="sc-days">${streakCalHtml}</div>
+            </div>
           </div>
+        </section>
+
+        <section class="leaderboard-card">
+          <div class="lb-head">
+            <h3>🏆 Carta Mingguan Adik-Beradik</h3>
+            <span class="lb-sub">Siapa paling banyak jawapan tepat minggu ini?</span>
+          </div>
+          <div class="lb-grid">${leaderboardHtml}</div>
         </section>
 
         <h2 class="section-title">📚 Semua Subjek (${esc(grade.name)})</h2>
         <div class="subject-grid">${cards}</div>
       `;
+
+      document.getElementById("btn-open-shop").addEventListener("click", () => {
+        App.Sound.click();
+        shopMsg = "";
+        currentView = "shop";
+        renderMain();
+      });
 
       if (showEditor) {
         const nameInput = document.getElementById("inp-kid-name");
@@ -304,6 +429,14 @@
           draftAvatar = profile.avatar;
           renderMain();
         });
+
+        document.getElementById("btn-quick-resume").addEventListener("click", () => {
+          App.Sound.click();
+          selectedSubject = resumeTarget.subj;
+          selectedChapter = resumeTarget.ch;
+          selectedSetNum = resumeTarget.setNum;
+          launchSetGame(main, profile, grade, dlp, false);
+        });
       }
 
       main.querySelectorAll(".subject-card").forEach((card) => {
@@ -314,14 +447,90 @@
           renderMain();
         });
       });
+    } else if (currentView === "shop") {
+      const renderItemShelf = (title, type) => {
+        const items = (App.SHOP_ITEMS || []).filter((it) => it.type === type);
+        const cardsHtml = items
+          .map((it) => {
+            const owned = profile.unlockedItems && profile.unlockedItems.includes(it.id);
+            const equipped =
+              (it.type === "avatar" && profile.avatar === it.value) ||
+              (it.type === "frame" && profile.equippedFrame === it.value) ||
+              (it.type === "effect" && profile.equippedEffect === it.value);
+            const preview =
+              it.type === "avatar"
+                ? `<div class="shop-preview shop-av">${it.value}</div>`
+                : it.type === "frame"
+                ? `<div class="shop-preview shop-frame-prev frame-${it.value}">${profile.avatar}</div>`
+                : `<div class="shop-preview shop-fx fx-badge-${it.value}">✨</div>`;
+            const btnLabel = equipped
+              ? "Sedang Dipakai ✅"
+              : owned
+              ? "Pakai Sekarang"
+              : `Buka (${it.price} 🪙)`;
+            const btnClass = equipped ? "btn-secondary" : owned ? "btn-tactile btn-true" : "btn-tactile btn-primary-3d";
+            return `
+              <div class="shop-card ${equipped ? "is-equipped" : owned ? "is-owned" : ""}">
+                ${preview}
+                <div class="shop-meta">
+                  <strong>${esc(it.name)}</strong>
+                  <small>${esc(it.desc)}</small>
+                </div>
+                <button type="button" class="${btnClass} btn-shop-act" data-item-id="${it.id}" ${equipped ? "disabled" : ""}>${btnLabel}</button>
+              </div>`;
+          })
+          .join("");
+        return `<h3 class="section-title">${title}</h3><div class="shop-grid">${cardsHtml}</div>`;
+      };
+
+      main.innerHTML = `
+        <div class="breadcrumb parent-top-bar">
+          <div class="breadcrumb-left">
+            <button class="btn-ghost" id="btn-back-shop">← Kembali</button>
+            <strong>🛍️ Kedai Ganjaran ${esc(displayName)}</strong>
+          </div>
+          <span class="coin-pill-lg">🪙 ${profile.coins || 0} Syiling</span>
+        </div>
+        ${shopMsg ? `<div class="shop-alert">${esc(shopMsg)}</div>` : ""}
+        ${renderItemShelf("🦸 Avatar Eksklusif", "avatar")}
+        ${renderItemShelf("🖼️ Bingkai Juara", "frame")}
+        ${renderItemShelf("⚡ Kesan Laser & Jejak Permainan", "effect")}
+      `;
+
+      document.getElementById("btn-back-shop").addEventListener("click", () => {
+        App.Sound.click();
+        currentView = "home";
+        renderMain();
+      });
+
+      main.querySelectorAll(".btn-shop-act").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const itemId = btn.getAttribute("data-item-id");
+          const res = App.Storage.buyOrEquipItem(profile.id, itemId);
+          if (res.ok) {
+            App.Sound.unlock();
+            shopMsg =
+              res.action === "bought"
+                ? `🎉 Tahniah! '${res.item.name}' berjaya dibuka dan terus dipakai!`
+                : `✅ '${res.item.name}' kini aktif!`;
+            renderTopBar();
+          } else {
+            App.Sound.wrong();
+            shopMsg = `⚠️ ${res.reason}`;
+          }
+          renderMain();
+        });
+      });
     } else if (currentView === "chapters" && selectedSubject) {
-      const subjName = dlp && selectedSubject.dlp ? selectedSubject.nameEn : selectedSubject.name;
+      const useDlp = !!(dlp && selectedSubject.dlp);
+      const subjName = useDlp ? selectedSubject.nameEn : selectedSubject.name;
       const chCards = selectedSubject.chapters
         .map((ch, i) => {
-          const chTitle = dlp && selectedSubject.dlp ? ch.titleEn : ch.title;
+          const chTitle = useDlp ? ch.titleEn : ch.title;
+          const setCount = App.QuestionEngine.getChapterSetCount(grade.id, selectedSubject.id, ch.id, useDlp);
           let done = 0;
           let sumPct = 0;
-          for (let s = 1; s <= App.SETS_PER_CHAPTER; s++) {
+          for (let s = 1; s <= setCount; s++) {
             const rec = profile.setBest[`${selectedSubject.id}:${ch.id}:${s}`];
             if (rec) {
               done++;
@@ -334,7 +543,7 @@
               <div class="ch-num">Bab ${i + 1}</div>
               <div class="ch-body">
                 <h3>${esc(chTitle)}</h3>
-                <p>${App.SETS_PER_CHAPTER} Set Soalan (${done}/${App.SETS_PER_CHAPTER} selesai)</p>
+                <p>${setCount} Set Unik (${done}/${setCount} selesai)</p>
               </div>
               <div class="ch-badge">${avg !== null ? `${avg}%` : "Baru"}</div>
             </div>`;
@@ -366,32 +575,49 @@
         });
       });
     } else if (currentView === "sets" && selectedSubject && selectedChapter) {
-      const subjName = dlp && selectedSubject.dlp ? selectedSubject.nameEn : selectedSubject.name;
-      const chTitle = dlp && selectedSubject.dlp ? selectedChapter.titleEn : selectedChapter.title;
+      const useDlp = !!(dlp && selectedSubject.dlp);
+      const subjName = useDlp ? selectedSubject.nameEn : selectedSubject.name;
+      const chTitle = useDlp ? selectedChapter.titleEn : selectedChapter.title;
+      const setCount = App.QuestionEngine.getChapterSetCount(grade.id, selectedSubject.id, selectedChapter.id, useDlp);
 
-      const modeCards = App.GAME_MODES.map(
+      const modePills = App.GAME_MODES.map(
         (m) => `
-        <button class="mode-card ${selectedMode === m.id ? "active" : ""}" data-mode="${m.id}">
-          <span class="mode-icon">${m.icon}</span>
-          <div>
-            <strong>${m.name}</strong>
-            <small>${m.desc}</small>
-          </div>
-        </button>`
+          <button type="button" class="mode-pill ${selectedMode === m.id ? "active" : ""} cat-${m.category}" data-mode="${m.id}" title="${esc(m.desc)}">
+            <span>${m.icon}</span>
+            <span>${esc(m.name)}</span>
+          </button>`
       ).join("");
 
-      const setButtons = Array.from({ length: App.SETS_PER_CHAPTER }, (_, i) => i + 1)
-        .map((s) => {
+      const activeModeInfo = App.GAME_MODES.find((m) => m.id === selectedMode) || App.GAME_MODES[0];
+
+      // Determine current recommended (first unplayed) node
+      let nextPlayable = 1;
+      for (let s = 1; s <= setCount; s++) {
+        if (!profile.setBest[`${selectedSubject.id}:${selectedChapter.id}:${s}`]) {
+          nextPlayable = s;
+          break;
+        }
+        nextPlayable = setCount;
+      }
+
+      const pathNodes = Array.from({ length: setCount }, (_, i) => i + 1)
+        .map((s, idx) => {
           const rec = profile.setBest[`${selectedSubject.id}:${selectedChapter.id}:${s}`];
           const pct = rec ? Math.round((rec.bestScore / rec.total) * 100) : null;
-          const stars = pct === null ? "☆☆☆" : pct >= 90 ? "★★★" : pct >= 70 ? "★★☆" : "★☆☆";
-          const bonusTxt = rec && rec.bestBonus ? ` ⚡+${rec.bestBonus}` : "";
+          const stars = pct === null ? "" : pct >= 90 ? "★★★" : pct >= 60 ? "★★☆" : "★☆☆";
+          const isCurrent = s === nextPlayable;
+          const isBossNode = s === setCount;
+          const offsetX = Math.round(Math.sin(idx * 0.95) * 44);
           return `
-            <button class="set-card ${rec ? "played" : ""}" data-set="${s}">
-              <div class="set-num">Set ${s}</div>
-              <div class="set-stars">${stars}</div>
-              <div class="set-score">${rec ? `${App.Storage.fmtScore(rec.bestScore)}/${rec.total} (${pct}%)${bonusTxt}` : "Mula Set"}</div>
-            </button>`;
+            <div class="path-node-wrap" style="transform: translateX(${offsetX}px)">
+              ${isCurrent ? `<div class="path-bubble">MULA ▶</div>` : ""}
+              <button type="button" class="path-node ${rec ? "is-done" : "is-open"} ${isCurrent ? "is-current" : ""} ${isBossNode ? "is-boss" : ""}" data-set="${s}">
+                <span class="node-badge">${isBossNode ? "👑" : s}</span>
+                <span class="node-label">Set ${s}</span>
+                ${stars ? `<span class="node-stars">${stars}</span>` : ""}
+              </button>
+              ${rec ? `<div class="node-sub-score">${App.Storage.fmtScore(rec.bestScore)}/${rec.total}${rec.bestBonus ? ` ⚡+${rec.bestBonus}` : ""}</div>` : ""}
+            </div>`;
         })
         .join("");
 
@@ -403,12 +629,27 @@
         </div>
 
         <div class="mode-picker-box">
-          <h3>🎮 Langkah 1: Pilih Mod Permainan</h3>
-          <div class="mode-grid">${modeCards}</div>
+          <div class="mode-picker-head">
+            <h3>🎮 Pilih Mod Permainan (9 Pilihan)</h3>
+            <small>${esc(activeModeInfo.desc)}</small>
+          </div>
+          <div class="mode-pill-strip">${modePills}</div>
         </div>
 
-        <h3 class="section-title">📝 Langkah 2: Pilih Set Soalan (1–${App.SETS_PER_CHAPTER})</h3>
-        <div class="set-grid">${setButtons}</div>
+        <div class="adventure-path-box">
+          <div class="path-head">
+            <h3>🗺️ Laluan Cabaran (${setCount} Set Unik • Tiada Soalan Berulang)</h3>
+            <span class="path-tip">5 soalan pantas setiap set</span>
+          </div>
+          <div class="path-spine">
+            ${pathNodes}
+          </div>
+          <div class="flash-revision-bar">
+            <button type="button" class="btn-tactile btn-flash" id="btn-flash-revision">
+              ⚡ Latihan Kilat Campuran (Ulang Kaji Rawak Tanpa Had)
+            </button>
+          </div>
+        </div>
       `;
 
       document.getElementById("btn-back-subj").addEventListener("click", () => {
@@ -417,7 +658,7 @@
         renderMain();
       });
 
-      main.querySelectorAll(".mode-card").forEach((m) => {
+      main.querySelectorAll(".mode-pill").forEach((m) => {
         m.addEventListener("click", () => {
           App.Sound.click();
           selectedMode = m.getAttribute("data-mode");
@@ -425,31 +666,40 @@
         });
       });
 
-      main.querySelectorAll(".set-card").forEach((btn) => {
+      main.querySelectorAll(".path-node").forEach((btn) => {
         btn.addEventListener("click", () => {
           App.Sound.click();
           selectedSetNum = Number(btn.getAttribute("data-set"));
-          launchSetGame(main, profile, grade, dlp);
+          launchSetGame(main, profile, grade, dlp, false);
         });
       });
+
+      document.getElementById("btn-flash-revision").addEventListener("click", () => {
+        App.Sound.click();
+        launchSetGame(main, profile, grade, dlp, true);
+      });
     } else if (currentView === "results" && lastResult) {
-      const { score, total, speedBonus = 0, maxStreak, answers, pct, earnedXp } = lastResult;
+      const { score, total, speedBonus = 0, maxStreak, answers, pct, earnedXp, earnedCoins = 0, isRevision } = lastResult;
       const rank = pct >= 90 ? "S" : pct >= 80 ? "A" : pct >= 65 ? "B" : "C";
-      const emoji = pct >= 90 ? "🏆" : pct >= 70 ? "🌟" : pct >= 50 ? "👍" : "💪";
+      const useDlp = !!(dlp && selectedSubject.dlp);
+      const chTitle = useDlp ? selectedChapter.titleEn : selectedChapter.title;
+      const setCount = App.QuestionEngine.getChapterSetCount(grade.id, selectedSubject.id, selectedChapter.id, useDlp);
+      const hasNextSet = !isRevision && selectedSetNum < setCount;
+      const mascotSvg = App.Mascot ? App.Mascot.render(grade.id, pct >= 60 ? "celebrate" : "encouraging", 82) : "";
+
       const confettiHtml =
         pct >= 70
           ? `<div class="confetti-burst" aria-hidden="true">${Array.from({ length: 16 }, (_, i) => `<span class="confetti-dot c-${i % 4}" style="--i:${i}"></span>`).join("")}</div>`
           : "";
 
-      const chTitle = dlp && selectedSubject.dlp ? selectedChapter.titleEn : selectedChapter.title;
       const studyTip = App.GameUtil_getStudyGuidance
         ? App.GameUtil_getStudyGuidance(selectedSubject.id, chTitle)
         : "";
 
       const reviewHtml = answers
         .map((a, i) => {
-          const userAns = a.qObj.options[a.selectedIndex];
-          const trueAns = a.qObj.options[a.qObj.correctIndex];
+          const userAns = a.chosenText !== undefined ? a.chosenText : a.qObj.options[a.selectedIndex] || "-";
+          const trueAns = a.correctText !== undefined ? a.correctText : a.qObj.options[a.qObj.correctIndex];
           const ptsLabel = a.isCorrect
             ? a.gotBonus
               ? `✅ Betul (+1) • ⚡ Bonus Pantas (${a.elapsedSec.toFixed(1)}s)`
@@ -472,17 +722,23 @@
         <div class="result-card">
           ${confettiHtml}
           <div class="result-top">
-            <span class="result-emoji">${emoji}</span>
+            ${mascotSvg}
             <span class="rank-badge rank-${rank}">Gred ${rank}</span>
           </div>
           <h2>Markah Ketepatan: ${App.Storage.fmtScore(score)} / ${total} (${pct}%)</h2>
           <div class="result-bonus-row">
-            <span class="result-bonus-badge">⚡ Bonus Pantas (≤10s, kiraan berasingan): +${speedBonus}</span>
-            <span class="result-xp-badge">+${earnedXp} XP • 🔥 Streak ${maxStreak}</span>
+            <span class="result-bonus-badge">⚡ Bonus Pantas (≤10s): +${speedBonus}</span>
+            <span class="result-coin-badge">+${earnedCoins} 🪙 Syiling</span>
+            <span class="result-xp-badge">+${earnedXp} XP • 🔥 ${maxStreak}</span>
           </div>
           <div class="result-actions">
-            <button class="btn-primary" id="btn-retry-set">🔄 Main Semula Set ${selectedSetNum}</button>
-            <button class="btn-secondary" id="btn-other-sets">📚 Pilih Set Lain</button>
+            ${
+              hasNextSet
+                ? `<button class="btn-tactile btn-true" id="btn-next-set">▶ Terus ke Set ${selectedSetNum + 1}</button>`
+                : ""
+            }
+            <button class="btn-tactile btn-primary-3d" id="btn-retry-set">🔄 Main Semula</button>
+            <button class="btn-secondary" id="btn-other-sets">🗺️ Peta Laluan</button>
           </div>
         </div>
 
@@ -490,9 +746,17 @@
         <div class="review-list">${reviewHtml}</div>
       `;
 
+      const nextBtn = document.getElementById("btn-next-set");
+      if (nextBtn) {
+        nextBtn.addEventListener("click", () => {
+          App.Sound.click();
+          selectedSetNum = Math.min(setCount, selectedSetNum + 1);
+          launchSetGame(main, profile, grade, dlp, false);
+        });
+      }
       document.getElementById("btn-retry-set").addEventListener("click", () => {
         App.Sound.click();
-        launchSetGame(main, profile, grade, dlp);
+        launchSetGame(main, profile, grade, dlp, !!isRevision);
       });
       document.getElementById("btn-other-sets").addEventListener("click", () => {
         App.Sound.click();
@@ -511,12 +775,12 @@
       main.innerHTML = `
         <div class="pin-box">
           <h2>🔒 Panel Ibu Bapa</h2>
-          <p>Masukkan PIN 4-digit untuk melihat prestasi semua anak, log kesilapan, penjana prompt AI & sandaran Cloud Drive. (PIN lalai: <code>1234</code>)</p>
+          <p>Masukkan kod PIN 4-digit untuk melihat prestasi semua anak, topik perlu fokus, pelan latihan AI & simpanan rekod. (Kod lalai: <code>1234</code>)</p>
           <div class="pin-row">
             <input type="password" id="pin-input" maxlength="6" placeholder="PIN (1234)" />
-            <button class="btn-primary" id="btn-unlock-pin">Buka</button>
+            <button class="btn-tactile btn-primary-3d" id="btn-unlock-pin">Buka</button>
           </div>
-          <p class="pin-err hidden" id="pin-err">PIN salah. Cuba lagi.</p>
+          <p class="pin-err hidden" id="pin-err">Kod PIN tidak tepat. Sila cuba lagi.</p>
           <button class="btn-ghost" id="btn-back-kids">← Kembali</button>
         </div>
       `;
@@ -553,20 +817,24 @@
         const history = p.history || [];
         const report = App.Storage.getFocusReport(p);
 
-        const weakHtml =
-          report.weakChapters.length > 0
+        const chapterStatusHtml =
+          report.allChapters && report.allChapters.length > 0
             ? `<div class="weak-box">
-                <strong>🎯 Bab Perlu Fokus (&lt;80% atau ada silap):</strong>
+                <strong>🚦 Prestasi Mengikut Bab:</strong>
                 <div class="weak-tags">
-                  ${report.weakChapters
-                    .map(
-                      (w) =>
-                        `<span class="weak-tag">${esc(w.subjectName)} • ${esc(w.chapterTitle)} (${w.avgPct}%, ${w.mistakeCount} silap)</span>`
-                    )
+                  ${report.allChapters
+                    .slice()
+                    .sort((a, b) => a.avgPct - b.avgPct)
+                    .slice(0, 6)
+                    .map((w) => {
+                      const dot = w.avgPct >= 80 && w.mistakeCount === 0 ? "🟢" : w.avgPct >= 60 ? "🟡" : "🔴";
+                      const cls = w.avgPct >= 80 && w.mistakeCount === 0 ? "tl-green" : w.avgPct >= 60 ? "tl-amber" : "tl-red";
+                      return `<span class="weak-tag ${cls}">${dot} ${esc(w.subjectName)} • ${esc(w.chapterTitle)} (${w.avgPct}%)</span>`;
+                    })
                     .join("")}
                 </div>
               </div>`
-            : `<div class="weak-box weak-clear">✅ Tiada bab lemah dikesan lagi.</div>`;
+            : `<div class="weak-box weak-clear">ℹ️ Anak belum mencuba latihan lagi.</div>`;
 
         const mistakesHtml =
           report.recentMistakes.length > 0
@@ -586,7 +854,7 @@
             : `<p class="empty-note">Tiada kesilapan direkodkan lagi.</p>`;
 
         const recent = history
-          .slice(0, 5)
+          .slice(0, 4)
           .map(
             (h) => `
           <li>
@@ -601,7 +869,7 @@
             <div class="pk-head">
               <div>
                 <h3>${p.avatar} ${esc(displayName)}</h3>
-                <small>${esc(grade.name)} • ${p.xp || 0} XP • ⚡ Bonus Pantas: ${report.totalSpeedBonus}</small>
+                <small>${esc(grade.name)} • 🔥 ${p.dailyStreak || 0} hari • ⚡ Bonus Pantas: ${report.totalSpeedBonus}</small>
               </div>
               <div class="pk-avg">${history.length ? `${report.avgPct}% purata` : "Belum ada rekod"}</div>
             </div>
@@ -609,12 +877,12 @@
               <input type="text" class="rename-input" data-pid="${p.id}" placeholder="Nama anak (belum diisi)" value="${esc(p.name || "")}" />
               <button class="btn-secondary btn-rename" data-pid="${p.id}">Simpan Nama</button>
             </div>
-            ${weakHtml}
-            <h4>📝 Log Kesilapan Terkini:</h4>
+            ${chapterStatusHtml}
+            <h4>📝 Kesilapan Terkini Untuk Dibimbing:</h4>
             ${mistakesHtml}
             <h4>Aktiviti Terkini:</h4>
             <ul class="pk-history">${recent || "<li>Tiada latihan direkodkan lagi.</li>"}</ul>
-            <button type="button" class="btn-primary btn-sm btn-ai-kid" data-pid="${p.id}">🤖 Jana Prompt AI (${esc(displayName)})</button>
+            <button type="button" class="btn-tactile btn-primary-3d btn-sm btn-ai-kid" data-pid="${p.id}">✨ Cipta Pelan Latihan AI (${esc(displayName)})</button>
           </div>`;
       })
       .join("");
@@ -625,14 +893,14 @@
       ? `
         <div class="ai-prompt-panel" id="ai-prompt-panel">
           <div class="ai-panel-head">
-            <h3>🤖 ${esc(activeAiPromptTitle)}</h3>
+            <h3>✨ ${esc(activeAiPromptTitle)}</h3>
             <button type="button" class="btn-ghost btn-sm" id="btn-close-ai-panel">✕ Tutup</button>
           </div>
-          <p class="ai-panel-desc">Salin prompt di bawah dan tampal ke dalam AI pilihan anda untuk membina projek permainan pemulihan interaktif seterusnya:</p>
+          <p class="ai-panel-desc">Salin arahan di bawah dan tampal ke dalam pembantu AI pilihan anda (contoh: ChatGPT, Gemini atau Claude) untuk membina permainan pemulihan khusus bagi kelemahan anak:</p>
           <textarea class="ai-prompt-textarea" id="ai-prompt-textarea" rows="10" readonly>${esc(activeAiPromptText)}</textarea>
           <div class="sync-actions">
-            <button type="button" class="btn-primary" id="btn-copy-ai-prompt">📋 Salin Prompt</button>
-            <button type="button" class="btn-secondary" id="btn-dl-ai-prompt">⬇️ Muat Turun Prompt (.md)</button>
+            <button type="button" class="btn-tactile btn-true" id="btn-copy-ai-prompt">📋 Salin Arahan</button>
+            <button type="button" class="btn-secondary" id="btn-dl-ai-prompt">📤 Kongsi / Simpan Nota</button>
             <span class="copy-msg" id="ai-copy-msg"></span>
           </div>
         </div>`
@@ -642,9 +910,9 @@
       <div class="breadcrumb parent-top-bar">
         <div class="breadcrumb-left">
           <button class="btn-ghost" id="btn-parent-exit">← Keluar Panel Ibu Bapa</button>
-          <strong>👨‍👩‍👧‍👦 Dashboard Ibu Bapa, Log Kelemahan & Penjana Prompt AI</strong>
+          <strong>👨‍👩‍👧‍👦 Dashboard Ibu Bapa & Penjana Pelan Latihan</strong>
         </div>
-        <button type="button" class="btn-primary btn-sm" id="btn-ai-all-kids">🤖 Jana Prompt AI (Semua 3 Anak)</button>
+        <button type="button" class="btn-tactile btn-primary-3d btn-sm" id="btn-ai-all-kids">✨ Cipta Pelan Latihan (Semua 3 Anak)</button>
       </div>
 
       ${aiPanelHtml}
@@ -652,25 +920,39 @@
       <div class="parent-grid">${kidCards}</div>
 
       <div class="sync-panel">
-        <h3>☁️ Simpan & Segerak Markah (Google Drive / OneDrive / Peranti Lain)</h3>
-        <p>Anda boleh pautkan fail JSON terus ke folder <strong>OneDrive</strong> atau <strong>Google Drive</strong> anda di PC supaya setiap markah & log kesilapan disimpan automatik, atau eksport/import fail JSON secara manual.</p>
-        <div class="sync-actions">
-          ${
-            App.Storage.supportsCloudFileSync()
-              ? `<button class="btn-primary" id="btn-link-cloud">💾 Pautkan Fail Auto-Simpan (${linkedName ? esc(linkedName) : "Pilih Folder Drive"})</button>
-                 <button class="btn-secondary" id="btn-load-cloud">📂 Muat Naik Dari Fail Drive</button>`
-              : ""
-          }
-          <button class="btn-secondary" id="btn-export-json">⬇️ Eksport JSON</button>
-          <label class="btn-secondary file-label">
-            ⬆️ Import JSON
-            <input type="file" id="inp-import-json" accept=".json,application/json" hidden />
+        <h3>☁️ Simpan & Gabung Rekod Belajar Anak</h3>
+        <p>Tekan satu butang untuk simpan salinan rekod ke <strong>Google Drive, OneDrive atau WhatsApp</strong>. Apabila memulihkan rekod dari telefon anak lain, sistem akan <strong>menggabung markah secara automatik</strong> tanpa memadam rekod anak lain.</p>
+        <div class="backup-big-actions">
+          <button type="button" class="btn-tactile btn-true backup-hero-btn" id="btn-save-backup">
+            <span class="bk-ico">💾</span>
+            <span class="bk-txt">
+              <strong>Simpan Rekod (Ke Drive / WhatsApp)</strong>
+              <small>Muat turun atau kongsi salinan keselamatan semua markah anak</small>
+            </span>
+          </button>
+          <label class="btn-tactile btn-primary-3d backup-hero-btn file-label">
+            <span class="bk-ico">📂</span>
+            <span class="bk-txt">
+              <strong>Pulihkan & Gabung Rekod</strong>
+              <small>Pilih fail rekod dari telefon / Google Drive untuk digabung</small>
+            </span>
+            <input type="file" id="inp-restore-backup" accept=".json,application/json" hidden />
           </label>
         </div>
+
+        ${
+          App.Storage.supportsCloudFileSync()
+            ? `<div class="pc-sync-row">
+                 <button type="button" class="btn-secondary btn-sm" id="btn-link-cloud">💻 Pautkan Folder Auto-Simpan PC (${linkedName ? esc(linkedName) : "Pilih Folder Drive"})</button>
+                 <button type="button" class="btn-secondary btn-sm" id="btn-load-cloud">🔄 Gabung Dari Fail PC</button>
+               </div>`
+            : ""
+        }
+
         <div class="pin-change-row">
-          <label>Tukar PIN Ibu Bapa:</label>
+          <label>Tukar Kod PIN Ibu Bapa:</label>
           <input type="password" id="new-pin" maxlength="6" placeholder="4-6 digit" />
-          <button class="btn-secondary" id="btn-save-pin">Tukar PIN</button>
+          <button class="btn-secondary" id="btn-save-pin">Simpan PIN</button>
         </div>
         <p id="sync-status" class="sync-status"></p>
       </div>
@@ -686,7 +968,7 @@
 
     document.getElementById("btn-ai-all-kids").addEventListener("click", () => {
       App.Sound.click();
-      activeAiPromptTitle = "Prompt Projek AI — Semua 3 Anak";
+      activeAiPromptTitle = "Pelan Latihan AI — Semua 3 Anak";
       activeAiPromptText = App.Storage.buildAiPromptAllKids();
       renderParentDashboard(main);
     });
@@ -697,7 +979,7 @@
         const pid = btn.getAttribute("data-pid");
         const kid = state.profiles.find((x) => x.id === pid);
         if (kid) {
-          activeAiPromptTitle = `Prompt Projek AI — ${App.Storage.getDisplayName(kid)}`;
+          activeAiPromptTitle = `Pelan Latihan AI — ${App.Storage.getDisplayName(kid)}`;
           activeAiPromptText = App.Storage.buildAiPromptForKid(kid);
           renderParentDashboard(main);
           const panel = document.getElementById("ai-prompt-panel");
@@ -727,23 +1009,31 @@
             ta.select();
             document.execCommand("copy");
           }
-          msg.textContent = "✅ Prompt berjaya disalin!";
+          msg.textContent = "✅ Arahan berjaya disalin!";
         } catch (err) {
           ta.select();
           document.execCommand("copy");
-          msg.textContent = "✅ Prompt dipilih — tekan Salin jika perlu.";
+          msg.textContent = "✅ Arahan dipilih — tekan Salin jika perlu.";
         }
       });
     }
 
     const dlAiBtn = document.getElementById("btn-dl-ai-prompt");
     if (dlAiBtn) {
-      dlAiBtn.addEventListener("click", () => {
-        const blob = new Blob([activeAiPromptText], { type: "text/markdown;charset=utf-8" });
+      dlAiBtn.addEventListener("click", async () => {
+        if (navigator.share) {
+          try {
+            await navigator.share({ title: activeAiPromptTitle, text: activeAiPromptText });
+            return;
+          } catch (e) {
+            if (e && e.name === "AbortError") return;
+          }
+        }
+        const blob = new Blob([activeAiPromptText], { type: "text/plain;charset=utf-8" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `ai-next-project-prompt-${new Date().toISOString().slice(0, 10)}.md`;
+        a.download = `Pelan-Latihan-MyKids-${new Date().toISOString().slice(0, 10)}.txt`;
         a.click();
         URL.revokeObjectURL(url);
       });
@@ -768,7 +1058,7 @@
       linkBtn.addEventListener("click", async () => {
         try {
           const name = await App.Storage.linkCloudFileSave();
-          statusEl.textContent = `✅ Fail '${name}' dipautkan! Semua markah baharu akan disimpan ke fail ini.`;
+          statusEl.textContent = `✅ Fail '${name}' dipautkan! Semua markah baharu akan disimpan automatik ke fail ini.`;
           renderParentDashboard(main);
         } catch (err) {
           statusEl.textContent = `ℹ️ ${err.message}`;
@@ -780,8 +1070,8 @@
     if (loadBtn) {
       loadBtn.addEventListener("click", async () => {
         try {
-          const name = await App.Storage.loadFromCloudFile();
-          statusEl.textContent = `✅ Data berjaya dimuatkan daripada '${name}'.`;
+          const res = await App.Storage.loadFromCloudFile();
+          statusEl.textContent = `✅ Rekod daripada '${res.fileName}' berjaya digabung! (+${res.addedHistory} latihan baharu, ${res.updatedSets} set dikemas kini.)`;
           renderTopBar();
           renderParentDashboard(main);
         } catch (err) {
@@ -790,29 +1080,51 @@
       });
     }
 
-    document.getElementById("btn-export-json").addEventListener("click", () => {
-      const blob = new Blob([App.Storage.exportJson()], { type: "application/json" });
+    document.getElementById("btn-save-backup").addEventListener("click", async () => {
+      const content = App.Storage.exportJson();
+      const fileName = App.Storage.exportBackupFileName();
+      try {
+        if (typeof File === "function" && navigator.share && navigator.canShare) {
+          const file = new File([content], fileName, { type: "application/json" });
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: "Rekod Belajar MyKids",
+              text: "Salinan keselamatan rekod belajar anak-anak"
+            });
+            statusEl.textContent = "✅ Salinan rekod berjaya dihantar / disimpan!";
+            return;
+          }
+        }
+      } catch (err) {
+        if (err && err.name === "AbortError") {
+          statusEl.textContent = "ℹ️ Simpanan dibatalkan.";
+          return;
+        }
+      }
+
+      const blob = new Blob([content], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `mykids-study-scores-${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = fileName;
       a.click();
       URL.revokeObjectURL(url);
-      statusEl.textContent = "✅ Fail JSON berjaya dimuat turun.";
+      statusEl.textContent = "✅ Fail rekod telah disimpan! Anda boleh muat naik ke Google Drive atau kongsi melalui WhatsApp.";
     });
 
-    document.getElementById("inp-import-json").addEventListener("change", (e) => {
+    document.getElementById("inp-restore-backup").addEventListener("change", (e) => {
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
       reader.onload = () => {
         try {
-          App.Storage.importJson(reader.result);
-          statusEl.textContent = "✅ Fail JSON berjaya diimport!";
+          const summary = App.Storage.mergeBackup(reader.result);
+          statusEl.textContent = `✅ Rekod berjaya digabung tanpa memadam markah anak lain! (+${summary.addedHistory} rekod latihan, ${summary.updatedSets} set dikemas kini.)`;
           renderTopBar();
           renderParentDashboard(main);
         } catch (err) {
-          statusEl.textContent = `❌ Ralat import: ${err.message}`;
+          statusEl.textContent = `❌ ${err.message}`;
         }
       };
       reader.readAsText(file);
@@ -821,9 +1133,9 @@
     document.getElementById("btn-save-pin").addEventListener("click", () => {
       const np = document.getElementById("new-pin").value.trim();
       if (App.Storage.setParentPin(np)) {
-        statusEl.textContent = "✅ PIN baharu disimpan.";
+        statusEl.textContent = "✅ Kod PIN baharu berjaya disimpan.";
       } else {
-        statusEl.textContent = "❌ PIN mesti 4 hingga 6 digit nombor.";
+        statusEl.textContent = "❌ Kod PIN mesti 4 hingga 6 digit nombor.";
       }
     });
   }

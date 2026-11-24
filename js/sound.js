@@ -40,7 +40,45 @@
     setMuted: (m) => {
       muted = !!m;
     },
+    vibrate: (pattern = 18) => {
+      if (muted) return;
+      try {
+        if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+          navigator.vibrate(pattern);
+        }
+      } catch (e) {
+        // Ignore haptics errors on unsupported devices
+      }
+    },
     click: () => tone(520, 0.05, "triangle", 0.06),
+    tileTap: () => {
+      tone(640, 0.045, "sine", 0.07, 0);
+      tone(760, 0.04, "triangle", 0.05, 0.02);
+    },
+    swipe: () => {
+      tone(380, 0.06, "sine", 0.07, 0);
+      tone(580, 0.07, "triangle", 0.06, 0.03);
+    },
+    match: () => {
+      tone(587.33, 0.07, "triangle", 0.09, 0);
+      tone(880, 0.11, "triangle", 0.1, 0.05);
+    },
+    powerup: () => {
+      tone(523.25, 0.07, "sine", 0.1, 0);
+      tone(659.25, 0.07, "sine", 0.1, 0.06);
+      tone(987.77, 0.14, "triangle", 0.11, 0.12);
+    },
+    streakUp: (streak = 3) => {
+      const base = 523.25 + Math.min(streak, 8) * 30;
+      tone(base, 0.08, "triangle", 0.1, 0);
+      tone(base * 1.25, 0.08, "triangle", 0.1, 0.07);
+      tone(base * 1.5, 0.16, "triangle", 0.12, 0.14);
+    },
+    bossHit: () => {
+      tone(160, 0.1, "sawtooth", 0.11, 0);
+      tone(320, 0.12, "square", 0.08, 0.05);
+      tone(880, 0.14, "triangle", 0.1, 0.1);
+    },
     shoot: () => {
       tone(880, 0.08, "sawtooth", 0.08, 0);
       tone(320, 0.09, "square", 0.06, 0.04);

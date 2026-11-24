@@ -1,11 +1,11 @@
 /**
- * Question Engine: deterministically builds 12 distinct sets of 10 questions
- * for EVERY grade, subject, and chapter without any repetition within a set.
+ * Question Engine: builds strictly non-repeating 5-question sets across Set 1..K
+ * per grade/subject/chapter, plus Endless Revision sets and 3-pair Match helpers.
  */
 (function (global) {
   const App = (global.App = global.App || {});
+  const chapterCache = new Map();
 
-  // Fast, deterministic 32-bit string hash -> mulberry32 PRNG
   function hashSeed(str) {
     let h = 2166136261 >>> 0;
     for (let i = 0; i < str.length; i++) {
@@ -35,6 +35,13 @@
     return copy;
   }
 
+  function normalizePrompt(str) {
+    return String(str || "")
+      .toLowerCase()
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
   function localizeAndShuffleOptions(rng, rawQ, dlp) {
     const qText = dlp && rawQ.qEn ? rawQ.qEn : rawQ.q;
     const optsSrc = dlp && Array.isArray(rawQ.optionsEn) ? rawQ.optionsEn : rawQ.options;
@@ -61,59 +68,197 @@
     return Array.isArray(subjData[chapterId]) ? subjData[chapterId] : [];
   }
 
+  function getFactTablePool(gradeId, subjectId, chapterId) {
+    const gradeFt = App.FactTables && App.FactTables[gradeId];
+    if (!gradeFt) return [];
+    const subjFt = gradeFt[subjectId];
+    if (!subjFt) return [];
+    return Array.isArray(subjFt[chapterId]) ? subjFt[chapterId] : [];
+  }
+
   function getGeneratorPool(gradeId, chapterId) {
     const gradeGens = App.Generators && App.Generators[gradeId];
     if (!gradeGens) return [];
     return Array.isArray(gradeGens[chapterId]) ? gradeGens[chapterId] : [];
   }
 
-  App.QuestionEngine = {
-    getSetQuestions: function (gradeId, subjectId, chapterId, setNum, dlp = false) {
-      const count = App.QUESTIONS_PER_SET || 10;
-      const rng = mulberry32(hashSeed(`${gradeId}:${subjectId}:${chapterId}:set:${setNum}:${dlp ? "en" : "bm"}`));
+  function buildChapterSets(gradeId, subjectId, chapterId, dlp) {
+    const cacheKey = `${gradeId}:${subjectId}:${chapterId}:${dlp ? "en" : "bm"}`;
+    if (chapterCache.has(cacheKey)) {
+      return chapterCache.get(cacheKey);
+    }
 
-      const gens = getGeneratorPool(gradeId, chapterId);
-      const staticPool = getStaticPool(gradeId, subjectId, chapterId);
+    const qPerSet = App.QUESTIONS_PER_SET || 5;
+    const maxSets = App.SETS_PER_CHAPTER || 12;
+    const gens = getGeneratorPool(gradeId, chapterId);
+    const rawStatic = [...getStaticPool(gradeId, subjectId, chapterId), ...getFactTablePool(gradeId, subjectId, chapterId)];
 
-      const questions = [];
-      const usedPromptTexts = new Set();
+    const chRng = mulberry32(hashSeed(`chapter:${cacheKey}`));
+    const usedPrompts = new Set();
+    const dedupedStatic = [];
 
-      // If we have deterministic generators, generate fresh unique problems
-      if (gens.length > 0 && staticPool.length === 0) {
+    for (const raw of rawStatic) {
+      const item = localizeAndShuffleOptions(chRng, raw, dlp);
+      const norm = normalizePrompt(item.q);
+      if (!usedPrompts.has(norm)) {
+        usedPrompts.add(norm);
+        dedupedStatic.push(item);
+      }
+    }
+
+    const shuffledStatic = shuffleWithRng(chRng, dedupedStatic);
+    const sets = [];
+    const chapterUsedPrompts = new Set();
+
+    // Slice disjoint static sets
+    const fullStaticSets = Math.min(maxSets, Math.floor(shuffledStatic.length / qPerSet));
+    for (let s = 0; s < fullStaticSets; s++) {
+      const slice = shuffledStatic.slice(s * qPerSet, (s + 1) * qPerSet);
+      slice.forEach((item) => chapterUsedPrompts.add(normalizePrompt(item.q)));
+      sets.push(slice);
+    }
+
+    // If generators exist, carry forward leftover static items once & top up to 12 full unique sets
+    if (gens.length > 0) {
+      let leftoverIdx = fullStaticSets * qPerSet;
+      while (sets.length < maxSets) {
+        const setNum = sets.length + 1;
+        const setRng = mulberry32(hashSeed(`gen:${cacheKey}:set:${setNum}`));
+        const setQs = [];
+
+        while (leftoverIdx < shuffledStatic.length && setQs.length < qPerSet) {
+          const item = shuffledStatic[leftoverIdx++];
+          const norm = normalizePrompt(item.q);
+          if (!chapterUsedPrompts.has(norm)) {
+            chapterUsedPrompts.add(norm);
+            setQs.push(item);
+          }
+        }
+
         let safety = 0;
-        while (questions.length < count && safety < 80) {
+        while (setQs.length < qPerSet && safety < 420) {
           safety++;
-          const gen = gens[(questions.length + setNum + safety) % gens.length];
+          const gen = gens[(setNum + safety) % gens.length];
+          const item = gen(setRng, dlp);
+          const norm = normalizePrompt(item.q);
+          if (!chapterUsedPrompts.has(norm)) {
+            chapterUsedPrompts.add(norm);
+            setQs.push(item);
+          }
+        }
+
+        if (setQs.length === qPerSet) {
+          sets.push(setQs);
+        } else {
+          break;
+        }
+      }
+    }
+
+    // Safety fallback if a chapter ever had < qPerSet static items and no generator
+    if (sets.length === 0 && shuffledStatic.length > 0) {
+      sets.push(shuffledStatic.slice(0, qPerSet));
+    }
+
+    chapterCache.set(cacheKey, sets);
+    return sets;
+  }
+
+  App.QuestionEngine = {
+    getChapterSetCount: function (gradeId, subjectId, chapterId, dlp = false) {
+      const sets = buildChapterSets(gradeId, subjectId, chapterId, dlp);
+      return sets.length;
+    },
+
+    getSetQuestions: function (gradeId, subjectId, chapterId, setNum, dlp = false) {
+      const sets = buildChapterSets(gradeId, subjectId, chapterId, dlp);
+      if (sets.length === 0) return [];
+      const safeIdx = Math.max(0, Math.min(sets.length - 1, (Number(setNum) || 1) - 1));
+      return sets[safeIdx].map((q) => ({
+        q: q.q,
+        options: q.options.slice(),
+        correctIndex: q.correctIndex,
+        explanation: q.explanation
+      }));
+    },
+
+    getEndlessRevisionSet: function (gradeId, subjectId, chapterId, dlp = false, roundSeed = 1) {
+      const count = App.QUESTIONS_PER_SET || 5;
+      const rng = mulberry32(hashSeed(`rev:${gradeId}:${subjectId}:${chapterId}:${dlp ? "en" : "bm"}:${roundSeed}`));
+      const gens = getGeneratorPool(gradeId, chapterId);
+      const rawStatic = [...getStaticPool(gradeId, subjectId, chapterId), ...getFactTablePool(gradeId, subjectId, chapterId)];
+      const pool = rawStatic.map((r) => localizeAndShuffleOptions(rng, r, dlp));
+      const shuffled = shuffleWithRng(rng, pool);
+      const picked = [];
+      const seen = new Set();
+
+      if (gens.length > 0) {
+        let safety = 0;
+        const targetGenCount = shuffled.length > 0 ? Math.max(2, count - Math.min(2, shuffled.length)) : count;
+        while (picked.length < targetGenCount && safety < 160) {
+          safety++;
+          const gen = gens[(safety + roundSeed) % gens.length];
           const item = gen(rng, dlp);
-          if (!usedPromptTexts.has(item.q)) {
-            usedPromptTexts.add(item.q);
-            questions.push(item);
+          const norm = normalizePrompt(item.q);
+          if (!seen.has(norm)) {
+            seen.add(norm);
+            picked.push(item);
           }
         }
       }
 
-      // If we have static pool (possibly alongside generators), draw deterministically
-      if (staticPool.length > 0) {
-        // Rotate starting offset by setNum so Set 1..12 get different slices/orders
-        const shuffledPool = shuffleWithRng(rng, staticPool);
-        const offset = ((setNum - 1) * 3) % shuffledPool.length;
-        const rotated = shuffledPool.slice(offset).concat(shuffledPool.slice(0, offset));
-
-        for (let i = 0; i < rotated.length && questions.length < count; i++) {
-          const item = localizeAndShuffleOptions(rng, rotated[i], dlp);
-          if (!usedPromptTexts.has(item.q)) {
-            usedPromptTexts.add(item.q);
-            questions.push(item);
-          }
+      for (const item of shuffled) {
+        if (picked.length >= count) break;
+        const norm = normalizePrompt(item.q);
+        if (!seen.has(norm)) {
+          seen.add(norm);
+          picked.push(item);
         }
-
-        // If static pool has < 10 items (e.g. 5 items), top up with generators if any,
-        // or distinct variations? Wait: if static pool has 5 items and no generators,
-        // let's make sure we don't duplicate questions in the same set!
-        // Instead, return what's available (or we can check in verify script).
       }
 
-      return questions;
+      return shuffleWithRng(rng, picked);
+    },
+
+    getMatchPairsForQuestion: function (gradeId, subjectId, chapterId, currentQObj, dlp = false, seed = 1) {
+      if (!currentQObj || !Array.isArray(currentQObj.options)) return null;
+      const mainAns = currentQObj.options[currentQObj.correctIndex];
+      if (!currentQObj.q || !mainAns || currentQObj.q.length > 130 || mainAns.length > 62) {
+        return null;
+      }
+
+      const sets = buildChapterSets(gradeId, subjectId, chapterId, dlp);
+      const rng = mulberry32(hashSeed(`match:${gradeId}:${subjectId}:${chapterId}:${seed}`));
+      const allQs = sets.flat();
+      const shuffledQs = shuffleWithRng(rng, allQs);
+
+      const usedQ = new Set([normalizePrompt(currentQObj.q)]);
+      const usedA = new Set([normalizePrompt(mainAns)]);
+      const pairs = [
+        {
+          prompt: currentQObj.q,
+          answer: mainAns,
+          isMain: true
+        }
+      ];
+
+      for (const item of shuffledQs) {
+        if (pairs.length >= 3) break;
+        const ans = item.options && item.options[item.correctIndex];
+        if (!item.q || !ans || item.q.length > 130 || ans.length > 62) continue;
+        const nq = normalizePrompt(item.q);
+        const na = normalizePrompt(ans);
+        if (!usedQ.has(nq) && !usedA.has(na)) {
+          usedQ.add(nq);
+          usedA.add(na);
+          pairs.push({
+            prompt: item.q,
+            answer: ans,
+            isMain: false
+          });
+        }
+      }
+
+      return pairs.length === 3 ? pairs : null;
     }
   };
 })(window);
