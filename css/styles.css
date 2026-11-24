@@ -3641,3 +3641,10 @@ html, body, button, input, textarea, select {
 /* Report a question */
 .btn-report { margin-top: 8px; padding: 6px 12px; border: 2px solid var(--ink); border-radius: 999px; background: #fff7ed; font: inherit; font-weight: 700; font-size: 0.8rem; cursor: pointer; min-height: 38px; }
 .btn-report:disabled { background: #dcfce7; cursor: default; }
+
+/* Phase 2: parent linking */
+.pair-modal .pin-modal-box { max-height: 92vh; overflow-y: auto; max-width: 360px; }
+.pair-qr { width: 220px; max-width: 70vw; margin: 8px auto; background: #fff; border: 2px solid var(--ink); border-radius: 12px; padding: 4px; }
+.pair-qr svg { display: block; width: 100%; height: auto; }
+.cloud-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 0; border-top: 1px dashed #bbb; }
+.cloud-err { color: #b91c1c; }

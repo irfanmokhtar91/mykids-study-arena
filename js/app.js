@@ -1272,18 +1272,10 @@
     const saveWarnHtml = App.Storage.getSaveStatus().failed
       ? `<div class="storage-warn">⚠️ Simpanan telefon penuh. Rekod terbaharu mungkin tidak tersimpan. Gunakan "Simpan Rekod" untuk sandaran dan kosongkan ruang.</div>`
       : "";
-    const syncSt = App.CloudSync ? App.CloudSync.getStatus() : { configured: false, linked: false };
-    if (syncSt.configured && syncSt.linked && !parentAutoSyncStarted) {
+    if (App.Cloud && !parentAutoSyncStarted) {
       parentAutoSyncStarted = true;
-      App.CloudSync.syncNow().then((res) => {
-        if (currentView !== "parent") return;
-        if (res.ok) {
-          parentCloudStatusMsg = `✅ Rekod terkini disegerakkan dari pelayan online (${App.Storage.fmtDate(res.updatedAt)}).`;
-        } else if (res.error) {
-          parentCloudStatusMsg = `⚠️ Gagal muat turun online buat masa ini (${res.error}). Memaparkan rekod peranti.`;
-        }
-        renderTopBar();
-        renderParentDashboard(main);
+      App.Cloud.syncAll().then((res) => {
+        if (currentView === "parent" && res.some((r) => r.marksApplied)) renderParentDashboard(main);
       });
     }
 
@@ -1559,50 +1551,7 @@
       </div>
     `;
 
-    const currentApiUrl = App.getCloudApiUrl ? App.getCloudApiUrl() : "";
-    let onlineCardInner = "";
-    if (syncSt.configured && syncSt.linked) {
-      onlineCardInner = `
-        <div class="cloud-linked-row">
-          <div>
-            <span class="cloud-status-pill is-online">🟢 Disambung Online</span>
-            <div class="family-code-display">Kod Keluarga: <strong>${esc(syncSt.code)}</strong></div>
-            <small>Segerak terakhir: ${syncSt.lastSyncedAt ? App.Storage.fmtDate(syncSt.lastSyncedAt) : "Sedia"}${syncSt.pendingSync ? " • Menunggu segerak..." : ""}</small>
-          </div>
-          <div class="cloud-btn-col">
-            <button type="button" class="btn-tactile btn-true btn-sm" id="btn-cloud-sync-now">🔄 Muat Turun & Segerak Sekarang</button>
-            <button type="button" class="btn-tactile btn-primary-3d btn-sm" id="btn-copy-family-link">📲 Salin / Kongsi Pautan Keluarga</button>
-            <button type="button" class="btn-ghost btn-sm" id="btn-cloud-disconnect">Putuskan Sambungan</button>
-          </div>
-        </div>`;
-    } else if (syncSt.configured) {
-      onlineCardInner = `
-        <div class="cloud-setup-grid">
-          <div class="cloud-option-box">
-            <strong>Telefon Pertama / Akaun Ibu Bapa Utama</strong>
-            <p>Cipta Kod Keluarga baharu supaya semua markah dan kelemahan anak dari mana-mana telefon dikumpul secara online.</p>
-            <button type="button" class="btn-tactile btn-true btn-sm" id="btn-cloud-create">✨ Cipta Kod Keluarga Online</button>
-          </div>
-          <div class="cloud-option-box">
-            <strong>Sambung Ke Keluarga Sedia Ada</strong>
-            <p>Masukkan Kod Keluarga daripada telefon ibu bapa / pautan WhatsApp untuk berkongsi rekod yang sama.</p>
-            <div class="cloud-join-row">
-              <input type="text" id="inp-family-code" maxlength="10" placeholder="Kod (cth: K7M4P9)" value="${esc(pendingInviteCode)}" />
-              <input type="password" id="inp-family-pin" maxlength="6" placeholder="PIN Keluarga" value="${esc(parentUnlockedPin || "")}" />
-              <button type="button" class="btn-tactile btn-primary-3d btn-sm" id="btn-cloud-join">🔗 Sambung</button>
-            </div>
-          </div>
-        </div>`;
-    } else {
-      onlineCardInner = `
-        <div class="cloud-not-configured">
-          <p>Pelayan pantauan online peribadi belum disambungkan ke halaman ini lagi. Anda masih boleh menggunakan butang <strong>Simpan / Gabung Rekod</strong> di bawah pada bila-bila masa, atau masukkan pautan pelayan Cloudflare peribadi anda jika sudah dilancarkan:</p>
-          <div class="cloud-join-row">
-            <input type="url" id="inp-cloud-url" placeholder="https://mykids-study-arena-api.xxx.workers.dev" value="${esc(currentApiUrl)}" />
-            <button type="button" class="btn-secondary btn-sm" id="btn-save-cloud-url">Simpan Pautan Pelayan</button>
-          </div>
-        </div>`;
-    }
+    const onlineCardInner = App.CloudUi ? App.CloudUi.cardHtml(profiles) : "";
 
     const linkedName = App.Storage.getLinkedFileName();
 
@@ -1719,109 +1668,8 @@
       });
     });
 
-    // Cloud sync actions
-    const saveUrlBtn = document.getElementById("btn-save-cloud-url");
-    if (saveUrlBtn) {
-      saveUrlBtn.addEventListener("click", () => {
-        const val = document.getElementById("inp-cloud-url").value.trim();
-        App.setCloudApiUrl(val);
-        parentCloudStatusMsg = val ? `✅ Pautan pelayan disimpan: ${val}` : "ℹ️ Pautan pelayan dikosongkan.";
-        renderParentDashboard(main);
-      });
-    }
-
-    const createCloudBtn = document.getElementById("btn-cloud-create");
-    if (createCloudBtn) {
-      createCloudBtn.addEventListener("click", async () => {
-        createCloudBtn.disabled = true;
-        parentCloudStatusMsg = "⏳ Mencipta Kod Keluarga online...";
-        renderParentDashboard(main);
-        try {
-          const res = await App.CloudSync.createFamily(parentUnlockedPin || state.parentPin);
-          parentCloudStatusMsg = `✅ Berjaya! Kod Keluarga anda ialah ${res.familyCode}. Kongsikan kod ini ke telefon lain untuk pantauan online.`;
-        } catch (err) {
-          parentCloudStatusMsg = `❌ ${err.message}`;
-        }
-        renderTopBar();
-        renderParentDashboard(main);
-      });
-    }
-
-    const joinCloudBtn = document.getElementById("btn-cloud-join");
-    if (joinCloudBtn) {
-      joinCloudBtn.addEventListener("click", async () => {
-        const code = document.getElementById("inp-family-code").value.trim().toUpperCase();
-        const pin = document.getElementById("inp-family-pin").value.trim() || parentUnlockedPin || state.parentPin;
-        if (!code) {
-          parentCloudStatusMsg = "❌ Sila masukkan Kod Keluarga.";
-          renderParentDashboard(main);
-          return;
-        }
-        joinCloudBtn.disabled = true;
-        try {
-          const res = await App.CloudSync.joinFamily(code, pin);
-          pendingInviteCode = "";
-          parentCloudStatusMsg = `✅ Disambung ke keluarga ${res.familyCode}! (+${res.addedProfiles || 0} akaun anak, +${res.addedHistory || 0} rekod latihan digabung.)`;
-        } catch (err) {
-          parentCloudStatusMsg = `❌ ${err.message}`;
-        }
-        renderTopBar();
-        renderParentDashboard(main);
-      });
-    }
-
-    const syncNowBtn = document.getElementById("btn-cloud-sync-now");
-    if (syncNowBtn) {
-      syncNowBtn.addEventListener("click", async () => {
-        syncNowBtn.disabled = true;
-        const res = await App.CloudSync.syncNow();
-        parentCloudStatusMsg = res.ok
-          ? `✅ Rekod disegerakkan! (+${res.addedProfiles || 0} akaun baharu, +${res.addedHistory || 0} rekod latihan, ${res.updatedSets || 0} set dikemas kini.)`
-          : `❌ ${res.error || "Gagal menyegerak buat masa ini."}`;
-        renderTopBar();
-        renderParentDashboard(main);
-      });
-    }
-
-    const shareLinkBtn = document.getElementById("btn-copy-family-link");
-    if (shareLinkBtn) {
-      shareLinkBtn.addEventListener("click", async () => {
-        const link = `${global.location.origin}${global.location.pathname}?family=${syncSt.code}`;
-        try {
-          if (navigator.share) {
-            await navigator.share({
-              title: "Pautan Keluarga MyKids Study Arena",
-              text: `Buka pautan ini dan masukkan PIN Ibu Bapa untuk menyambung telefon anak (Kod Keluarga: ${syncSt.code})`,
-              url: link
-            });
-            parentCloudStatusMsg = `✅ Pautan keluarga (${syncSt.code}) berjaya dikongsi!`;
-            renderParentDashboard(main);
-            return;
-          }
-        } catch (err) {
-          if (err && err.name === "AbortError") return;
-        }
-        try {
-          await navigator.clipboard.writeText(link);
-          parentCloudStatusMsg = `✅ Pautan keluarga disalin: ${link}`;
-        } catch (e) {
-          parentCloudStatusMsg = `ℹ️ Kod Keluarga: ${syncSt.code} — Pautan: ${link}`;
-        }
-        renderParentDashboard(main);
-      });
-    }
-
-    const disconnectBtn = document.getElementById("btn-cloud-disconnect");
-    if (disconnectBtn) {
-      disconnectBtn.addEventListener("click", () => {
-        if (global.confirm("Putuskan telefon ini daripada segerak keluarga dalam talian? Rekod tempatan dalam peranti tidak akan dipadam.")) {
-          App.CloudSync.disconnect();
-          parentCloudStatusMsg = "ℹ️ Sambungan online diputuskan. Rekod peranti kekal selamat.";
-          renderTopBar();
-          renderParentDashboard(main);
-        }
-      });
-    }
+    // Cloud link actions
+    if (App.CloudUi) App.CloudUi.bind(main, () => renderParentDashboard(main));
 
     const closeAiBtn = document.getElementById("btn-close-ai-panel");
     if (closeAiBtn) {

@@ -1,0 +1,10 @@
+{
+  "name": "MyKids Study Arena (Ibu Bapa)",
+  "short_name": "Ibu Bapa",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FBF9F4",
+  "theme_color": "#18181B",
+  "icons": [{ "src": "../assets/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
