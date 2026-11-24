@@ -3472,3 +3472,37 @@ html, body {
 .pk-edit .btn-rename {
   flex: 0 0 auto;
 }
+
+/* Parent PIN modal */
+.pin-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(24, 24, 27, 0.55);
+}
+.pin-modal-box {
+  width: 100%;
+  max-width: 340px;
+  box-sizing: border-box;
+  background: var(--surface);
+  border: 2.5px solid var(--ink);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+.pin-modal-box h3 { margin: 0 0 6px; }
+.pin-modal-box p { margin: 0 0 10px; color: var(--muted); font-size: 0.9rem; }
+.pin-modal-box input {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 16px;
+  padding: 10px 12px;
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+}
+.pin-modal-box .pin-modal-err { color: #b91c1c; font-weight: 700; margin: 8px 0 0; }
+.pin-modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }

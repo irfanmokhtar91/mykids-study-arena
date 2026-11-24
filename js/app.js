@@ -195,6 +195,48 @@
     });
   }
 
+  function requestParentPin(message, onOk) {
+    const old = document.getElementById("pin-modal");
+    if (old) old.parentNode.removeChild(old);
+    const wrap = document.createElement("div");
+    wrap.id = "pin-modal";
+    wrap.className = "pin-modal";
+    wrap.innerHTML = `
+      <div class="pin-modal-box" role="dialog" aria-modal="true" aria-labelledby="pin-modal-title">
+        <h3 id="pin-modal-title">🔒 PIN Ibu Bapa</h3>
+        <p>${esc(message)}</p>
+        <input type="password" id="pin-modal-input" inputmode="numeric" autocomplete="off" maxlength="12" placeholder="Masukkan PIN" />
+        <p class="pin-modal-err hidden" id="pin-modal-err">PIN salah. Cuba lagi.</p>
+        <div class="pin-modal-actions">
+          <button type="button" class="btn-ghost" id="pin-modal-cancel">Batal</button>
+          <button type="button" class="btn-tactile btn-true" id="pin-modal-ok">Sahkan</button>
+        </div>
+      </div>`;
+    document.body.appendChild(wrap);
+    const input = document.getElementById("pin-modal-input");
+    const close = () => {
+      if (wrap.parentNode) wrap.parentNode.removeChild(wrap);
+    };
+    const tryOk = () => {
+      if (App.Storage.verifyParentPin(input.value.trim())) {
+        close();
+        onOk();
+      } else {
+        App.Sound.wrong();
+        document.getElementById("pin-modal-err").classList.remove("hidden");
+        input.value = "";
+        input.focus();
+      }
+    };
+    document.getElementById("pin-modal-ok").addEventListener("click", tryOk);
+    document.getElementById("pin-modal-cancel").addEventListener("click", close);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") tryOk();
+      if (e.key === "Escape") close();
+    });
+    input.focus();
+  }
+
   function renderAccountSelector(main) {
     const state = App.Storage.getState();
     const profiles = state.profiles || [];
@@ -347,27 +389,34 @@
           renderMain();
           return;
         }
-        App.Sound.unlock();
-        if (isNew) {
-          App.Storage.createProfile({
-            name: cleanName,
-            gradeId: draftGradeId,
-            avatar: draftAvatar
-          });
-          editingAccountId = null;
-          selectedSubject = null;
-          selectedChapter = null;
-          currentView = "home";
-        } else {
-          App.Storage.updateProfile(editingAccountId, {
-            name: cleanName,
-            gradeId: draftGradeId,
-            avatar: draftAvatar
-          });
-          editingAccountId = null;
+        const commit = () => {
+          App.Sound.unlock();
+          if (isNew) {
+            App.Storage.createProfile({
+              name: cleanName,
+              gradeId: draftGradeId,
+              avatar: draftAvatar
+            });
+            editingAccountId = null;
+            selectedSubject = null;
+            selectedChapter = null;
+            currentView = "home";
+          } else {
+            App.Storage.updateProfile(editingAccountId, {
+              name: cleanName,
+              gradeId: draftGradeId,
+              avatar: draftAvatar
+            });
+            editingAccountId = null;
+          }
+          formErrorMsg = "";
+          renderAll();
+        };
+        if (!isNew && editProfile && editProfile.gradeId !== draftGradeId) {
+          requestParentPin("Menukar Darjah / Tingkatan memerlukan PIN ibu bapa.", commit);
+          return;
         }
-        formErrorMsg = "";
-        renderAll();
+        commit();
       };
 
       document.getElementById("btn-save-acc-form").addEventListener("click", saveForm);
@@ -393,10 +442,12 @@
         delBtn.addEventListener("click", () => {
           const nm = App.Storage.getDisplayName(editProfile);
           if (global.confirm(`Adakah anda pasti mahu memadam akaun '${nm}' dan semua rekodnya di peranti ini?`)) {
-            App.Storage.deleteProfile(editProfile.id);
-            editingAccountId = null;
-            formErrorMsg = "";
-            renderAll();
+            requestParentPin("Memadam profil memerlukan PIN ibu bapa.", () => {
+              App.Storage.deleteProfile(editProfile.id);
+              editingAccountId = null;
+              formErrorMsg = "";
+              renderAll();
+            });
           }
         });
       }
