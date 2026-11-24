@@ -104,6 +104,13 @@
         };
       }
 
+      let hasInteracted = false;
+      let isTouchAiming = false;
+
+      function isOverAnyDrone(px, py) {
+        return drones.some((d) => px >= d.x && px <= d.x + d.w && py >= d.y && py <= d.y + d.h);
+      }
+
       function onPointerMove(e) {
         const { w, h } = cm.getSize();
         const pos = getPointerPos(e);
@@ -115,11 +122,29 @@
       function onPointerDown(e) {
         if (paused || answered) return;
         e.preventDefault();
+        hasInteracted = true;
         const { w, h } = cm.getSize();
         const pos = getPointerPos(e);
         aimX = Math.max(0.03, Math.min(0.97, pos.x / Math.max(1, w)));
         aimY = Math.max(0.05, Math.min(0.92, pos.y / Math.max(1, h)));
-        fireAt(pos.x, pos.y);
+        hasPointer = true;
+        if (isOverAnyDrone(pos.x, pos.y)) {
+          fireAt(pos.x, pos.y);
+        } else {
+          isTouchAiming = true;
+        }
+      }
+
+      function onPointerUp(e) {
+        if (!isTouchAiming) return;
+        isTouchAiming = false;
+        if (paused || answered) return;
+        const { w, h } = cm.getSize();
+        const px = aimX * w;
+        const py = aimY * h;
+        if (isOverAnyDrone(px, py)) {
+          fireAt(px, py);
+        }
       }
 
       function onKeyDown(e) {
@@ -128,9 +153,11 @@
         const k = e.key.toLowerCase();
         if (["arrowup", "arrowdown", "arrowleft", "arrowright", "w", "a", "s", "d"].includes(k)) {
           keys.add(k);
+          hasInteracted = true;
           if (!paused) e.preventDefault();
         } else if ((k === " " || k === "enter") && !paused && !answered) {
           e.preventDefault();
+          hasInteracted = true;
           const { w, h } = cm.getSize();
           fireAt(aimX * w, aimY * h);
         }
@@ -142,6 +169,8 @@
 
       canvas.addEventListener("pointermove", onPointerMove);
       canvas.addEventListener("pointerdown", onPointerDown);
+      global.addEventListener("pointerup", onPointerUp);
+      global.addEventListener("pointercancel", onPointerUp);
       global.addEventListener("keydown", onKeyDown);
       global.addEventListener("keyup", onKeyUp);
 
@@ -358,22 +387,45 @@
         ctx.stroke();
         ctx.restore();
 
-        // Crosshair
+        // Crosshair with LOCK! indicator when aimed over a drone
+        const lockedOn = hasPointer && isOverAnyDrone(px, py);
         ctx.save();
-        ctx.strokeStyle = "#ef4444";
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = lockedOn ? "#34d399" : "#ef4444";
+        ctx.lineWidth = lockedOn ? 2.8 : 2;
         ctx.beginPath();
-        ctx.arc(px, py, 14, 0, Math.PI * 2);
-        ctx.moveTo(px - 20, py);
+        ctx.arc(px, py, lockedOn ? 18 : 14, 0, Math.PI * 2);
+        ctx.moveTo(px - 22, py);
         ctx.lineTo(px - 8, py);
         ctx.moveTo(px + 8, py);
-        ctx.lineTo(px + 20, py);
-        ctx.moveTo(px, py - 20);
+        ctx.lineTo(px + 22, py);
+        ctx.moveTo(px, py - 22);
         ctx.lineTo(px, py - 8);
         ctx.moveTo(px, py + 8);
-        ctx.lineTo(px, py + 20);
+        ctx.lineTo(px, py + 22);
         ctx.stroke();
+        if (lockedOn && isTouchAiming) {
+          ctx.fillStyle = "#34d399";
+          ctx.font = "800 10px 'JetBrains Mono', monospace";
+          ctx.textAlign = "center";
+          ctx.fillText("LOCK!", px, py - 24);
+        }
         ctx.restore();
+
+        // Subtle bottom gesture hint before first touch
+        if (!hasInteracted && !answered) {
+          ctx.save();
+          const hint = w < 440 ? "🎯 Ketik dron atau seret & lepas tembak" : "🎯 Ketik dron atau seret jari untuk bidik & lepas untuk tembak";
+          ctx.font = "700 11px 'Plus Jakarta Sans', sans-serif";
+          const tw = Math.min(w - 24, ctx.measureText(hint).width + 20);
+          ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+          App.GameUtil.drawRoundedRect(ctx, (w - tw) / 2, h - 46, tw, 20, 10);
+          ctx.fill();
+          ctx.fillStyle = "#fde047";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(hint, w / 2, h - 36);
+          ctx.restore();
+        }
 
         ctx.restore();
         rafId = global.requestAnimationFrame(tick);
@@ -398,6 +450,8 @@
           if (rafId) global.cancelAnimationFrame(rafId);
           canvas.removeEventListener("pointermove", onPointerMove);
           canvas.removeEventListener("pointerdown", onPointerDown);
+          global.removeEventListener("pointerup", onPointerUp);
+          global.removeEventListener("pointercancel", onPointerUp);
           global.removeEventListener("keydown", onKeyDown);
           global.removeEventListener("keyup", onKeyUp);
           cm.destroy();

@@ -22,6 +22,11 @@
       let draggingIdx = -1;
       let dragOffX = 0;
       let dragOffY = 0;
+      let dragStartY = 0;
+      let dragStartTime = 0;
+      let lastMoveY = 0;
+      let lastMoveTime = 0;
+      let dragVelY = 0;
       let launchingIdx = -1;
       let lastTapIdx = -1;
       let lastTapTime = 0;
@@ -119,6 +124,11 @@
             draggingIdx = i;
             dragOffX = pos.x - c.x;
             dragOffY = pos.y - c.y;
+            dragStartY = pos.y;
+            dragStartTime = now;
+            lastMoveY = pos.y;
+            lastMoveTime = now;
+            dragVelY = 0;
             App.Sound.click();
             return;
           }
@@ -129,6 +139,11 @@
         if (draggingIdx < 0 || paused || answered) return;
         e.preventDefault();
         const pos = getPointerPos(e);
+        const now = performance.now();
+        const dtMs = Math.max(8, now - lastMoveTime);
+        dragVelY = ((pos.y - lastMoveY) / dtMs) * 1000; // px/s
+        lastMoveY = pos.y;
+        lastMoveTime = now;
         const c = cores[draggingIdx];
         c.x = pos.x - dragOffX;
         c.y = pos.y - dragOffY;
@@ -136,20 +151,28 @@
 
       function onPointerUp() {
         if (draggingIdx < 0) return;
-        const c = cores[draggingIdx];
+        const idx = draggingIdx;
+        const c = cores[idx];
         const { w, h } = cm.getSize();
         const sock = getSocket(w, h);
         const coreCx = c.x + c.w / 2;
         const coreCy = c.y + c.h / 2;
 
         const nearSocket =
-          coreCx >= sock.x - 24 &&
-          coreCx <= sock.x + sock.w + 24 &&
-          coreCy >= sock.y - 28 &&
-          coreCy <= sock.y + sock.h + 24;
+          coreCx >= sock.x - 28 &&
+          coreCx <= sock.x + sock.w + 28 &&
+          coreCy >= sock.y - 32 &&
+          coreCy <= sock.y + sock.h + 28;
+
+        const flickedDown =
+          dragVelY > 420 ||
+          (lastMoveY - dragStartY > 45 && performance.now() - dragStartTime < 260);
 
         if (nearSocket && !paused && !answered) {
-          commitCore(draggingIdx);
+          commitCore(idx);
+        } else if (flickedDown && !paused && !answered) {
+          launchingIdx = idx;
+          draggingIdx = -1;
         } else {
           draggingIdx = -1;
         }
@@ -294,8 +317,8 @@
         ctx.stroke();
 
         ctx.fillStyle = nearSock ? "#18181b" : "#f8fafc";
-        const sockLabel = w < 440 ? "⚡ SERET KE REAKTOR" : "⚡ SERET JAWAPAN KE REAKTOR (ATAU TAP 2×)";
-        ctx.font = `700 ${w < 440 ? 12 : 13}px 'Fredoka', 'Plus Jakarta Sans', sans-serif`;
+        const sockLabel = w < 440 ? "⚡ SERET / LERET ▼ KE REAKTOR" : "⚡ SERET ATAU LERET ▼ TERAS KE REAKTOR";
+        ctx.font = `700 ${w < 440 ? 11.5 : 13}px 'Fredoka', 'Plus Jakarta Sans', sans-serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(sockLabel, sock.cx, sock.cy);

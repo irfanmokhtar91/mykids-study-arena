@@ -7,11 +7,11 @@ Aplikasi permainan pendidikan interaktif HTML5 Canvas mengikut silibus **KSSR Se
 ## Pautan Langsung (GitHub Pages)
 - **Live App:** https://irfanmokhtar91.github.io/mykids-study-arena/
 
-## 4 Permainan Interaktif Sebenar (Telefon, Tablet, PC & Gamepad)
-1. **🎯 Target Strike (FPS Arena)** — Bidik dan tembak dron jawapan tepat sebelum masa tamat.
-2. **🦊 Crate Rush (4-Lane Runner)** — Kawal pelari di 4 lorong, kutip syiling & rempuh peti jawapan tepat.
-3. **🧭 Maze Runner (Top-Down Maze)** — Navigasi pagar sesat ke portal jawapan tepat dengan D-Pad, kekunci arah, Gamepad, atau ketik laluan.
-4. **🧲 Reactor Puzzle (Drag-and-Drop)** — Seret dan pasangkan teras tenaga jawapan ke dalam reaktor.
+## 4 Permainan Interaktif Sentuhan Penuh (Telefon, Tablet, PC & Gamepad)
+1. **🎯 Target Strike (FPS Arena)** — Ketik dron jawapan tepat atau seret jari untuk membidik & lepas untuk menembak.
+2. **🦊 Crate Rush (4-Lane Runner)** — Leret kiri/kanan untuk tukar lorong, dan leret atas atau ketik peti untuk rempuh jawapan tepat.
+3. **🧭 Maze Runner (Top-Down Maze)** — Leret jari ke arah laluan atau ketik terus pada portal/petak untuk berjalan dalam pagar sesat.
+4. **🧲 Reactor Puzzle (Drag-and-Drop)** — Seret atau leret ke bawah (*flick*) teras tenaga jawapan ke dalam reaktor (atau ketik 2×).
 
 ## Sistem Pemarkahan, Bimbingan & Penjana Prompt AI
 - **Pemarkahan Tepat + Bonus Pantas 10 Saat (Berasingan):** Setiap jawapan betul mendapat **1 markah penuh**. Jawapan betul dalam **10 saat** menerima **+1 Bonus Pantas** yang direkodkan secara berasingan (tidak bercampur dalam jumlah markah ketepatan).

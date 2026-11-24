@@ -1,14 +1,14 @@
 /**
- * Crate Rush (Crash-style 4-Lane Runner) — Real Playable HTML5 Canvas Game
- * Controls: Left/Right or A/D, swipe, tap a lane/crate, on-screen D-Pad/Boost, or Gamepad.
- * Space / Up / Boost dashes straight into the crate in your current lane!
+ * Crate Rush (Crash-style 4-Lane Runner) — Pure Touch Gesture HTML5 Canvas Game
+ * Gestures: Swipe/drag left-right across lanes, swipe up or tap crate/card to smash!
+ * Keyboard/Gamepad also supported quietly for PC.
  */
 (function (global) {
   const App = (global.App = global.App || {});
   App.MiniGames = App.MiniGames || {};
 
   App.MiniGames.runner = {
-    mount: function ({ canvas, controlsEl, qObj, playerAvatar, onAnswer }) {
+    mount: function ({ canvas, qObj, playerAvatar, onAnswer }) {
       const ctx = canvas.getContext("2d");
       const cm = App.GameUtil.setupCanvas(canvas);
       const gp = App.GameUtil.createGamepadReader();
@@ -88,61 +88,86 @@
         onAnswer(lane);
       }
 
-      // On-screen controls for phone / iPad
-      if (controlsEl) {
-        controlsEl.innerHTML = `
-          <div class="dpad-strip">
-            <button type="button" class="ctrl-btn" id="run-left">◀ Kiri</button>
-            <button type="button" class="ctrl-btn ctrl-action" id="run-boost">⚡ REMPUH PETI</button>
-            <button type="button" class="ctrl-btn" id="run-right">Kanan ▶</button>
-          </div>`;
-        controlsEl.querySelector("#run-left").addEventListener("click", () => moveLane(-1));
-        controlsEl.querySelector("#run-boost").addEventListener("click", triggerBoost);
-        controlsEl.querySelector("#run-right").addEventListener("click", () => moveLane(1));
-      }
+      let hasInteracted = false;
+      let dragStartX = 0;
+      let dragStartY = 0;
+      let isPointerDown = false;
+      let dragMoved = false;
+      let downHitLane = -1;
+      let downY = 0;
+      let downLane = 1;
 
-      let swipeStartX = null;
-
-      function onPointerDown(e) {
-        if (paused || answered) return;
+      function getPointerPos(e) {
         const rect = canvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        swipeStartX = clientX;
-        const x = clientX - rect.left;
-        const y = clientY - rect.top;
-        const { w, h } = cm.getSize();
+        return { x: clientX - rect.left, y: clientY - rect.top };
+      }
 
-        // Check staggered/crate answer card hit first so phone taps hit the right lane accurately
-        let hitLane = -1;
+      function onPointerDown(e) {
+        if (paused || answered) return;
+        e.preventDefault();
+        hasInteracted = true;
+        isPointerDown = true;
+        dragMoved = false;
+        const pos = getPointerPos(e);
+        dragStartX = pos.x;
+        dragStartY = pos.y;
+        downY = pos.y;
+
+        const { w } = cm.getSize();
+        downHitLane = -1;
         for (const c of crates) {
           const r = c.cardRect;
-          if (x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h) {
-            hitLane = c.lane;
+          if (pos.x >= r.x && pos.x <= r.x + r.w && pos.y >= r.y && pos.y <= r.y + r.h) {
+            downHitLane = c.lane;
             break;
           }
         }
-        const lane =
-          hitLane >= 0
-            ? hitLane
-            : Math.max(0, Math.min(3, Math.floor(((x - 12) / Math.max(1, w - 24)) * 4)));
-        const wasSameLane = lane === targetLane;
-        targetLane = lane;
-        // Tapping a crate/card or tapping the current lane dashes straight into the crate
-        if (hitLane >= 0 || y < h * 0.55 || wasSameLane) {
+        downLane =
+          downHitLane >= 0
+            ? downHitLane
+            : Math.max(0, Math.min(3, Math.floor(((pos.x - 12) / Math.max(1, w - 24)) * 4)));
+      }
+
+      function onPointerMove(e) {
+        if (!isPointerDown || paused || answered) return;
+        e.preventDefault();
+        const pos = getPointerPos(e);
+        const dx = pos.x - dragStartX;
+        const dy = pos.y - dragStartY;
+        const { w } = cm.getSize();
+
+        // Real-time horizontal lane tracking when dragging finger left/right
+        if (Math.abs(dx) > 20 && Math.abs(dx) >= Math.abs(dy)) {
+          dragMoved = true;
+          const lane = Math.max(0, Math.min(3, Math.floor(((pos.x - 12) / Math.max(1, w - 24)) * 4)));
+          if (lane !== targetLane) {
+            targetLane = lane;
+            App.Sound.click();
+          }
+        }
+
+        // Upward flick boosts straight into current lane's crate
+        if (dy < -32 && Math.abs(dy) > Math.abs(dx)) {
+          dragMoved = true;
+          isPointerDown = false;
           triggerBoost();
-        } else {
-          App.Sound.click();
         }
       }
 
       function onPointerUp(e) {
-        if (swipeStartX === null || paused || answered) return;
-        const clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
-        const dx = clientX - swipeStartX;
-        swipeStartX = null;
-        if (Math.abs(dx) > 36) {
-          moveLane(dx > 0 ? 1 : -1);
+        if (!isPointerDown || paused || answered) return;
+        isPointerDown = false;
+        const { h } = cm.getSize();
+        if (!dragMoved) {
+          const wasSameLane = downLane === targetLane;
+          targetLane = downLane;
+          if (downHitLane >= 0 || downY < h * 0.55 || wasSameLane) {
+            triggerBoost();
+          } else {
+            App.Sound.click();
+          }
         }
       }
 
@@ -152,20 +177,25 @@
         const k = e.key.toLowerCase();
         if (k === "arrowleft" || k === "a") {
           e.preventDefault();
+          hasInteracted = true;
           moveLane(-1);
         } else if (k === "arrowright" || k === "d") {
           e.preventDefault();
+          hasInteracted = true;
           moveLane(1);
         } else if (k === " " || k === "arrowup" || k === "w" || k === "enter") {
           if (!paused && !answered) {
             e.preventDefault();
+            hasInteracted = true;
             triggerBoost();
           }
         }
       }
 
       canvas.addEventListener("pointerdown", onPointerDown);
-      canvas.addEventListener("pointerup", onPointerUp);
+      canvas.addEventListener("pointermove", onPointerMove, { passive: false });
+      global.addEventListener("pointerup", onPointerUp);
+      global.addEventListener("pointercancel", onPointerUp);
       global.addEventListener("keydown", onKeyDown);
 
       let lastTs = performance.now();
@@ -433,6 +463,22 @@
         }
         ctx.globalAlpha = 1;
 
+        // Subtle gesture hint at bottom before first touch
+        if (!hasInteracted && !answered) {
+          ctx.save();
+          const hint = w < 440 ? "👆 Leret ◀▶ lorong • Leret ▲ / Ketik peti" : "👆 Leret ◀▶ tukar lorong • Leret ▲ atau ketik peti untuk rempuh";
+          ctx.font = "700 11px 'Plus Jakarta Sans', sans-serif";
+          const tw = Math.min(w - 24, ctx.measureText(hint).width + 20);
+          ctx.fillStyle = "rgba(24, 24, 27, 0.78)";
+          App.GameUtil.drawRoundedRect(ctx, (w - tw) / 2, h - 26, tw, 20, 10);
+          ctx.fill();
+          ctx.fillStyle = "#fef08a";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(hint, w / 2, h - 16);
+          ctx.restore();
+        }
+
         ctx.restore();
         rafId = global.requestAnimationFrame(tick);
       }
@@ -451,7 +497,9 @@
           destroyed = true;
           if (rafId) global.cancelAnimationFrame(rafId);
           canvas.removeEventListener("pointerdown", onPointerDown);
-          canvas.removeEventListener("pointerup", onPointerUp);
+          canvas.removeEventListener("pointermove", onPointerMove);
+          global.removeEventListener("pointerup", onPointerUp);
+          global.removeEventListener("pointercancel", onPointerUp);
           global.removeEventListener("keydown", onKeyDown);
           cm.destroy();
         }

@@ -371,8 +371,6 @@
               <div class="toast-banner hidden" id="game-toast"></div>
               <div class="learning-overlay hidden" id="learning-overlay"></div>
             </div>
-
-            <div class="game-controls-bar" id="game-controls-bar"></div>
           </div>
         `;
 
@@ -413,11 +411,10 @@
         timerInterval = setInterval(updateTimerDisplay, 100);
 
         const canvasEl = container.querySelector("#game-canvas");
-        const controlsEl = container.querySelector("#game-controls-bar");
 
         activeMini = App.MiniGames[safeMode].mount({
           canvas: canvasEl,
-          controlsEl,
+          controlsEl: null,
           qObj,
           playerAvatar: profile.avatar || "🦊",
           bossEmoji,

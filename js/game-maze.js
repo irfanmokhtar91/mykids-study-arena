@@ -126,31 +126,14 @@
         cardRect: { x: 0, y: 0, w: 120, h: 48 }
       }));
 
-      if (controlsEl) {
-        controlsEl.innerHTML = `
-          <div class="dpad-console">
-            <button type="button" class="ctrl-btn dpad-left" data-dx="-1" data-dy="0">◀</button>
-            <button type="button" class="ctrl-btn dpad-up" data-dx="0" data-dy="-1">▲</button>
-            <button type="button" class="ctrl-btn dpad-down" data-dx="0" data-dy="1">▼</button>
-            <button type="button" class="ctrl-btn dpad-right" data-dx="1" data-dy="0">▶</button>
-          </div>`;
-        controlsEl.querySelectorAll(".ctrl-btn").forEach((btn) => {
-          const dx = Number(btn.getAttribute("data-dx"));
-          const dy = Number(btn.getAttribute("data-dy"));
-          const start = (e) => {
-            e.preventDefault();
-            autoPath = [];
-            dpadDir = { x: dx, y: dy };
-          };
-          const stop = () => {
-            dpadDir = { x: 0, y: 0 };
-          };
-          btn.addEventListener("pointerdown", start);
-          btn.addEventListener("pointerup", stop);
-          btn.addEventListener("pointerleave", stop);
-          btn.addEventListener("pointercancel", stop);
-        });
-      }
+      let hasInteracted = false;
+      let dragActive = false;
+      let dragOrigin = { x: 0, y: 0 };
+      let dragCurrent = { x: 0, y: 0 };
+      let dragStartTime = 0;
+      let swipeUsed = false;
+      let touchDir = { x: 0, y: 0 };
+      let glideDir = { x: 0, y: 0 };
 
       function isWalkable(nx, ny) {
         const radius = 0.28;
@@ -214,28 +197,88 @@
         return { cardH, cardW, mazeX, mazeY, mazeW, mazeH, tile };
       }
 
+      function getPointerPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - rect.left, y: clientY - rect.top };
+      }
+
       function onPointerDown(e) {
         if (paused || answered) return;
-        const rect = canvas.getBoundingClientRect();
-        const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-        const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+        e.preventDefault();
+        hasInteracted = true;
+        const pos = getPointerPos(e);
+        dragActive = true;
+        dragOrigin = { x: pos.x, y: pos.y };
+        dragCurrent = { x: pos.x, y: pos.y };
+        dragStartTime = performance.now();
+        swipeUsed = false;
+        touchDir = { x: 0, y: 0 };
+      }
+
+      function onPointerMove(e) {
+        if (!dragActive || paused || answered) return;
+        e.preventDefault();
+        const pos = getPointerPos(e);
+        dragCurrent = { x: pos.x, y: pos.y };
+        const dx = pos.x - dragOrigin.x;
+        const dy = pos.y - dragOrigin.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist > 18) {
+          swipeUsed = true;
+          autoPath = [];
+          glideDir = { x: 0, y: 0 };
+          if (Math.abs(dx) >= Math.abs(dy)) {
+            touchDir = { x: dx > 0 ? 1 : -1, y: 0 };
+          } else {
+            touchDir = { x: 0, y: dy > 0 ? 1 : -1 };
+          }
+        }
+      }
+
+      function onPointerUp(e) {
+        if (!dragActive) return;
+        dragActive = false;
+        const elapsed = performance.now() - dragStartTime;
+        const dx = dragCurrent.x - dragOrigin.x;
+        const dy = dragCurrent.y - dragOrigin.y;
+        const dist = Math.hypot(dx, dy);
+
+        if (swipeUsed && dist > 20) {
+          // Quick flick keeps gliding in swiped direction until wall or next touch; long hold stops on lift
+          if (elapsed < 260) {
+            glideDir = { x: touchDir.x, y: touchDir.y };
+          } else {
+            glideDir = { x: 0, y: 0 };
+          }
+          touchDir = { x: 0, y: 0 };
+          return;
+        }
+
+        touchDir = { x: 0, y: 0 };
+        if (paused || answered) return;
+
+        // Clean tap: auto-walk via BFS to tapped answer signboard or maze floor cell
         const { w, h } = cm.getSize();
         const lay = getLayout(w, h);
+        const x = dragOrigin.x;
+        const y = dragOrigin.y;
 
-        // Check if user tapped one of the 4 corner answer cards -> auto-walk to that portal
         for (const p of portals) {
           const r = p.cardRect;
           if (x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h) {
+            glideDir = { x: 0, y: 0 };
             autoPath = findPathBFS(grid, Math.floor(px), Math.floor(py), p.gx, p.gy);
             App.Sound.click();
             return;
           }
         }
 
-        // Or tapped directly inside a maze floor cell -> auto-walk there
         const gx = Math.floor((x - lay.mazeX) / lay.tile);
         const gy = Math.floor((y - lay.mazeY) / lay.tile);
         if (gx >= 0 && gx < COLS && gy >= 0 && gy < ROWS && grid[gy][gx] === 0) {
+          glideDir = { x: 0, y: 0 };
           autoPath = findPathBFS(grid, Math.floor(px), Math.floor(py), gx, gy);
         }
       }
@@ -246,7 +289,9 @@
         const k = e.key.toLowerCase();
         if (["arrowup", "arrowdown", "arrowleft", "arrowright", "w", "a", "s", "d"].includes(k)) {
           heldKeys.add(k);
+          hasInteracted = true;
           autoPath = [];
+          glideDir = { x: 0, y: 0 };
           if (!paused) e.preventDefault();
         }
       }
@@ -256,6 +301,9 @@
       }
 
       canvas.addEventListener("pointerdown", onPointerDown);
+      canvas.addEventListener("pointermove", onPointerMove, { passive: false });
+      global.addEventListener("pointerup", onPointerUp);
+      global.addEventListener("pointercancel", onPointerUp);
       global.addEventListener("keydown", onKeyDown);
       global.addEventListener("keyup", onKeyUp);
 
@@ -278,8 +326,8 @@
         if (!paused && !answered) {
           time += dt;
 
-          let vx = dpadDir.x;
-          let vy = dpadDir.y;
+          let vx = touchDir.x !== 0 || touchDir.y !== 0 ? touchDir.x : glideDir.x;
+          let vy = touchDir.x !== 0 || touchDir.y !== 0 ? touchDir.y : glideDir.y;
           if (heldKeys.has("arrowleft") || heldKeys.has("a")) vx -= 1;
           if (heldKeys.has("arrowright") || heldKeys.has("d")) vx += 1;
           if (heldKeys.has("arrowup") || heldKeys.has("w")) vy -= 1;
@@ -295,7 +343,14 @@
               vx /= len;
               vy /= len;
             }
+            const beforeX = px;
+            const beforeY = py;
             movePlayer(vx, vy, dt);
+            if (glideDir.x !== 0 || glideDir.y !== 0) {
+              if (Math.hypot(px - beforeX, py - beforeY) < 0.005) {
+                glideDir = { x: 0, y: 0 };
+              }
+            }
           } else if (autoPath.length > 0) {
             const next = autoPath[0];
             const tx = next.gx + 0.5;
@@ -457,6 +512,46 @@
           ctx.stroke();
         });
 
+        // Floating touch joystick ring while dragging
+        if (dragActive && swipeUsed) {
+          ctx.save();
+          ctx.strokeStyle = "rgba(37, 99, 235, 0.55)";
+          ctx.fillStyle = "rgba(255, 255, 255, 0.35)";
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.arc(dragOrigin.x, dragOrigin.y, 28, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          const dx = dragCurrent.x - dragOrigin.x;
+          const dy = dragCurrent.y - dragOrigin.y;
+          const d = Math.hypot(dx, dy);
+          const clampD = Math.min(22, d);
+          const kx = dragOrigin.x + (d > 0 ? (dx / d) * clampD : 0);
+          const ky = dragOrigin.y + (d > 0 ? (dy / d) * clampD : 0);
+          ctx.fillStyle = "#2563eb";
+          ctx.beginPath();
+          ctx.arc(kx, ky, 11, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        // Subtle gesture hint before first touch
+        if (!hasInteracted && !answered) {
+          ctx.save();
+          const hint = "👆 Leret jari untuk arah / ketik jawapan terus";
+          ctx.font = "700 11px 'Plus Jakarta Sans', sans-serif";
+          const tw = Math.min(w - 24, ctx.measureText(hint).width + 20);
+          ctx.fillStyle = "rgba(24, 24, 27, 0.8)";
+          App.GameUtil.drawRoundedRect(ctx, (w - tw) / 2, lay.mazeY + lay.mazeH / 2 - 11, tw, 22, 11);
+          ctx.fill();
+          ctx.fillStyle = "#fef08a";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(hint, w / 2, lay.mazeY + lay.mazeH / 2);
+          ctx.restore();
+        }
+
         rafId = global.requestAnimationFrame(tick);
       }
 
@@ -474,6 +569,9 @@
           destroyed = true;
           if (rafId) global.cancelAnimationFrame(rafId);
           canvas.removeEventListener("pointerdown", onPointerDown);
+          canvas.removeEventListener("pointermove", onPointerMove);
+          global.removeEventListener("pointerup", onPointerUp);
+          global.removeEventListener("pointercancel", onPointerUp);
           global.removeEventListener("keydown", onKeyDown);
           global.removeEventListener("keyup", onKeyUp);
           cm.destroy();
