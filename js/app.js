@@ -112,17 +112,17 @@
             <span class="ak-grade">${esc(grade ? grade.name : profile.gradeId)}</span>
           </div>
           <button type="button" class="btn-switch-acc" id="btn-switch-account" title="Tukar ke akaun anak lain">
-            🔄 Tukar Akaun
+            <span aria-hidden="true">🔄</span><span class="lbl"> Tukar Akaun</span>
           </button>
         </div>
       `;
       rightControlsHtml = `
         <label class="dlp-toggle" title="Tukar bahasa Matematik & Sains kepada Bahasa Inggeris">
           <input type="checkbox" id="chk-dlp" ${state.dlpEnabled ? "checked" : ""} />
-          <span>🌐 BM / EN</span>
+          <span><span aria-hidden="true">🌐</span><span class="lbl"> BM / EN</span></span>
         </label>
-        <button class="btn-ghost" id="btn-sound" title="Bunyi">${muted ? "🔇" : "🔊"}</button>
-        <button class="btn-parent" id="btn-parent-dash">👨‍👩‍👧‍👦 Ibu Bapa</button>
+        <button class="btn-ghost" id="btn-sound" title="Bunyi" aria-label="Bunyi">${muted ? "🔇" : "🔊"}</button>
+        <button class="btn-parent" id="btn-parent-dash" aria-label="Panel Ibu Bapa"><span aria-hidden="true">👨‍👩‍👧‍👦</span><span class="lbl"> Ibu Bapa</span></button>
       `;
     } else {
       centerHtml = syncSt.linked
@@ -136,6 +136,7 @@
       `;
     }
 
+    document.getElementById("topbar").classList.toggle("topbar--kid", inKidSpace);
     document.getElementById("topbar").innerHTML = `
       <div class="brand" id="nav-brand">
         <span class="brand-logo">🚀</span>
@@ -221,8 +222,8 @@
 
     const heroHtml = `
       <section class="account-selector-hero">
-        <h1>👋 Siapa nak belajar hari ini?</h1>
-        <p>Pilih akaun kamu atau cipta akaun baharu. Darjah atau Tingkatan disimpan khas pada setiap akaun supaya adik-beradik tidak tersalah tahap walaupun berkongsi telefon.</p>
+        <h1>👋 Siapa nak belajar?</h1>
+        <p>Pilih profil kamu. Darjah atau Tingkatan disimpan pada setiap profil.</p>
       </section>
       ${inviteBannerHtml}
     `;
@@ -415,19 +416,12 @@
           const g = App.GRADES[p.gradeId] || App.GRADES.d6;
           const name = App.Storage.getDisplayName(p);
           const frameCls = p.equippedFrame && p.equippedFrame !== "default" ? `frame-${p.equippedFrame}` : "";
-          const setsDone = Object.keys(p.setBest || {}).length;
           return `
-            <div class="account-card card-${p.gradeId}" data-pid="${p.id}">
-              <button type="button" class="account-edit-btn" data-edit-id="${p.id}" title="Edit nama, avatar atau darjah">✏️ Edit</button>
+            <div class="account-card card-${p.gradeId}" data-pid="${p.id}" role="button" tabindex="0" aria-label="Masuk sebagai ${esc(name)}, ${esc(g.name)}">
+              <button type="button" class="account-edit-btn" data-edit-id="${p.id}" title="Edit nama, avatar atau darjah" aria-label="Edit profil ${esc(name)}">✏️</button>
               <div class="acc-avatar-wrap ${frameCls}">${p.avatar || "🦊"}</div>
               <h3 class="acc-name">${esc(name)}</h3>
               <span class="acc-grade-pill pill-${p.gradeId}">${esc(g.name)}</span>
-              <div class="acc-mini-stats">
-                <span>🔥 ${p.dailyStreak || 0} hari</span>
-                <span>⭐ ${p.xp || 0} XP</span>
-                <span>🎯 ${setsDone} set</span>
-              </div>
-              <div class="acc-enter-cta">Masuk Ruang Belajar ▶</div>
             </div>`;
         })
         .join("");
@@ -438,8 +432,7 @@
           ${accountCardsHtml}
           <button type="button" class="account-card-add" id="btn-add-account-card">
             <span class="add-plus">＋</span>
-            <strong>Tambah Akaun Anak</strong>
-            <small>Pilih nama, avatar & Darjah / Tingkatan baharu</small>
+            <strong>Tambah Profil</strong>
           </button>
         </div>
 

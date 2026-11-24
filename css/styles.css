@@ -3295,3 +3295,180 @@ body.is-playing .game-shell {
     gap: 10px;
   }
 }
+
+
+/* ================= V5 PHONE-FIRST LAYOUT (Netflix profile tiles, compact top bar) ================= */
+.account-selector-hero {
+  padding: 16px 18px;
+  text-align: center;
+}
+.account-selector-hero h1 {
+  font-size: 1.5rem;
+  margin: 0 0 4px;
+}
+.account-selector-hero p {
+  font-size: 0.9rem;
+}
+
+.account-grid {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+}
+.account-card {
+  padding: 18px 10px 14px;
+  gap: 6px;
+  min-width: 0;
+}
+.account-card .acc-avatar-wrap {
+  width: 84px;
+  height: 84px;
+  font-size: 2.8rem;
+}
+.account-card .acc-name {
+  width: 100%;
+  margin: 6px 0 0;
+  font-size: 1.02rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.account-card .account-edit-btn {
+  top: 6px;
+  right: 6px;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  font-size: 0.95rem;
+}
+.account-card-add {
+  min-height: 0;
+  padding: 18px 10px;
+}
+
+.acc-field-group input {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.dlp-toggle input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.dlp-toggle {
+  position: relative;
+  user-select: none;
+}
+.dlp-toggle:has(input:checked) {
+  background: #dbeafe;
+}
+
+@media (max-width: 640px) {
+  .account-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .account-selector-hero p {
+    display: none;
+  }
+
+  /* One slim top bar row on phones */
+  .topbar {
+    flex-wrap: nowrap;
+    gap: 6px;
+    padding: calc(6px + env(safe-area-inset-top)) 8px 6px;
+  }
+  .brand-title,
+  .brand-sub {
+    display: none;
+  }
+  .topbar--kid .brand {
+    display: none;
+  }
+  .topbar--kid .active-account-bar {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+  .topbar--kid .active-kid-pill {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 3px 8px 3px 5px;
+    font-size: 0.8rem;
+  }
+  .topbar--kid .ak-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .topbar--kid .ak-grade {
+    flex: 0 0 auto;
+  }
+  .topbar--kid .btn-switch-acc .lbl,
+  .topbar--kid .btn-parent .lbl {
+    display: none;
+  }
+  .topbar--kid .btn-switch-acc {
+    flex: 0 0 auto;
+    padding: 5px 9px;
+  }
+  .topbar-actions {
+    flex: 0 0 auto;
+    gap: 5px;
+  }
+  .topbar-actions button,
+  .dlp-toggle {
+    min-height: 38px;
+    padding: 4px 9px;
+  }
+}
+
+/* Never let content push past the screen */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+.main-content img, .main-content svg, .main-content canvas {
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  .topbar--kid .ak-grade,
+  .dlp-toggle .lbl {
+    display: none;
+  }
+  #btn-hero-switch-acc {
+    display: none;
+  }
+}
+
+/* Parent dashboard edit row: wrap instead of overflowing on phones */
+.pk-edit {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pk-edit .rename-input {
+  flex: 1 1 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.pk-edit .grade-select {
+  flex: 1 1 140px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.pk-edit .btn-rename {
+  flex: 0 0 auto;
+}
