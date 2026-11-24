@@ -8,6 +8,8 @@
   const OVERRIDE_KEY = "mykids_cloud_api_override";
 
   App.CLOUD_API_URL = "";
+  // Public Google OAuth client id (not a secret). Filled by worker/deploy-personal.ps1.
+  App.GOOGLE_CLIENT_ID = "";
 
   App.getCloudApiUrl = function () {
     let custom = "";

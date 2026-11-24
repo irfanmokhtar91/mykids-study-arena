@@ -3637,3 +3637,7 @@ html, body, button, input, textarea, select {
 .wk-advice { margin: 6px 0 0; padding-left: 18px; font-size: 0.88rem; }
 .wk-advice li { margin: 3px 0; overflow-wrap: anywhere; }
 .wk-mock .wk-bar { margin-bottom: 8px; }
+
+/* Report a question */
+.btn-report { margin-top: 8px; padding: 6px 12px; border: 2px solid var(--ink); border-radius: 999px; background: #fff7ed; font: inherit; font-weight: 700; font-size: 0.8rem; cursor: pointer; min-height: 38px; }
+.btn-report:disabled { background: #dcfce7; cursor: default; }

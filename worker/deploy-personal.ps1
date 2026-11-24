@@ -1,89 +1,90 @@
+# Deploy the MyKids Study Arena API to Irfan's PERSONAL Cloudflare account (irfanmokhtar1991@gmail.com).
+#
+# Safety:
+#  - Uses its OWN wrangler profile folder (%USERPROFILE%\.wrangler-personal) so the company login on this PC is never touched or logged out.
+#  - Refuses to run if the active account is the company account.
+#
+# Usage (from the repo root, in PowerShell):
+#   powershell -ExecutionPolicy Bypass -File worker\deploy-personal.ps1 -GoogleClientId "xxxx.apps.googleusercontent.com"
+param(
+  [Parameter(Mandatory = $true)][string]$GoogleClientId
+)
 $ErrorActionPreference = 'Stop'
 
-# Personal Cloudflare Account Safety Guard
 $ForbiddenEmail = 'irfanmokhtar@ogmeta.biz'
+$AllowedEmail = 'irfanmokhtar1991@gmail.com'
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RepoRoot = Split-Path -Parent $ScriptDir
+$env:XDG_CONFIG_HOME = Join-Path $env:USERPROFILE '.wrangler-personal'
+New-Item -ItemType Directory -Force -Path $env:XDG_CONFIG_HOME | Out-Null
 
-function Get-WranglerWhoami {
-  $out = cmd /c "wrangler whoami 2>&1"
-  return ($out -join "`n")
+if ($GoogleClientId -notmatch '^[0-9a-zA-Z\-]+\.apps\.googleusercontent\.com$') {
+  throw "GoogleClientId looks wrong. It should end with .apps.googleusercontent.com"
 }
 
-Write-Host "Checking Wrangler authentication..." -ForegroundColor Cyan
-$whoami = Get-WranglerWhoami
-
-if ($whoami -match [regex]::Escape($ForbiddenEmail) -or $whoami -match 'not authenticated' -or -not ($whoami -match 'Account ID')) {
-  Write-Warning "SAFETY STOP: Wrangler is currently logged into '$ForbiddenEmail' (company account) or not logged in."
-  Write-Host "Logging out of current session and prompting login for your PERSONAL Cloudflare account..." -ForegroundColor Yellow
-  cmd /c "wrangler logout" | Out-Null
-  cmd /c "wrangler login"
-  $whoami = Get-WranglerWhoami
-  if ($whoami -match [regex]::Escape($ForbiddenEmail)) {
-    throw "Refused to deploy: still logged into company account '$ForbiddenEmail'."
-  }
-  if (-not ($whoami -match 'Account ID')) {
-    throw "Wrangler login failed or incomplete. Please re-run this script after logging into your personal Cloudflare account."
-  }
+function Invoke-Wrangler([string]$argLine) {
+  $out = cmd /c "npx --yes wrangler $argLine 2>&1" | Out-String
+  return $out
 }
-
-Write-Host "Confirmed personal Cloudflare session:" -ForegroundColor Green
-Write-Host $whoami
 
 Push-Location $ScriptDir
 try {
-  Write-Host "`nCreating / verifying D1 database 'mykids-study-arena-db'..." -ForegroundColor Cyan
-  $d1List = cmd /c "wrangler d1 list --json 2>&1" | Out-String
+  Write-Host "Checking the personal Cloudflare login (separate profile)..." -ForegroundColor Cyan
+  $who = Invoke-Wrangler 'whoami'
+  if ($who -match 'not authenticated') {
+    Write-Host "Not logged in yet. A browser window will open: sign in as $AllowedEmail and click Allow." -ForegroundColor Yellow
+    cmd /c "npx --yes wrangler login"
+    $who = Invoke-Wrangler 'whoami'
+  }
+  if ($who -match [regex]::Escape($ForbiddenEmail)) { throw "SAFETY STOP: this profile is the company account ($ForbiddenEmail). Not deploying." }
+  if ($who -notmatch [regex]::Escape($AllowedEmail)) { throw "SAFETY STOP: the logged-in account is not $AllowedEmail. Output was:`n$who" }
+  Write-Host "Confirmed personal account:`n$who" -ForegroundColor Green
+
+  Write-Host "`nD1 database..." -ForegroundColor Cyan
+  $list = Invoke-Wrangler 'd1 list --json'
   $dbId = $null
-  try {
-    $parsedList = $d1List | ConvertFrom-Json
-    $matchDb = $parsedList | Where-Object { $_.name -eq 'mykids-study-arena-db' } | Select-Object -First 1
-    if ($matchDb) { $dbId = $matchDb.uuid }
-  } catch { }
-
+  try { $m = ($list | ConvertFrom-Json) | Where-Object { $_.name -eq 'mykids-study-arena-db' } | Select-Object -First 1; if ($m) { $dbId = $m.uuid } } catch { }
   if (-not $dbId) {
-    $createOut = cmd /c "wrangler d1 create mykids-study-arena-db 2>&1" | Out-String
-    Write-Host $createOut
-    if ($createOut -match 'database_id\s*=\s*"([^"]+)"') {
-      $dbId = $Matches[1]
-    }
+    $created = Invoke-Wrangler 'd1 create mykids-study-arena-db'
+    Write-Host $created
+    if ($created -match 'database_id\s*=\s*"([^"]+)"') { $dbId = $Matches[1] }
   }
+  if (-not $dbId) { throw "Could not determine the D1 database id." }
 
-  if (-not $dbId) {
-    throw "Could not determine D1 database_id for 'mykids-study-arena-db'."
-  }
-
-  $tomlPath = Join-Path $ScriptDir "wrangler.toml"
+  $tomlPath = Join-Path $ScriptDir 'wrangler.toml'
   $toml = Get-Content $tomlPath -Raw
   $toml = $toml -replace 'database_id\s*=\s*"[^"]*"', "database_id = `"$dbId`""
+  $toml = $toml -replace 'GOOGLE_CLIENT_ID\s*=\s*"[^"]*"', "GOOGLE_CLIENT_ID = `"$GoogleClientId`""
   Set-Content -Path $tomlPath -Value $toml -Encoding UTF8
-  Write-Host "Updated worker/wrangler.toml with database_id = $dbId" -ForegroundColor Green
 
-  Write-Host "`nApplying schema.sql to remote D1..." -ForegroundColor Cyan
-  cmd /c "wrangler d1 execute mykids-study-arena-db --remote --file=schema.sql"
-  if ($LASTEXITCODE -ne 0) { throw "D1 schema execution failed." }
+  Write-Host "`nApplying schema.sql..." -ForegroundColor Cyan
+  Write-Host (Invoke-Wrangler 'd1 execute mykids-study-arena-db --remote --file=schema.sql')
 
-  Write-Host "`nDeploying Worker to personal Cloudflare account..." -ForegroundColor Cyan
-  $deployOut = cmd /c "wrangler deploy 2>&1" | Out-String
+  Write-Host "`nSession secret (random, stored only inside Cloudflare)..." -ForegroundColor Cyan
+  $secretList = Invoke-Wrangler 'secret list'
+  if ($secretList -notmatch 'SESSION_SECRET') {
+    $bytes = New-Object byte[] 48; [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+    $secret = ([System.BitConverter]::ToString($bytes)).Replace('-', '').ToLower()
+    $secret | npx --yes wrangler secret put SESSION_SECRET
+  } else { Write-Host "SESSION_SECRET already set." }
+
+  Write-Host "`nDeploying..." -ForegroundColor Cyan
+  $deployOut = Invoke-Wrangler 'deploy'
   Write-Host $deployOut
-  if ($LASTEXITCODE -ne 0) { throw "wrangler deploy failed." }
+  if ($deployOut -notmatch '(https://[a-zA-Z0-9.-]+\.workers\.dev)') { throw "Deployed, but no workers.dev URL found in the output." }
+  $workerUrl = $Matches[1]
 
-  $workerUrl = $null
-  if ($deployOut -match '(https://[a-zA-Z0-9.-]+\.workers\.dev)') {
-    $workerUrl = $Matches[1]
-  }
-  if (-not $workerUrl) {
-    throw "Worker deployed, but could not parse workers.dev URL from wrangler output."
-  }
+  Write-Host "`nHealth check..." -ForegroundColor Cyan
+  $health = Invoke-RestMethod -Uri "$workerUrl/api/health" -TimeoutSec 30
+  Write-Host ($health | ConvertTo-Json -Compress)
+  if (-not $health.googleConfigured -or -not $health.sessionConfigured) { throw "Worker is up but not fully configured." }
 
-  $configPath = Join-Path $RepoRoot "js\config.js"
+  $configPath = Join-Path $RepoRoot 'js\config.js'
   $cfg = Get-Content $configPath -Raw
   $cfg = $cfg -replace 'App\.CLOUD_API_URL\s*=\s*"[^"]*";', "App.CLOUD_API_URL = `"$workerUrl`";"
+  $cfg = $cfg -replace 'App\.GOOGLE_CLIENT_ID\s*=\s*"[^"]*";', "App.GOOGLE_CLIENT_ID = `"$GoogleClientId`";"
   Set-Content -Path $configPath -Value $cfg -Encoding UTF8
-
-  Write-Host "`nSUCCESS! Updated js/config.js with CLOUD_API_URL = $workerUrl" -ForegroundColor Green
-  Write-Host "Run these commands from repo root to publish the live online sync endpoint to GitHub Pages:" -ForegroundColor Yellow
-  Write-Host "  git add js/config.js worker/wrangler.toml; git commit -m `"Enable personal Cloudflare online sync API`"; git push origin main"
+  Write-Host "`nSUCCESS. js/config.js now points to $workerUrl" -ForegroundColor Green
 } finally {
   Pop-Location
 }

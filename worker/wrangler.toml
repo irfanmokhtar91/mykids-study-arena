@@ -2,6 +2,13 @@ name = "mykids-study-arena-api"
 main = "src/index.js"
 compatibility_date = "2026-01-01"
 
+# Public values (not secrets). deploy-personal.ps1 fills GOOGLE_CLIENT_ID.
+[vars]
+GOOGLE_CLIENT_ID = ""
+ALLOWED_ORIGINS = "https://irfanmokhtar91.github.io,http://localhost:8080,http://127.0.0.1:8080"
+
+# SESSION_SECRET is a Worker secret: wrangler secret put SESSION_SECRET (never commit it).
+
 [[d1_databases]]
 binding = "DB"
 database_name = "mykids-study-arena-db"

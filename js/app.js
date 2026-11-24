@@ -1110,6 +1110,7 @@
               </div>
               <div class="rev-exp">💡 ${esc(a.qObj.explanation)}</div>
               ${!a.isCorrect && studyTip ? `<div class="rev-tip">🎯 <strong>Cara faham:</strong> ${esc(studyTip)}</div>` : ""}
+              <button type="button" class="btn-report" data-report="${i}">🚩 Laporkan soalan ini</button>
             </div>`;
         })
         .join("");
@@ -1141,6 +1142,26 @@
         <h3 class="section-title">📋 Semakan Jawapan & Penerangan</h3>
         <div class="review-list">${reviewHtml}</div>
       `;
+
+      main.querySelectorAll("[data-report]").forEach((btn) =>
+        btn.addEventListener("click", () => {
+          const a = answers[Number(btn.getAttribute("data-report"))];
+          if (!a) return;
+          App.Sound.click();
+          const added = App.Storage.addReport(profile.id, {
+            gradeId: profile.gradeId,
+            subjectId: selectedSubject.id,
+            subjectName: selectedSubject.name,
+            chapterTitle: chTitle,
+            q: a.qObj.q,
+            options: a.qObj.options,
+            keyAnswer: a.correctText !== undefined ? a.correctText : a.qObj.options[a.qObj.correctIndex],
+            chosen: a.chosenText !== undefined ? a.chosenText : a.qObj.options[a.selectedIndex] || ""
+          });
+          btn.textContent = added ? "✅ Dilaporkan. Ibu bapa boleh semak di Panel Ibu Bapa." : "✅ Sudah dilaporkan";
+          btn.disabled = true;
+        })
+      );
 
       const nextBtn = document.getElementById("btn-next-set");
       if (nextBtn) {
@@ -1380,6 +1401,30 @@
                   </div>`
                 : "";
 
+              const openReports = (p.reports || []).filter((r) => !r.done);
+              const reportsHtml = openReports.length
+                ? `<div class="tasks-box">
+                    <h4>🚩 Soalan Yang Dilaporkan (${openReports.length})</h4>
+                    <p class="task-meta">Soalan yang anak rasa salah atau pelik. Hantar kepada guru untuk disahkan, atau salin untuk pembangun aplikasi.</p>
+                    ${openReports
+                      .slice(0, 6)
+                      .map(
+                        (r) => `
+                      <div class="task-card">
+                        <div class="task-title">${esc(r.subjectName || r.subjectId)}${r.chapterTitle ? ` • ${esc(r.chapterTitle)}` : ""}</div>
+                        <p class="task-diag">${esc(r.q)}</p>
+                        <ul>${(r.options || []).map((o, k) => `<li>${"ABCD"[k] || k + 1}) ${esc(o)}${o === r.keyAnswer ? " ✅ (jawapan dalam aplikasi)" : ""}</li>`).join("")}</ul>
+                        <div class="task-actions">
+                          <button type="button" class="btn-secondary btn-sm" data-report-action="teacher" data-pid="${p.id}" data-rts="${esc(r.ts)}">📤 Tanya cikgu (WhatsApp)</button>
+                          <button type="button" class="btn-secondary btn-sm" data-report-action="copy" data-pid="${p.id}" data-rts="${esc(r.ts)}">📋 Salin</button>
+                          <button type="button" class="btn-ghost btn-sm" data-report-action="done" data-pid="${p.id}" data-rts="${esc(r.ts)}">✔ Selesai</button>
+                        </div>
+                      </div>`
+                      )
+                      .join("")}
+                  </div>`
+                : "";
+
               const kidTasks = App.Storage.refreshTasks(p.id);
               const openTasks = kidTasks.filter((t) => t.status === "aktif" || t.status === "rujuk_guru").slice(0, 4);
               const doneTasks = kidTasks.filter((t) => t.status === "selesai" || t.status === "tamat").slice(-3).reverse();
@@ -1487,6 +1532,7 @@
                   </div>
                   ${chapterStatusHtml}
                   ${mockWkHtml}
+                  ${reportsHtml}
                   ${tasksHtml}
                   ${markHtml}
                   <h4>📝 Kesilapan Terkini Untuk Dibimbing:</h4>
@@ -1828,6 +1874,35 @@
         URL.revokeObjectURL(url);
       });
     }
+
+    main.querySelectorAll("[data-report-action]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        App.Sound.click();
+        const prof = (App.Storage.getState().profiles || []).find((x) => x.id === btn.getAttribute("data-pid"));
+        const rep = prof && (prof.reports || []).find((r) => r.ts === btn.getAttribute("data-rts"));
+        if (!rep) return;
+        const action = btn.getAttribute("data-report-action");
+        const text =
+          `Salam cikgu. Boleh cikgu semak soalan latihan ini sama ada jawapannya betul?\n\n` +
+          `Subjek: ${rep.subjectName}${rep.chapterTitle ? ` (${rep.chapterTitle})` : ""}\n` +
+          `Soalan: ${rep.q}\n` +
+          (rep.options || []).map((o, k) => `${"ABCD"[k] || k + 1}) ${o}`).join("\n") +
+          `\nJawapan dalam aplikasi: ${rep.keyAnswer}\nTerima kasih cikgu.`;
+        if (action === "teacher") {
+          global.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener");
+        } else if (action === "copy") {
+          try {
+            await global.navigator.clipboard.writeText(text);
+            btn.textContent = "✅ Disalin";
+          } catch (e) {
+            btn.textContent = "Salin tidak dibenarkan";
+          }
+        } else if (action === "done") {
+          App.Storage.dismissReport(prof.id, rep.ts);
+          renderMain();
+        }
+      });
+    });
 
     main.querySelectorAll("[data-mark-ts]").forEach((btn) => {
       btn.addEventListener("click", () => {

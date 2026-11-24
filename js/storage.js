@@ -130,6 +130,7 @@
       mistakeLog: [],
       tasks: [],
       mockResults: [],
+      reports: [],
       setBest: {},
       updatedAt: new Date().toISOString()
     };
@@ -170,6 +171,10 @@
     }
     if (!Array.isArray(p.mockResults)) {
       p.mockResults = [];
+      changed = true;
+    }
+    if (!Array.isArray(p.reports)) {
+      p.reports = [];
       changed = true;
     }
     if (!p.id) {
@@ -1063,6 +1068,39 @@
       };
     },
     getFocusReport,
+    /** A child/parent flags a question as possibly wrong. Stored locally; the parent can send it to a teacher. */
+    addReport: (profileId, rep) => {
+      const p = state.profiles.find((x) => x.id === profileId);
+      if (!p) return false;
+      normalizeProfileFields(p);
+      const key = `${rep.gradeId}|${rep.subjectId}|${rep.q}`;
+      if (p.reports.some((r) => !r.done && `${r.gradeId}|${r.subjectId}|${r.q}` === key)) return false; // already reported
+      p.reports.unshift({
+        ts: new Date().toISOString(),
+        gradeId: rep.gradeId,
+        subjectId: rep.subjectId,
+        subjectName: rep.subjectName || "",
+        chapterTitle: rep.chapterTitle || "",
+        q: String(rep.q || "").slice(0, 500),
+        options: (rep.options || []).slice(0, 6).map((o) => String(o).slice(0, 200)),
+        keyAnswer: String(rep.keyAnswer || "").slice(0, 200),
+        chosen: String(rep.chosen || "").slice(0, 200),
+        done: false
+      });
+      if (p.reports.length > 100) p.reports.length = 100;
+      p.updatedAt = new Date().toISOString();
+      save();
+      return true;
+    },
+    dismissReport: (profileId, ts) => {
+      const p = state.profiles.find((x) => x.id === profileId);
+      const r = p && (p.reports || []).find((x) => x.ts === ts);
+      if (!r) return false;
+      r.done = true;
+      p.updatedAt = new Date().toISOString();
+      save();
+      return true;
+    },
     saveMockResult: (profileId, rec) => {
       const p = state.profiles.find((x) => x.id === profileId);
       if (!p) return;

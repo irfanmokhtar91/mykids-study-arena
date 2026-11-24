@@ -566,6 +566,7 @@
             <div class="m-q">${esc(it.q)}</div>
             <div class="m-ans">${a === undefined ? "⏱️ Tidak dijawab" : `❌ ${esc(it.options[a])}`} → ✅ <strong>${esc(it.options[it.correctIndex])}</strong></div>
             ${it.explanation ? `<small>${esc(it.explanation)}</small>` : ""}
+            <button type="button" class="btn-report" data-mock-report="${esc(it.id)}">🚩 Laporkan soalan ini</button>
           </div>`
           )
           .join("")
@@ -582,6 +583,24 @@
           <button type="button" class="btn-ghost" id="mock-home">Utama</button>
         </div>
       </section>`;
+    main.querySelectorAll("[data-mock-report]").forEach((b) =>
+      b.addEventListener("click", () => {
+        const found = wrong.find((w) => w.it.id === b.getAttribute("data-mock-report"));
+        if (!found) return;
+        const added = App.Storage.addReport(ctx.profile.id, {
+          gradeId: ctx.profile.gradeId,
+          subjectId: pickedSubject.id,
+          subjectName: pickedSubject.name,
+          chapterTitle: (pickedSubject.chapters.find((c) => c.id === found.it.chapterId) || {}).title || "",
+          q: found.it.q,
+          options: found.it.options,
+          keyAnswer: found.it.options[found.it.correctIndex],
+          chosen: found.a === undefined ? "" : found.it.options[found.a]
+        });
+        b.textContent = added ? "✅ Dilaporkan" : "✅ Sudah dilaporkan";
+        b.disabled = true;
+      })
+    );
     document.getElementById("mock-again").addEventListener("click", () => {
       screen = "pick";
       render(main);
