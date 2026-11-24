@@ -7,9 +7,9 @@
   const App = (global.App = global.App || {});
   const OVERRIDE_KEY = "mykids_cloud_api_override";
 
-  App.CLOUD_API_URL = "";
+  App.CLOUD_API_URL = "https://mykids-study-arena-api.mykidsarena.workers.dev";
   // Public Google OAuth client id (not a secret). Filled by worker/deploy-personal.ps1.
-  App.GOOGLE_CLIENT_ID = "";
+  App.GOOGLE_CLIENT_ID = "878824935856-0b89vbtfnias7lv2gdnicop3thhko6bj.apps.googleusercontent.com";
 
   App.getCloudApiUrl = function () {
     let custom = "";

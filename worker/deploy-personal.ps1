@@ -10,6 +10,7 @@ param(
   [Parameter(Mandatory = $true)][string]$GoogleClientId
 )
 $ErrorActionPreference = 'Stop'
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 # Windows PowerShell 5.1 defaults to old TLS
 
 $ForbiddenEmail = 'irfanmokhtar@ogmeta.biz'
 $AllowedEmail = 'irfanmokhtar1991@gmail.com'
@@ -75,7 +76,10 @@ try {
   $workerUrl = $Matches[1]
 
   Write-Host "`nHealth check..." -ForegroundColor Cyan
-  $health = Invoke-RestMethod -Uri "$workerUrl/api/health" -TimeoutSec 30
+  Write-Host 'A brand-new workers.dev name can need a few minutes for its certificate; retrying...'
+  $health = $null
+  for ($i = 0; $i -lt 12 -and -not $health; $i++) { try { $health = Invoke-RestMethod -Uri "$workerUrl/api/health" -TimeoutSec 20 } catch { Start-Sleep -Seconds 20 } }
+  if (-not $health) { throw 'Worker did not answer the health check yet. Wait a few minutes and open /api/health in a browser.' }
   Write-Host ($health | ConvertTo-Json -Compress)
   if (-not $health.googleConfigured -or -not $health.sessionConfigured) { throw "Worker is up but not fully configured." }
 
