@@ -1204,22 +1204,46 @@
                 .map((g) => `<option value="${g.id}" ${p.gradeId === g.id ? "selected" : ""}>${esc(g.name)}</option>`)
                 .join("");
 
+              const wk = App.Weakness.analyse(p);
+              const statusDot = { lemah: "🔴", sederhana: "🟡", kuat: "🟢", baharu: "⚪" };
+              const statusCls = { lemah: "tl-red", sederhana: "tl-amber", kuat: "tl-green", baharu: "tl-amber" };
+              const trendTxt = { naik: " ⬆️ naik", turun: " ⬇️ turun", tetap: "" };
+              const mistakeTxt = (m) => {
+                const parts = [];
+                if (m.concept) parts.push(`${m.concept} kemungkinan salah faham konsep`);
+                if (m.careless) parts.push(`${m.careless} kemungkinan cuai`);
+                if (m.timeout) parts.push(`${m.timeout} tidak sempat jawab`);
+                if (m.slow) parts.push(`${m.slow} jawab perlahan tetapi salah`);
+                return parts.join(", ");
+              };
               const chapterStatusHtml =
-                report.allChapters && report.allChapters.length > 0
+                wk.chapters.length > 0
                   ? `<div class="weak-box">
-                      <strong>🚦 Prestasi Mengikut Bab:</strong>
-                      <div class="weak-tags">
-                        ${report.allChapters
-                          .slice()
-                          .sort((a, b) => a.avgPct - b.avgPct)
-                          .slice(0, 6)
-                          .map((w) => {
-                            const dot = w.avgPct >= 80 && w.mistakeCount === 0 ? "🟢" : w.avgPct >= 60 ? "🟡" : "🔴";
-                            const cls = w.avgPct >= 80 && w.mistakeCount === 0 ? "tl-green" : w.avgPct >= 60 ? "tl-amber" : "tl-red";
-                            return `<span class="weak-tag ${cls}">${dot} ${esc(w.subjectName)} • ${esc(w.chapterTitle)} (${w.avgPct}%)</span>`;
-                          })
-                          .join("")}
-                      </div>
+                      <strong>🚦 Kekuatan & Kelemahan Mengikut Subjek:</strong>
+                      ${wk.subjects
+                        .map(
+                          (sub) => `
+                        <div class="wk-subject">
+                          <div class="wk-subject-head">
+                            <span>${statusDot[sub.status]} ${esc(sub.subjectName || sub.subjectId)}</span>
+                            <strong>${sub.mastery}%</strong>
+                          </div>
+                          <div class="wk-bar"><span class="${statusCls[sub.status]}" style="width:${Math.max(3, sub.mastery)}%"></span></div>
+                          ${sub.chapters
+                            .filter((c) => c.status === "lemah")
+                            .slice(0, 3)
+                            .map(
+                              (c) => `
+                            <div class="wk-chapter">
+                              <div>🔴 <strong>${esc(c.chapterTitle)}</strong> — ${c.mastery}%${c.provisional ? " (sementara)" : ""}${trendTxt[c.trend] || ""}</div>
+                              ${mistakeTxt(c.mistakes) ? `<small>${esc(mistakeTxt(c.mistakes))}</small>` : ""}
+                            </div>`
+                            )
+                            .join("")}
+                        </div>`
+                        )
+                        .join("")}
+                      <small class="wk-note">Lemah: bawah ${App.Weakness.WEAK_BELOW}%. Kuat: ${App.Weakness.STRONG_AT}% ke atas. Berdasarkan 3 percubaan terkini setiap bab. Jenis kesilapan adalah anggaran, bukan kepastian.</small>
                     </div>`
                   : `<div class="weak-box weak-clear">ℹ️ Anak belum mencuba latihan lagi.</div>`;
 

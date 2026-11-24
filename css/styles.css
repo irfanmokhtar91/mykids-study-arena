@@ -3506,3 +3506,15 @@ html, body {
 }
 .pin-modal-box .pin-modal-err { color: #b91c1c; font-weight: 700; margin: 8px 0 0; }
 .pin-modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+
+/* Weakness report (parent dashboard) */
+.wk-subject { margin: 10px 0 14px; }
+.wk-subject-head { display: flex; justify-content: space-between; gap: 8px; font-weight: 700; }
+.wk-bar { height: 10px; background: #e5e7eb; border: 1.5px solid var(--ink); border-radius: 999px; overflow: hidden; margin: 4px 0 6px; }
+.wk-bar span { display: block; height: 100%; }
+.wk-bar .tl-red { background: #ef4444; }
+.wk-bar .tl-amber { background: #f59e0b; }
+.wk-bar .tl-green { background: #22c55e; }
+.wk-chapter { margin: 4px 0 0 4px; font-size: 0.88rem; overflow-wrap: anywhere; }
+.wk-chapter small { display: block; color: var(--muted); }
+.wk-note { display: block; color: var(--muted); margin-top: 6px; }
