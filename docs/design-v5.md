@@ -12,6 +12,7 @@ Core purpose: help **parents** see each child's weaknesses and how to fix them. 
 - Darjah 6 UASA (50 marks, 1 j 15 min each): BM (A10 OAP, B10, C10 perenggan, D20 karangan); BI (7 parts 5/4/5/6/5/10/15); Matematik (A 13 soalan 26m, B 2 soalan 24m); Sains (A 10 OAP, B 2 soalan 8m, C 4 soalan 32m); Sejarah (A 20 OAP, B 4 soalan 20m, C 2 soalan 10m).
 - Tingkatan 2 UASA: BM K1 60m 1j30 + K2 40m 1j; BI Reading 40m 1j30 + Writing 40m 1j; Sejarah/Geografi A20 B40 C20 =80m 2j; Matematik/Sains A20 B20 C60 =100m 2j; Pendidikan Islam 5 bahagian =100m 2j; also Asas Sains Komputer, RBT.
 - Tingkatan 4: SPM-style formats from Lembaga Peperiksaan (research and reconfirm before building).
+- Tingkatan 4 school papers follow the SPM style. Evidence (sample sent by Irfan, a 2023 PAT Matematik Tingkatan 4 Kertas 2, code 1449/2, 2 j 30 min, Scribd doc 708025093): Bahagian A Q1-10 (3-5 marks each), Bahagian B Q11-15 (9 marks each), Bahagian C Q16 (15 marks); bilingual (BM first, then English); a printed "Rumus Matematik" formula sheet is provided; all answers are structured with working. So the Mock Exam for T4 Matematik needs: formula-sheet panel, per-step "jalan kerja" capture, and marks per question. Only one sample paper seen; confirm against the school's own paper.
 - Subjects with no official paper: chapter practice only, no invented formats.
 - Source docs: lp.moe.gov.my/lp/files/uasa (Format Pentaksiran dan Pelaporan, Rendah and Menengah).
 - Every question carries two tags: chapter + exam part. Weakness is reported by both.
