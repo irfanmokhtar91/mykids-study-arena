@@ -80,3 +80,8 @@ T4 subject list; Google OAuth Client ID (guided); personal Cloudflare login at P
 - Every question (code-generated or AI-written) must be in the official DSKP scope of its chapter and year group. Never content from another chapter or year.
 - Adaptive difficulty INSIDE the child's own year group: weak chapter starts easier and rises with mastery; strong chapter gets harder items (official 5:3:2 low:medium:high mix). Needs a difficulty tag per question; existing 8,340 questions are tagged only where reliably derivable; every new question is tagged at authoring.
 - AI-written questions ship only after independent second-model verification + review. Never shown unverified to children.
+
+### Format evidence from real papers (24/Nov/2026; format only, no question text copied)
+- Tingkatan 2 Matematik UASA model paper (Pelangi, publisher model, with worked answers): Bahagian A Q1-20 objective, Bahagian B Q21-25, Bahagian C Q26-31 with sub-parts (a)(i)... = matches official UASA blueprint (A 20 / B 5 / C 6; 20+20+60 = 100 marks, 2 jam). Worked solutions show every step line by line, bilingual (BM / English). Source: plus.pelangibooks.com .../MatematikT2/Jawapan/KertasModelUASA.pdf
+- Darjah 6 Matematik mid-year (UPSA 2025/26) from SK Pa' Dallih: 1 jam 15 min, Section A Q1-13 (26 marks, 1-3 marks each), Section B Q14-15 (12 marks each), total 50 = matches official Darjah 6 blueprint (A 13 q 26 m; B 2 q 24 m). Source: Scribd 879166934.
+- Conclusion: the official format documents match what schools actually set, for both Darjah 6 and Tingkatan 2 Matematik. Anyflip is behind a Cloudflare bot check and is not read by the tooling.
