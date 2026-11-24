@@ -75,3 +75,8 @@ T4 subject list; Google OAuth Client ID (guided); personal Cloudflare login at P
 
 ### Question generation policy
 - More practice via two routes only: (a) rule-based generators run live in the app (answer computed by code); (b) AI-written questions generated OFFLINE into the bank and shipped only after an independent second-model verification + review. Live on-the-fly AI questions are NOT shown to children in the free tier (no verification step). Could be a labelled premium option later.
+
+### Generated-question rules (Irfan, 24/Nov/2026: "must follow the chapter and the student's level")
+- Every question (code-generated or AI-written) must be in the official DSKP scope of its chapter and year group. Never content from another chapter or year.
+- Adaptive difficulty INSIDE the child's own year group: weak chapter starts easier and rises with mastery; strong chapter gets harder items (official 5:3:2 low:medium:high mix). Needs a difficulty tag per question; existing 8,340 questions are tagged only where reliably derivable; every new question is tagged at authoring.
+- AI-written questions ship only after independent second-model verification + review. Never shown unverified to children.
