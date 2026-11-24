@@ -198,6 +198,29 @@
   function requestParentPin(message, onOk) {
     const old = document.getElementById("pin-modal");
     if (old) old.parentNode.removeChild(old);
+    if (!App.Storage.hasParentPin()) {
+      const w = document.createElement("div");
+      w.id = "pin-modal";
+      w.className = "pin-modal";
+      w.innerHTML = `
+        <div class="pin-modal-box" role="dialog" aria-modal="true">
+          <h3>🔐 PIN belum ditetapkan</h3>
+          <p>Perubahan ini memerlukan PIN ibu bapa. Minta ibu bapa mencipta PIN dahulu di Panel Ibu Bapa.</p>
+          <div class="pin-modal-actions">
+            <button type="button" class="btn-ghost" id="pin-modal-cancel">Batal</button>
+            <button type="button" class="btn-tactile btn-true" id="pin-modal-create">Cipta PIN</button>
+          </div>
+        </div>`;
+      document.body.appendChild(w);
+      document.getElementById("pin-modal-cancel").addEventListener("click", () => w.parentNode && w.parentNode.removeChild(w));
+      document.getElementById("pin-modal-create").addEventListener("click", () => {
+        if (w.parentNode) w.parentNode.removeChild(w);
+        editingAccountId = null;
+        currentView = "parent";
+        renderAll();
+      });
+      return;
+    }
     const wrap = document.createElement("div");
     wrap.id = "pin-modal";
     wrap.className = "pin-modal";
@@ -1142,14 +1165,55 @@
   function renderParentDashboard(main) {
     const state = App.Storage.getState();
 
+    if (!parentUnlocked && !App.Storage.hasParentPin()) {
+      main.innerHTML = `
+        <div class="pin-box">
+          <h2>🔐 Cipta PIN Ibu Bapa</h2>
+          <p>PIN melindungi markah, gred dan tetapan anak. Pilih 4 hingga 6 digit yang sukar diteka. PIN seperti 1234, 0000 atau 1111 tidak dibenarkan.</p>
+          <div class="pin-row"><input type="password" id="new-pin-1" inputmode="numeric" maxlength="6" placeholder="PIN baharu" /></div>
+          <div class="pin-row"><input type="password" id="new-pin-2" inputmode="numeric" maxlength="6" placeholder="Ulang PIN" />
+            <button class="btn-tactile btn-primary-3d" id="btn-create-pin">Simpan</button></div>
+          <p class="pin-err hidden" id="pin-create-err"></p>
+          <button class="btn-ghost" id="btn-back-kids">← Kembali</button>
+        </div>
+      `;
+      const createPin = () => {
+        const p1 = document.getElementById("new-pin-1").value.trim();
+        const p2 = document.getElementById("new-pin-2").value.trim();
+        const err = document.getElementById("pin-create-err");
+        err.classList.remove("hidden");
+        if (p1 !== p2) {
+          err.textContent = "Kedua-dua PIN tidak sama.";
+        } else if (!/^\d{4,6}$/.test(p1)) {
+          err.textContent = "PIN mesti 4 hingga 6 digit nombor.";
+        } else if (App.Storage.isPinWeak(p1)) {
+          err.textContent = "PIN terlalu mudah diteka. Elakkan 1234, 0000, 1111 dan nombor berturutan.";
+        } else if (App.Storage.setParentPin(p1)) {
+          parentUnlocked = true;
+          parentUnlockedPin = p1;
+          parentAutoSyncStarted = false;
+          App.Sound.unlock();
+          renderParentDashboard(main);
+          return;
+        }
+        App.Sound.wrong();
+      };
+      document.getElementById("btn-create-pin").addEventListener("click", createPin);
+      document.getElementById("btn-back-kids").addEventListener("click", () => {
+        currentView = App.Storage.getActiveProfile() ? "home" : "accounts";
+        renderAll();
+      });
+      return;
+    }
+
     if (!parentUnlocked) {
       main.innerHTML = `
         <div class="pin-box">
           <h2>🔒 Panel Ibu Bapa</h2>
-          <p>Masukkan kod PIN 4-digit untuk melihat prestasi semua anak secara dalam talian, topik perlu fokus, pelan latihan AI & tetapan keluarga. (Kod lalai: <code>1234</code>)</p>
+          <p>Masukkan PIN ibu bapa untuk melihat prestasi semua anak, menanda kertas dan tetapan keluarga.</p>
           ${pendingInviteCode ? `<p class="pin-invite-note">🔗 Kod Keluarga <strong>${esc(pendingInviteCode)}</strong> sedia disambungkan selepas PIN dibuka.</p>` : ""}
           <div class="pin-row">
-            <input type="password" id="pin-input" maxlength="6" placeholder="PIN (1234)" />
+            <input type="password" id="pin-input" inputmode="numeric" maxlength="6" placeholder="PIN" />
             <button class="btn-tactile btn-primary-3d" id="btn-unlock-pin">Buka</button>
           </div>
           <p class="pin-err hidden" id="pin-err">Kod PIN tidak tepat. Sila cuba lagi.</p>
@@ -1184,6 +1248,9 @@
       return;
     }
 
+    const saveWarnHtml = App.Storage.getSaveStatus().failed
+      ? `<div class="storage-warn">⚠️ Simpanan telefon penuh. Rekod terbaharu mungkin tidak tersimpan. Gunakan "Simpan Rekod" untuk sandaran dan kosongkan ruang.</div>`
+      : "";
     const syncSt = App.CloudSync ? App.CloudSync.getStatus() : { configured: false, linked: false };
     if (syncSt.configured && syncSt.linked && !parentAutoSyncStarted) {
       parentAutoSyncStarted = true;
@@ -1464,6 +1531,7 @@
       : "";
 
     main.innerHTML = `
+      ${saveWarnHtml}
       <div class="breadcrumb parent-top-bar">
         <div class="breadcrumb-left">
           <button class="btn-ghost" id="btn-parent-exit">← Keluar Panel Ibu Bapa</button>
@@ -1880,7 +1948,7 @@
         }
         statusEl.textContent = "✅ Kod PIN baharu berjaya disimpan.";
       } else {
-        statusEl.textContent = "❌ Kod PIN mesti 4 hingga 6 digit nombor.";
+        statusEl.textContent = "❌ PIN mesti 4 hingga 6 digit dan tidak boleh mudah diteka (contoh 1234, 0000, 1111).";
       }
     });
   }

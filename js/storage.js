@@ -138,7 +138,7 @@
   function defaultState() {
     return {
       version: 4,
-      parentPin: "1234",
+      parentPin: "",
       dlpEnabled: false,
       activeProfileId: null,
       profiles: [],
@@ -261,6 +261,17 @@
     return changed;
   }
 
+  /** A PIN is weak if it is the old default, all the same digit, or a simple run (1234, 4321, 2345 ...). */
+  function isPinWeak(pin) {
+    const p = String(pin || "");
+    if (!/^\d{4,6}$/.test(p)) return true;
+    if (/^(\d)\1+$/.test(p)) return true;
+    const d = p.split("").map(Number);
+    const asc = d.every((x, i) => i === 0 || x === d[i - 1] + 1);
+    const desc = d.every((x, i) => i === 0 || x === d[i - 1] - 1);
+    return asc || desc || p === "1234";
+  }
+
   function load() {
     try {
       const raw = global.localStorage.getItem(STORAGE_KEY);
@@ -275,6 +286,11 @@
         parsed.profiles = parsed.profiles.filter(isMeaningfulProfile);
         if (parsed.profiles.length !== beforeLen) changed = true;
         parsed.version = 4;
+        changed = true;
+      }
+      if (typeof parsed.parentPin !== "string" || isPinWeak(parsed.parentPin)) {
+        // The old default PIN (1234) or any weak PIN is discarded: the parent must create a new one.
+        parsed.parentPin = "";
         changed = true;
       }
       if (!Array.isArray(parsed.deletedProfileIds)) {
@@ -316,14 +332,34 @@
     }
   }
 
+  let saveFailed = false;
+
+  function shrinkState() {
+    state.profiles.forEach((p) => {
+      if (Array.isArray(p.history)) p.history.forEach((h, i) => { if (i >= 20) delete h.questionLogs; });
+      if (Array.isArray(p.mockResults)) {
+        p.mockResults.forEach((r, i) => { if (i >= 5) delete r.typed; }); // keep marks, drop old typed working
+        if (p.mockResults.length > 15) p.mockResults.length = 15;
+      }
+    });
+  }
+
   function save(opts = {}) {
     if (!opts.skipCloudPush && state.familySync && state.familySync.code && state.familySync.syncToken) {
       state.familySync.pendingSync = true;
     }
     try {
       global.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      saveFailed = false;
     } catch (e) {
-      // ignore quota error
+      // Storage is full: drop the heaviest, least valuable data first, then retry once.
+      shrinkState();
+      try {
+        global.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        saveFailed = false;
+      } catch (e2) {
+        saveFailed = true; // surfaced to the parent in the dashboard; never silent
+      }
     }
     syncToLinkedFile();
     if (!opts.skipCloudPush && typeof onSaveListener === "function") {
@@ -859,15 +895,18 @@
       state.dlpEnabled = !!enabled;
       save();
     },
+    isPinWeak,
+    hasParentPin: () => !!state.parentPin && !isPinWeak(state.parentPin),
     setParentPin: (newPin) => {
-      if (/^\d{4,6}$/.test(newPin)) {
+      if (!isPinWeak(newPin)) {
         state.parentPin = newPin;
         save({ skipCloudPush: true });
         return true;
       }
       return false;
     },
-    verifyParentPin: (pin) => pin === state.parentPin,
+    verifyParentPin: (pin) => !!state.parentPin && !isPinWeak(state.parentPin) && pin === state.parentPin,
+    getSaveStatus: () => ({ failed: saveFailed }),
     getFamilySync: () => ({
       code: "",
       syncToken: "",
