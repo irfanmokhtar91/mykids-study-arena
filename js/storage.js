@@ -1,8 +1,8 @@
 /**
- * Persistent storage for 3 kid profiles, scores, separate 10s speed bonuses,
- * Coins & Rewards Shop, 7-day Streak Calendar, Weekly Sibling Leaderboard,
+ * Persistent storage (v4) for kid accounts (blank start, self-service CRUD, grade locked per account),
+ * scores, separate 10s speed bonuses, Coins & Rewards Shop, 7-day Streak Calendar, Weekly Sibling Leaderboard,
  * full question/mistake logs, Parent PIN, AI Study Plan Generator,
- * plus 1-Tap Backup & Smart Auto-Merge across multiple devices.
+ * plus 1-Tap Backup, Smart Auto-Merge, and Cloud Sync metadata across multiple phones.
  */
 (function (global) {
   const App = (global.App = global.App || {});
@@ -40,10 +40,12 @@
     "Along (Tingkatan 4)"
   ]);
 
+  const VALID_GRADES = new Set(["d6", "t2", "t4"]);
   const MONTHS_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const DAYS_MY = ["Aha", "Isn", "Sel", "Rab", "Kha", "Jum", "Sab"];
 
   let fileHandle = null;
+  let onSaveListener = null;
 
   function fmtDate(iso) {
     const d = iso ? new Date(iso) : new Date();
@@ -107,12 +109,12 @@
     return streak;
   }
 
-  function defaultProfile(id, gradeId, avatar) {
+  function defaultProfile(id, gradeId, avatar, name = "") {
     return {
       id,
-      name: "",
-      gradeId,
-      avatar,
+      name: String(name || "").trim(),
+      gradeId: VALID_GRADES.has(gradeId) ? gradeId : "d6",
+      avatar: avatar || "🦊",
       xp: 0,
       coins: 0,
       dailyStreak: 0,
@@ -126,40 +128,69 @@
       totalSpeedBonus: 0,
       history: [],
       mistakeLog: [],
-      setBest: {}
+      setBest: {},
+      updatedAt: new Date().toISOString()
     };
   }
 
   function defaultState() {
     return {
-      version: 3,
+      version: 4,
       parentPin: "1234",
       dlpEnabled: false,
-      activeProfileId: "kid_d6",
-      profiles: [
-        defaultProfile("kid_d6", "d6", "🦊"),
-        defaultProfile("kid_t2", "t2", "🚀"),
-        defaultProfile("kid_t4", "t4", "⚡")
-      ]
+      activeProfileId: null,
+      profiles: [],
+      deletedProfileIds: [],
+      familySync: {
+        code: "",
+        syncToken: "",
+        lastSyncedAt: null,
+        pendingSync: false
+      }
     };
+  }
+
+  function isMeaningfulProfile(p) {
+    if (!p || typeof p !== "object") return false;
+    const trimmed = typeof p.name === "string" ? p.name.trim() : "";
+    if (trimmed && !LEGACY_GUESSED_NAMES.has(trimmed)) return true;
+    if (Array.isArray(p.history) && p.history.length > 0) return true;
+    if (p.setBest && Object.keys(p.setBest).length > 0) return true;
+    if ((Number(p.xp) || 0) > 0 || (Number(p.coins) || 0) > 0) return true;
+    return false;
   }
 
   function normalizeProfileFields(p) {
     let changed = false;
-    if (typeof p.name === "string" && LEGACY_GUESSED_NAMES.has(p.name.trim())) {
+    if (!p.id) {
+      p.id = `kid_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
+      changed = true;
+    }
+    if (typeof p.name !== "string") {
+      p.name = "";
+      changed = true;
+    } else if (LEGACY_GUESSED_NAMES.has(p.name.trim())) {
       p.name = "";
       changed = true;
     }
+    if (!VALID_GRADES.has(p.gradeId)) {
+      p.gradeId = "d6";
+      changed = true;
+    }
+    if (typeof p.avatar !== "string" || !p.avatar) {
+      p.avatar = "🦊";
+      changed = true;
+    }
     if (typeof p.xp !== "number") {
-      p.xp = 0;
+      p.xp = Number(p.xp) || 0;
       changed = true;
     }
     if (typeof p.coins !== "number") {
-      p.coins = 0;
+      p.coins = Number(p.coins) || 0;
       changed = true;
     }
     if (typeof p.totalSpeedBonus !== "number") {
-      p.totalSpeedBonus = 0;
+      p.totalSpeedBonus = Number(p.totalSpeedBonus) || 0;
       changed = true;
     }
     if (!Array.isArray(p.activeDays)) {
@@ -198,6 +229,10 @@
       p.setBest = {};
       changed = true;
     }
+    if (typeof p.updatedAt !== "string") {
+      p.updatedAt = "";
+      changed = true;
+    }
     const recomputedStreak = computeDailyStreak(p.activeDays);
     if (p.dailyStreak !== recomputedStreak) {
       p.dailyStreak = recomputedStreak;
@@ -221,10 +256,31 @@
       const raw = global.localStorage.getItem(STORAGE_KEY);
       if (!raw) return defaultState();
       const parsed = JSON.parse(raw);
-      if (!parsed || !Array.isArray(parsed.profiles) || parsed.profiles.length === 0) {
+      if (!parsed || !Array.isArray(parsed.profiles)) {
         return defaultState();
       }
-      if (normalizeProfiles(parsed)) {
+      let changed = false;
+      if (!parsed.version || parsed.version < 4) {
+        const beforeLen = parsed.profiles.length;
+        parsed.profiles = parsed.profiles.filter(isMeaningfulProfile);
+        if (parsed.profiles.length !== beforeLen) changed = true;
+        parsed.version = 4;
+        changed = true;
+      }
+      if (!Array.isArray(parsed.deletedProfileIds)) {
+        parsed.deletedProfileIds = [];
+        changed = true;
+      }
+      if (!parsed.familySync || typeof parsed.familySync !== "object") {
+        parsed.familySync = { code: "", syncToken: "", lastSyncedAt: null, pendingSync: false };
+        changed = true;
+      }
+      if (parsed.activeProfileId && !parsed.profiles.some((p) => p.id === parsed.activeProfileId)) {
+        parsed.activeProfileId = null;
+        changed = true;
+      }
+      if (normalizeProfiles(parsed)) changed = true;
+      if (changed) {
         try {
           global.localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
         } catch (e) {
@@ -246,17 +302,23 @@
       await writable.write(JSON.stringify(state, null, 2));
       await writable.close();
     } catch (e) {
-      // Permission might have expired; ignore silently and keep localStorage safe
+      // Permission might have expired; ignore silently
     }
   }
 
-  function save() {
+  function save(opts = {}) {
+    if (!opts.skipCloudPush && state.familySync && state.familySync.code && state.familySync.syncToken) {
+      state.familySync.pendingSync = true;
+    }
     try {
       global.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch (e) {
       // ignore quota error
     }
     syncToLinkedFile();
+    if (!opts.skipCloudPush && typeof onSaveListener === "function") {
+      onSaveListener(opts);
+    }
   }
 
   function getDisplayName(profile) {
@@ -264,6 +326,15 @@
     if (trimmed) return trimmed;
     const grade = App.GRADES && profile ? App.GRADES[profile.gradeId] : null;
     return grade ? grade.name : "Pelajar";
+  }
+
+  function getSetBest(profile, gradeId, subjectId, chapterId, setNum) {
+    if (!profile || !profile.setBest) return null;
+    return (
+      profile.setBest[`${gradeId}:${subjectId}:${chapterId}:${setNum}`] ||
+      profile.setBest[`${subjectId}:${chapterId}:${setNum}`] ||
+      null
+    );
   }
 
   function lookupChapterInfo(gradeId, subjectId, chapterId) {
@@ -339,6 +410,7 @@
     else if (item.type === "frame") p.equippedFrame = item.value;
     else if (item.type === "effect") p.equippedEffect = item.value;
 
+    p.updatedAt = new Date().toISOString();
     save();
     return { ok: true, action, item, coins: p.coins };
   }
@@ -491,11 +563,14 @@
 
   function buildAiPromptAllKids() {
     const today = fmtDate(new Date().toISOString());
+    if (state.profiles.length === 0) {
+      return `# Pelan Latihan Interaktif (${today})\n\nBelum ada akaun anak didaftarkan lagi.`;
+    }
     const sections = state.profiles.map((p) => buildKidSection(p)).join("\n\n---\n\n");
     return [
       `# Permintaan Projek Aplikasi Pemulihan Interaktif Keluarga (${today})`,
       "",
-      "Sila bantu rancang dan bina aplikasi/modul permainan HTML5 interaktif baharu (sifar kesilapan jawapan, mesra skrin sentuh telefon & PC) untuk membaiki kelemahan ketiga-tiga anak berdasarkan log sebenar di bawah (Silibus Malaysia 2027):",
+      "Sila bantu rancang dan bina aplikasi/modul permainan HTML5 interaktif baharu (sifar kesilapan jawapan, mesra skrin sentuh telefon & PC) untuk membaiki kelemahan semua anak berdasarkan log sebenar di bawah (Silibus Malaysia 2027):",
       "",
       sections,
       "",
@@ -506,34 +581,103 @@
     ].join("\n");
   }
 
-  function mergeBackup(text) {
+  function mergeBackup(textOrObj, opts = {}) {
     let parsed;
-    try {
-      parsed = JSON.parse(text);
-    } catch (e) {
-      throw new Error("Fail ini bukan fail rekod belajar yang sah.");
+    if (typeof textOrObj === "string") {
+      try {
+        parsed = JSON.parse(textOrObj);
+      } catch (e) {
+        throw new Error("Fail ini bukan fail rekod belajar yang sah.");
+      }
+    } else {
+      parsed = textOrObj;
     }
     if (!parsed || !Array.isArray(parsed.profiles)) {
       throw new Error("Fail ini bukan fail rekod belajar yang sah.");
     }
     normalizeProfiles(parsed);
 
+    // Absorb explicit profile deletions across devices
+    const delMap = new Map();
+    const absorbDeletes = (list) => {
+      if (!Array.isArray(list)) return;
+      list.forEach((d) => {
+        if (!d || !d.id) return;
+        const prev = delMap.get(d.id) || "";
+        const ts = String(d.ts || "");
+        if (ts >= prev) delMap.set(d.id, ts);
+      });
+    };
+    absorbDeletes(state.deletedProfileIds);
+    absorbDeletes(parsed.deletedProfileIds);
+
+    const isProfileDeleted = (p) => {
+      if (!p || !p.id || !delMap.has(p.id)) return false;
+      const delTs = delMap.get(p.id);
+      const profTs = String(p.updatedAt || "");
+      return !profTs || delTs >= profTs;
+    };
+
+    state.profiles = state.profiles.filter((p) => !isProfileDeleted(p));
+    state.deletedProfileIds = Array.from(delMap.entries())
+      .map(([id, ts]) => ({ id, ts }))
+      .sort((a, b) => String(b.ts).localeCompare(String(a.ts)))
+      .slice(0, 50);
+
+    let addedProfiles = 0;
     let addedHistory = 0;
     let addedMistakes = 0;
     let updatedSets = 0;
 
     parsed.profiles.forEach((inc) => {
-      let local = state.profiles.find((p) => p.id === inc.id);
-      if (!local && inc.gradeId) {
-        local = state.profiles.find((p) => p.gradeId === inc.gradeId);
-      }
-      if (!local) return;
-      normalizeProfileFields(local);
+      if (!inc || isProfileDeleted(inc) || !isMeaningfulProfile(inc)) return;
 
       const incName = typeof inc.name === "string" ? inc.name.trim() : "";
-      const locName = typeof local.name === "string" ? local.name.trim() : "";
-      if (!locName && incName && !LEGACY_GUESSED_NAMES.has(incName)) {
+      let local = state.profiles.find((p) => p.id === inc.id);
+      if (!local && incName) {
+        local = state.profiles.find(
+          (p) => p.name && p.name.trim().toLowerCase() === incName.toLowerCase() && p.gradeId === inc.gradeId
+        );
+      }
+
+      if (!local) {
+        const cloned = JSON.parse(JSON.stringify(inc));
+        normalizeProfileFields(cloned);
+        state.profiles.push(cloned);
+        addedProfiles++;
+        addedHistory += (cloned.history || []).length;
+        addedMistakes += (cloned.mistakeLog || []).length;
+        updatedSets += Object.keys(cloned.setBest || {}).length;
+        return;
+      }
+
+      normalizeProfileFields(local);
+
+      const locTs = String(local.updatedAt || "");
+      const incTs = String(inc.updatedAt || "");
+      const incIsNewer = incTs > locTs;
+
+      if (incName && (!local.name.trim() || incIsNewer)) {
         local.name = incName;
+      }
+      if (VALID_GRADES.has(inc.gradeId) && incIsNewer) {
+        local.gradeId = inc.gradeId;
+      }
+      if (inc.avatar && incIsNewer) {
+        local.avatar = inc.avatar;
+      }
+      if (incIsNewer && inc.equippedFrame) {
+        local.equippedFrame = inc.equippedFrame;
+      } else if (local.equippedFrame === "default" && inc.equippedFrame && inc.equippedFrame !== "default") {
+        local.equippedFrame = inc.equippedFrame;
+      }
+      if (incIsNewer && inc.equippedEffect) {
+        local.equippedEffect = inc.equippedEffect;
+      } else if (local.equippedEffect === "default" && inc.equippedEffect && inc.equippedEffect !== "default") {
+        local.equippedEffect = inc.equippedEffect;
+      }
+      if (incTs > locTs) {
+        local.updatedAt = incTs;
       }
 
       local.xp = Math.max(Number(local.xp) || 0, Number(inc.xp) || 0);
@@ -628,19 +772,17 @@
         .sort((a, b) => String(b.ts || "").localeCompare(String(a.ts || "")))
         .slice(0, 300);
 
-      if (!local.lastPlayed && inc.lastPlayed) {
+      if (inc.lastPlayed && (!local.lastPlayed || incIsNewer)) {
         local.lastPlayed = inc.lastPlayed;
-      }
-      if (local.equippedFrame === "default" && inc.equippedFrame && inc.equippedFrame !== "default") {
-        local.equippedFrame = inc.equippedFrame;
-      }
-      if (local.equippedEffect === "default" && inc.equippedEffect && inc.equippedEffect !== "default") {
-        local.equippedEffect = inc.equippedEffect;
       }
     });
 
-    save();
-    return { addedHistory, addedMistakes, updatedSets };
+    if (state.activeProfileId && !state.profiles.some((p) => p.id === state.activeProfileId)) {
+      state.activeProfileId = null;
+    }
+
+    save({ skipCloudPush: !!opts.skipCloudPush });
+    return { addedProfiles, addedHistory, addedMistakes, updatedSets };
   }
 
   App.Storage = {
@@ -651,8 +793,9 @@
     getLast7DaysStatus,
     getSiblingLeaderboard,
     buyOrEquipItem,
+    getSetBest,
     getActiveProfile: () =>
-      state.profiles.find((p) => p.id === state.activeProfileId) || state.profiles[0],
+      state.profiles.find((p) => p.id === state.activeProfileId) || null,
     getDisplayName,
     fmtScore: (n) => {
       const num = Number(n) || 0;
@@ -660,15 +803,47 @@
       return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
     },
     setActiveProfile: (id) => {
+      state.activeProfileId = id || null;
+      save({ skipCloudPush: true });
+    },
+    createProfile: ({ name, gradeId, avatar }) => {
+      const cleanName = String(name || "").trim();
+      if (!cleanName) throw new Error("Sila masukkan nama anak.");
+      const safeGrade = VALID_GRADES.has(gradeId) ? gradeId : "d6";
+      const id = `kid_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
+      const profile = defaultProfile(id, safeGrade, avatar || "🦊", cleanName);
+      state.profiles.push(profile);
       state.activeProfileId = id;
       save();
+      return profile;
     },
     updateProfile: (id, patch) => {
       const p = state.profiles.find((x) => x.id === id);
       if (p) {
-        Object.assign(p, patch);
+        const nextPatch = { ...patch };
+        if (nextPatch.gradeId && !VALID_GRADES.has(nextPatch.gradeId)) {
+          delete nextPatch.gradeId;
+        }
+        if (typeof nextPatch.name === "string") {
+          nextPatch.name = nextPatch.name.trim();
+        }
+        Object.assign(p, nextPatch);
+        p.updatedAt = new Date().toISOString();
         save();
       }
+    },
+    deleteProfile: (id) => {
+      const exists = state.profiles.some((p) => p.id === id);
+      if (!exists) return false;
+      state.profiles = state.profiles.filter((p) => p.id !== id);
+      if (!Array.isArray(state.deletedProfileIds)) state.deletedProfileIds = [];
+      state.deletedProfileIds.unshift({ id, ts: new Date().toISOString() });
+      state.deletedProfileIds = state.deletedProfileIds.slice(0, 50);
+      if (state.activeProfileId === id) {
+        state.activeProfileId = null;
+      }
+      save();
+      return true;
     },
     setDlpEnabled: (enabled) => {
       state.dlpEnabled = !!enabled;
@@ -677,12 +852,38 @@
     setParentPin: (newPin) => {
       if (/^\d{4,6}$/.test(newPin)) {
         state.parentPin = newPin;
-        save();
+        save({ skipCloudPush: true });
         return true;
       }
       return false;
     },
     verifyParentPin: (pin) => pin === state.parentPin,
+    getFamilySync: () => ({
+      code: "",
+      syncToken: "",
+      lastSyncedAt: null,
+      pendingSync: false,
+      ...(state.familySync || {})
+    }),
+    setFamilySync: (patch) => {
+      state.familySync = {
+        code: "",
+        syncToken: "",
+        lastSyncedAt: null,
+        pendingSync: false,
+        ...(state.familySync || {}),
+        ...patch
+      };
+      save({ skipCloudPush: true });
+      return state.familySync;
+    },
+    clearFamilySync: () => {
+      state.familySync = { code: "", syncToken: "", lastSyncedAt: null, pendingSync: false };
+      save({ skipCloudPush: true });
+    },
+    setOnSaveListener: (fn) => {
+      onSaveListener = typeof fn === "function" ? fn : null;
+    },
     recordAttempt: (
       profileId,
       { gradeId, subjectId, subjectName, chapterId, chapterTitle, setNum, score, total, speedBonus, maxStreak, mode, answers, isRevision }
@@ -723,10 +924,11 @@
       const sName = subjectName || info.subjectName;
       const cTitle = chapterTitle || info.chapterTitle;
       const nowIso = new Date().toISOString();
+      p.updatedAt = nowIso;
 
       if (!isRevision) {
-        const key = `${subjectId}:${chapterId}:${setNum}`;
-        const prev = p.setBest[key];
+        const key = `${gradeId}:${subjectId}:${chapterId}:${setNum}`;
+        const prev = getSetBest(p, gradeId, subjectId, chapterId, setNum);
         p.setBest[key] = {
           bestScore: prev ? Math.max(prev.bestScore, cleanScore) : cleanScore,
           bestBonus: prev ? Math.max(prev.bestBonus || 0, bonus) : bonus,
@@ -734,7 +936,7 @@
           attempts: (prev ? prev.attempts : 0) + 1,
           lastPlayed: nowIso
         };
-        p.lastPlayed = { subjectId, chapterId, setNum, mode };
+        p.lastPlayed = { gradeId, subjectId, chapterId, setNum, mode };
       }
 
       const questionLogs = Array.isArray(answers)

@@ -192,7 +192,7 @@
     }
   };
 
-  // ==================== 2. MATCH (SAMBUNG PASANGAN) ====================
+  // ==================== 2. MATCH (SAMBUNG PASANGAN / 1-KE-4 KABEL) ====================
   App.MiniGames.match = {
     isDomGame: true,
     mount: function ({ stageEl, gradeId, subjectId, chapterId, qObj, dlp, seed = 1, onAnswer }) {
@@ -201,41 +201,52 @@
       let destroyed = false;
 
       const rng = mulberry32(hashSeed(`match-ui:${gradeId}:${subjectId}:${chapterId}:${qObj.q}:${seed}`));
-      let pairs = App.QuestionEngine.getMatchPairsForQuestion
+      const pairs = App.QuestionEngine.getMatchPairsForQuestion
         ? App.QuestionEngine.getMatchPairsForQuestion(gradeId, subjectId, chapterId, qObj, dlp, seed)
         : null;
 
-      // Fallback single-main + 2 dummy concepts if chapter didn't have 3 distinct short pairs
-      if (!pairs) {
-        const cAns = qObj.options[qObj.correctIndex];
-        const wrong = qObj.options.filter((_, idx) => idx !== qObj.correctIndex);
-        pairs = [{ prompt: qObj.q, answer: cAns, isMain: true }];
-        if (wrong[0]) pairs.push({ prompt: "— (Pilihan Gangguan 1)", answer: wrong[0], isMain: false, decoyOnly: true });
-      }
+      const isSingleMode = !pairs;
+      const leftItems = isSingleMode
+        ? [{ id: 0, text: qObj.q, answer: qObj.options[qObj.correctIndex], isMain: true, matched: false }]
+        : pairs.map((p, idx) => ({ id: idx, text: p.prompt, answer: p.answer, isMain: !!p.isMain, matched: false }));
 
-      const leftItems = pairs.map((p, idx) => ({ id: idx, text: p.prompt, answer: p.answer, isMain: !!p.isMain, matched: false }));
-      const rightItems = shuffleWithRng(
-        rng,
-        pairs.map((p, idx) => ({ id: idx, text: p.answer, matched: false }))
-      );
+      const rightItems = isSingleMode
+        ? shuffleWithRng(
+            rng,
+            qObj.options.map((optText, origIdx) => ({
+              id: origIdx,
+              text: optText,
+              isCorrect: origIdx === qObj.correctIndex,
+              matched: false,
+              eliminated: false
+            }))
+          )
+        : shuffleWithRng(
+            rng,
+            pairs.map((p, idx) => ({ id: idx, text: p.answer, isCorrect: true, matched: false, eliminated: false }))
+          );
 
-      let selectedLeftId = null;
-      let dragStart = null; // { side: 'L'|'R', id, x, y }
+      let selectedLeftId = isSingleMode ? 0 : null;
+      let dragStart = null; // { side: 'L'|'R', id, x, y, clientX, clientY }
       let pointerCur = null;
 
       stageEl.innerHTML = `
         <div class="ig-wrap ig-match-wrap" id="match-wrap">
           <div class="ig-match-head">
-            <span>🔌 Seret atau ketik untuk sambung setiap konsep dengan jawapannya</span>
+            <span>${
+              isSingleMode
+                ? "🔌 Tarik kabel atau ketik jawapan tepat untuk menyambung soalan!"
+                : "🔌 Seret atau ketik untuk sambung setiap konsep dengan jawapannya"
+            }</span>
             <span class="ig-match-counter" id="match-counter">0/${leftItems.length}</span>
           </div>
-          <div class="ig-match-board" id="match-board">
+          <div class="ig-match-board ${isSingleMode ? "is-single-mode" : ""}" id="match-board">
             <svg class="ig-match-svg" id="match-svg"></svg>
             <div class="ig-match-col" id="match-left-col">
               ${leftItems
                 .map(
                   (it) => `
-                <button type="button" class="match-node match-left ${it.isMain ? "is-main" : ""}" data-lid="${it.id}">
+                <button type="button" class="match-node match-left ${it.isMain ? "is-main" : ""} ${isSingleMode ? "selected" : ""}" data-lid="${it.id}">
                   <span class="node-num">${it.id + 1}</span>
                   <span class="node-text">${esc(it.text)}</span>
                   <span class="node-port"></span>
@@ -304,6 +315,7 @@
       }
 
       function clearSelections() {
+        if (isSingleMode) return;
         selectedLeftId = null;
         boardEl.querySelectorAll(".match-node.selected").forEach((n) => n.classList.remove("selected"));
       }
@@ -312,10 +324,11 @@
         if (paused || answered || destroyed) return;
         const leftObj = leftItems.find((x) => x.id === lid);
         const rightObj = rightItems.find((x) => x.id === rid);
-        if (!leftObj || !rightObj || leftObj.matched || rightObj.matched) return;
+        if (!leftObj || !rightObj || leftObj.matched || rightObj.matched || rightObj.eliminated) return;
 
         clearSelections();
-        if (lid === rid) {
+        const isPairOk = isSingleMode ? !!rightObj.isCorrect : lid === rid;
+        if (isPairOk) {
           leftObj.matched = true;
           rightObj.matched = true;
           completedWires.push({ lid, rid, color: "#10b981" });
@@ -340,8 +353,8 @@
           renderWires();
           onAnswer({
             isCorrect: false,
-            chosenText: `${leftObj.text} ≠ ${rightObj.text}`,
-            correctText: `${leftObj.text} → ${leftObj.answer}`
+            chosenText: isSingleMode ? rightObj.text : `${leftObj.text} ≠ ${rightObj.text}`,
+            correctText: isSingleMode ? qObj.options[qObj.correctIndex] : `${leftObj.text} → ${leftObj.answer}`
           });
         }
       }
@@ -358,7 +371,7 @@
           const item = leftItems.find((x) => x.id === lid);
           if (item && item.matched) return;
           const pos = getPortPos(`[data-lid="${lid}"]`);
-          if (pos) dragStart = { side: "L", id: lid, x: pos.x, y: pos.y };
+          if (pos) dragStart = { side: "L", id: lid, x: pos.x, y: pos.y, clientX: e.clientX, clientY: e.clientY };
           pointerCur = { x: e.clientX, y: e.clientY };
           clearSelections();
           selectedLeftId = lid;
@@ -368,13 +381,13 @@
         } else if (rBtn) {
           const rid = Number(rBtn.getAttribute("data-rid"));
           const item = rightItems.find((x) => x.id === rid);
-          if (item && item.matched) return;
-          if (selectedLeftId !== null) {
+          if (!item || item.matched || item.eliminated) return;
+          if (!isSingleMode && selectedLeftId !== null) {
             attemptPair(selectedLeftId, rid);
             return;
           }
           const pos = getPortPos(`[data-rid="${rid}"]`);
-          if (pos) dragStart = { side: "R", id: rid, x: pos.x, y: pos.y };
+          if (pos) dragStart = { side: "R", id: rid, x: pos.x, y: pos.y, clientX: e.clientX, clientY: e.clientY };
           pointerCur = { x: e.clientX, y: e.clientY };
           renderWires();
         }
@@ -407,6 +420,11 @@
               attemptPair(Number(lBtn.getAttribute("data-lid")), start.id);
               return;
             }
+            const rBtn = el.closest(".match-right");
+            if (isSingleMode && rBtn && Number(rBtn.getAttribute("data-rid")) === start.id) {
+              attemptPair(0, start.id);
+              return;
+            }
           }
         }
         renderWires();
@@ -422,6 +440,23 @@
           paused = !!p;
         },
         eliminateTwo: () => {
+          if (isSingleMode) {
+            const wrongItems = shuffleWithRng(
+              rng,
+              rightItems.filter((r) => !r.isCorrect && !r.eliminated)
+            );
+            const toDisable = wrongItems.slice(0, 2);
+            if (toDisable.length === 0) return false;
+            toDisable.forEach((r) => {
+              r.eliminated = true;
+              const btn = boardEl.querySelector(`[data-rid="${r.id}"]`);
+              if (btn) {
+                btn.classList.add("ig-eliminated");
+                btn.disabled = true;
+              }
+            });
+            return true;
+          }
           // Auto-solve 1 unmatched non-main pair (or first unmatched) for free
           const cand = leftItems.find((x) => !x.matched && !x.isMain) || leftItems.find((x) => !x.matched);
           if (!cand) return false;

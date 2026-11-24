@@ -1,27 +1,35 @@
 /**
- * Main Application Controller (v3.0 Duolingo + Kahoot Hybrid):
- * - Self-service 3-kid profiles with adaptive themes (theme-d6 / theme-t2 / theme-t4)
- * - Animated Mascot reactions, 7-day Streak Calendar, Weekly Sibling Leaderboard
- * - Winding Adventure Chapter Path (honest non-repeating Sets 1..K + Flash Revision)
+ * Main Application Controller (v4.0):
+ * - Dedicated Front-Page Account Selector (blank start on new phones, self-service Name + Avatar + Darjah/Tingkatan)
+ * - Strictly 1-Account-Per-UI inside kid workspace (grade & theme locked to selected account, explicit Switch Account button)
+ * - Winding Adventure Chapter Path (strictly non-repeating Sets 1..K + Flash Revision)
  * - 9 Play Modes (Campuran Pintar + 4 Interactive Touch + 4 Arcade)
- * - Coin & Rewards Shop (Avatars, Frames, Trail Effects)
- * - Jargon-Free Parent Panel with 1-Tap Save/Share Backup & Smart Auto-Merge
+ * - Online Family Sync & Jargon-Free Parent Dashboard
  */
 (function (global) {
   const App = (global.App = global.App || {});
 
-  let currentView = "home"; // 'home' | 'chapters' | 'sets' | 'shop' | 'playing' | 'results' | 'parent'
+  let currentView = "accounts"; // 'accounts' | 'home' | 'chapters' | 'sets' | 'shop' | 'playing' | 'results' | 'parent'
   let selectedSubject = null;
   let selectedChapter = null;
   let selectedSetNum = 1;
   let selectedMode = "mix";
   let lastResult = null;
   let parentUnlocked = false;
-  let editingProfile = false;
-  let draftAvatar = null;
+  let parentUnlockedPin = "";
+  let parentAutoSyncStarted = false;
+  let parentCloudStatusMsg = "";
   let activeAiPromptTitle = "";
   let activeAiPromptText = "";
   let shopMsg = "";
+
+  // Account selector form state
+  let editingAccountId = null; // null | "NEW" | <profileId>
+  let draftName = "";
+  let draftGradeId = "d6";
+  let draftAvatar = "🦊";
+  let formErrorMsg = "";
+  let pendingInviteCode = "";
 
   function esc(str) {
     return String(str || "")
@@ -41,9 +49,12 @@
 
   function syncBodyMode() {
     const profile = App.Storage.getActiveProfile();
-    const grade = profile && App.GRADES ? App.GRADES[profile.gradeId] : null;
+    const inKidSpace = !!(profile && currentView !== "accounts" && currentView !== "parent");
+    const grade = inKidSpace && App.GRADES ? App.GRADES[profile.gradeId] : null;
     document.body.classList.remove("theme-d6", "theme-t2", "theme-t4");
-    document.body.classList.add(grade && grade.themeClass ? grade.themeClass : "theme-d6");
+    if (grade && grade.themeClass) {
+      document.body.classList.add(grade.themeClass);
+    }
     document.body.classList.toggle("is-playing", currentView === "playing");
     syncViewportMetrics();
     if (currentView === "playing") {
@@ -53,32 +64,80 @@
 
   function getPlayableAvatars(profile) {
     const unlockedPremium = (App.SHOP_ITEMS || [])
-      .filter((it) => it.type === "avatar" && profile.unlockedItems && profile.unlockedItems.includes(it.id))
+      .filter((it) => it.type === "avatar" && profile && profile.unlockedItems && profile.unlockedItems.includes(it.id))
       .map((it) => it.value);
     return Array.from(new Set([...(App.AVATARS || []), ...unlockedPremium]));
+  }
+
+  function openAccountEditor(targetId) {
+    formErrorMsg = "";
+    if (targetId === "NEW") {
+      const profiles = App.Storage.getState().profiles || [];
+      const usedAvatars = new Set(profiles.map((p) => p.avatar));
+      const nextAv = (App.AVATARS || ["🦊"]).find((a) => !usedAvatars.has(a)) || App.AVATARS[0] || "🦊";
+      editingAccountId = "NEW";
+      draftName = "";
+      draftGradeId = "d6";
+      draftAvatar = nextAv;
+    } else {
+      const p = (App.Storage.getState().profiles || []).find((x) => x.id === targetId);
+      if (!p) return;
+      editingAccountId = p.id;
+      draftName = p.name || "";
+      draftGradeId = p.gradeId || "d6";
+      draftAvatar = p.avatar || "🦊";
+    }
+    renderMain();
   }
 
   function renderTopBar() {
     const state = App.Storage.getState();
     const profile = App.Storage.getActiveProfile();
     const muted = App.Sound.isMuted();
+    const syncSt = App.CloudSync ? App.CloudSync.getStatus() : { linked: false, code: "" };
+    const inKidSpace = !!(profile && currentView !== "accounts" && currentView !== "parent");
 
-    const profileChips = state.profiles
-      .map((p) => {
-        const displayName = App.Storage.getDisplayName(p);
-        const unnamed = !(p.name && p.name.trim());
-        const frameCls = p.equippedFrame && p.equippedFrame !== "default" ? `frame-${p.equippedFrame}` : "";
-        return `
-          <button class="profile-chip ${p.id === profile.id ? "active" : ""}" data-profile-id="${p.id}">
-            <span class="chip-avatar ${frameCls}">${p.avatar}</span>
-            <span>${esc(displayName)}</span>
-            ${unnamed ? `<span class="chip-dot" title="Belum isi nama">Isi Nama</span>` : ""}
-          </button>`;
-      })
-      .join("");
+    let centerHtml = "";
+    let rightControlsHtml = "";
+
+    if (inKidSpace) {
+      const grade = App.GRADES[profile.gradeId];
+      const displayName = App.Storage.getDisplayName(profile);
+      const frameCls = profile.equippedFrame && profile.equippedFrame !== "default" ? `frame-${profile.equippedFrame}` : "";
+      centerHtml = `
+        <div class="active-account-bar">
+          <div class="active-kid-pill pill-${profile.gradeId}">
+            <span class="chip-avatar ${frameCls}">${profile.avatar}</span>
+            <span class="ak-name">${esc(displayName)}</span>
+            <span class="ak-grade">${esc(grade ? grade.name : profile.gradeId)}</span>
+          </div>
+          <button type="button" class="btn-switch-acc" id="btn-switch-account" title="Tukar ke akaun anak lain">
+            🔄 Tukar Akaun
+          </button>
+        </div>
+      `;
+      rightControlsHtml = `
+        <label class="dlp-toggle" title="Tukar bahasa Matematik & Sains kepada Bahasa Inggeris">
+          <input type="checkbox" id="chk-dlp" ${state.dlpEnabled ? "checked" : ""} />
+          <span>🌐 BM / EN</span>
+        </label>
+        <button class="btn-ghost" id="btn-sound" title="Bunyi">${muted ? "🔇" : "🔊"}</button>
+        <button class="btn-parent" id="btn-parent-dash">👨‍👩‍👧‍👦 Ibu Bapa</button>
+      `;
+    } else {
+      centerHtml = syncSt.linked
+        ? `<div class="top-sync-pill is-online">🟢 Segerak Online (${esc(syncSt.code)})</div>`
+        : pendingInviteCode
+        ? `<div class="top-sync-pill is-invite">🔗 Pautan: ${esc(pendingInviteCode)}</div>`
+        : "";
+      rightControlsHtml = `
+        <button class="btn-ghost" id="btn-sound" title="Bunyi">${muted ? "🔇" : "🔊"}</button>
+        <button class="btn-parent" id="btn-parent-dash">👨‍👩‍👧‍👦 Ibu Bapa</button>
+      `;
+    }
 
     document.getElementById("topbar").innerHTML = `
-      <div class="brand" id="nav-home">
+      <div class="brand" id="nav-brand">
         <span class="brand-logo">🚀</span>
         <div>
           <div class="brand-title">MyKids Study Arena</div>
@@ -86,42 +145,42 @@
         </div>
       </div>
 
-      <div class="profile-switcher">${profileChips}</div>
+      ${centerHtml}
 
-      <div class="topbar-actions">
-        <label class="dlp-toggle" title="Tukar bahasa Matematik & Sains kepada Bahasa Inggeris">
-          <input type="checkbox" id="chk-dlp" ${state.dlpEnabled ? "checked" : ""} />
-          <span>🌐 BM / EN</span>
-        </label>
-        <button class="btn-ghost" id="btn-sound" title="Bunyi">${muted ? "🔇" : "🔊"}</button>
-        <button class="btn-parent" id="btn-parent-dash">👨‍👩‍👧‍👦 Ibu Bapa</button>
-      </div>
+      <div class="topbar-actions">${rightControlsHtml}</div>
     `;
 
-    document.getElementById("nav-home").addEventListener("click", () => {
+    document.getElementById("nav-brand").addEventListener("click", () => {
       App.Sound.click();
-      currentView = "home";
-      renderMain();
+      if (inKidSpace) {
+        currentView = "home";
+      } else {
+        editingAccountId = null;
+        currentView = "accounts";
+      }
+      renderAll();
     });
 
-    document.querySelectorAll(".profile-chip").forEach((btn) => {
-      btn.addEventListener("click", () => {
+    const switchBtn = document.getElementById("btn-switch-account");
+    if (switchBtn) {
+      switchBtn.addEventListener("click", () => {
         App.Sound.click();
-        App.Storage.setActiveProfile(btn.getAttribute("data-profile-id"));
-        currentView = "home";
         selectedSubject = null;
         selectedChapter = null;
-        editingProfile = false;
-        draftAvatar = null;
+        editingAccountId = null;
         shopMsg = "";
+        currentView = "accounts";
         renderAll();
       });
-    });
+    }
 
-    document.getElementById("chk-dlp").addEventListener("change", (e) => {
-      App.Storage.setDlpEnabled(e.target.checked);
-      if (currentView !== "playing") renderMain();
-    });
+    const chkDlp = document.getElementById("chk-dlp");
+    if (chkDlp) {
+      chkDlp.addEventListener("change", (e) => {
+        App.Storage.setDlpEnabled(e.target.checked);
+        if (currentView !== "playing") renderMain();
+      });
+    }
 
     document.getElementById("btn-sound").addEventListener("click", () => {
       App.Sound.setMuted(!App.Sound.isMuted());
@@ -131,8 +190,315 @@
     document.getElementById("btn-parent-dash").addEventListener("click", () => {
       App.Sound.click();
       currentView = "parent";
-      renderMain();
+      renderAll();
     });
+  }
+
+  function renderAccountSelector(main) {
+    const state = App.Storage.getState();
+    const profiles = state.profiles || [];
+    const syncSt = App.CloudSync ? App.CloudSync.getStatus() : { configured: false, linked: false };
+
+    if (profiles.length === 0 && editingAccountId === null) {
+      editingAccountId = "NEW";
+      draftName = "";
+      draftGradeId = "d6";
+      draftAvatar = (App.AVATARS && App.AVATARS[0]) || "🦊";
+      formErrorMsg = "";
+    }
+
+    const inviteBannerHtml =
+      pendingInviteCode && !syncSt.linked
+        ? `
+        <div class="invite-banner">
+          <div>
+            <strong>🔗 Pautan Keluarga (${esc(pendingInviteCode)}) Dikesan!</strong>
+            <span>Sambung telefon ini untuk memuat turun rekod anak-anak secara dalam talian.</span>
+          </div>
+          <button type="button" class="btn-tactile btn-true btn-sm" id="btn-invite-parent">Sambung Sekarang</button>
+        </div>`
+        : "";
+
+    const heroHtml = `
+      <section class="account-selector-hero">
+        <h1>👋 Siapa nak belajar hari ini?</h1>
+        <p>Pilih akaun kamu atau cipta akaun baharu. Darjah atau Tingkatan disimpan khas pada setiap akaun supaya adik-beradik tidak tersalah tahap walaupun berkongsi telefon.</p>
+      </section>
+      ${inviteBannerHtml}
+    `;
+
+    if (editingAccountId !== null) {
+      const isNew = editingAccountId === "NEW";
+      const editProfile = !isNew ? profiles.find((x) => x.id === editingAccountId) : null;
+      const avatars = isNew ? App.AVATARS || ["🦊"] : getPlayableAvatars(editProfile);
+      const gradeEntries = Object.values(App.GRADES || {});
+
+      const gradeCardsHtml = gradeEntries
+        .map(
+          (g) => `
+          <button type="button" class="grade-pick-card gcard-${g.id} ${draftGradeId === g.id ? "selected" : ""}" data-grade-id="${g.id}">
+            <span class="gcard-badge">${esc(g.badge)}</span>
+            <strong>${esc(g.name)}</strong>
+            <small>${esc(g.subtitle)}</small>
+          </button>`
+        )
+        .join("");
+
+      const avatarButtonsHtml = avatars
+        .map(
+          (av) => `
+          <button type="button" class="avatar-pick ${av === draftAvatar ? "selected" : ""}" data-avatar="${av}">
+            ${av}
+          </button>`
+        )
+        .join("");
+
+      main.innerHTML = `
+        ${heroHtml}
+        <section class="account-form-card">
+          <div class="account-form-head">
+            <h2>${isNew ? "✨ Cipta Akaun Anak Baharu" : `✏️ Kemas Kini Akaun (${esc(App.Storage.getDisplayName(editProfile))})`}</h2>
+            ${profiles.length > 0 ? `<button type="button" class="btn-ghost btn-sm" id="btn-cancel-acc-form">← Kembali</button>` : ""}
+          </div>
+
+          <div class="acc-field-group">
+            <label for="acc-name-input"><strong>1. Nama Panggilan Anak:</strong></label>
+            <input
+              type="text"
+              id="acc-name-input"
+              maxlength="28"
+              placeholder="Contoh: Umar / Aisyah / Sofea"
+              value="${esc(draftName)}"
+            />
+          </div>
+
+          <div class="acc-field-group">
+            <label><strong>2. Pilih Darjah atau Tingkatan (Disimpan Pada Akaun Ini):</strong></label>
+            <div class="grade-picker-grid">${gradeCardsHtml}</div>
+          </div>
+
+          <div class="acc-field-group">
+            <label><strong>3. Pilih Avatar Pilihan:</strong></label>
+            <div class="avatar-grid">${avatarButtonsHtml}</div>
+          </div>
+
+          ${formErrorMsg ? `<p class="form-err">⚠️ ${esc(formErrorMsg)}</p>` : ""}
+
+          <div class="acc-form-actions">
+            <button type="button" class="btn-tactile btn-true" id="btn-save-acc-form">
+              ${isNew ? "✅ Simpan & Mula Belajar" : "✅ Simpan Perubahan"}
+            </button>
+            ${
+              !isNew
+                ? `<button type="button" class="btn-danger-outline" id="btn-delete-acc-form">🗑️ Padam Akaun</button>`
+                : ""
+            }
+          </div>
+
+          ${
+            profiles.length === 0
+              ? `<div class="acc-empty-sync-note">
+                   <span>Sudah ada Kod Keluarga atau fail rekod di telefon lain?</span>
+                   <button type="button" class="btn-link" id="btn-empty-open-parent">Buka Panel Ibu Bapa untuk Muat Turun Rekod →</button>
+                 </div>`
+              : ""
+          }
+        </section>
+
+        <div class="front-parent-card">
+          <div>
+            <strong>👨‍👩‍👧‍👦 Panel Ibu Bapa</strong>
+            <small>Lihat keputusan, topik lemah, pelan latihan AI & segerak online semua anak.</small>
+          </div>
+          <button type="button" class="btn-secondary" id="btn-front-parent">Buka Dashboard</button>
+        </div>
+      `;
+
+      const nameInput = document.getElementById("acc-name-input");
+      nameInput.addEventListener("input", (e) => {
+        draftName = e.target.value;
+      });
+
+      main.querySelectorAll(".grade-pick-card").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          App.Sound.click();
+          draftGradeId = btn.getAttribute("data-grade-id");
+          main.querySelectorAll(".grade-pick-card").forEach((b) => b.classList.remove("selected"));
+          btn.classList.add("selected");
+        });
+      });
+
+      main.querySelectorAll(".avatar-pick").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          App.Sound.click();
+          draftAvatar = btn.getAttribute("data-avatar");
+          main.querySelectorAll(".avatar-pick").forEach((b) => b.classList.remove("selected"));
+          btn.classList.add("selected");
+        });
+      });
+
+      const saveForm = () => {
+        const cleanName = nameInput.value.trim();
+        draftName = cleanName;
+        if (!cleanName) {
+          App.Sound.wrong();
+          formErrorMsg = "Sila taip nama panggilan anak dahulu sebelum menyimpan.";
+          renderMain();
+          return;
+        }
+        App.Sound.unlock();
+        if (isNew) {
+          App.Storage.createProfile({
+            name: cleanName,
+            gradeId: draftGradeId,
+            avatar: draftAvatar
+          });
+          editingAccountId = null;
+          selectedSubject = null;
+          selectedChapter = null;
+          currentView = "home";
+        } else {
+          App.Storage.updateProfile(editingAccountId, {
+            name: cleanName,
+            gradeId: draftGradeId,
+            avatar: draftAvatar
+          });
+          editingAccountId = null;
+        }
+        formErrorMsg = "";
+        renderAll();
+      };
+
+      document.getElementById("btn-save-acc-form").addEventListener("click", saveForm);
+      nameInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          saveForm();
+        }
+      });
+
+      const cancelBtn = document.getElementById("btn-cancel-acc-form");
+      if (cancelBtn) {
+        cancelBtn.addEventListener("click", () => {
+          App.Sound.click();
+          editingAccountId = null;
+          formErrorMsg = "";
+          renderMain();
+        });
+      }
+
+      const delBtn = document.getElementById("btn-delete-acc-form");
+      if (delBtn && editProfile) {
+        delBtn.addEventListener("click", () => {
+          const nm = App.Storage.getDisplayName(editProfile);
+          if (global.confirm(`Adakah anda pasti mahu memadam akaun '${nm}' dan semua rekodnya di peranti ini?`)) {
+            App.Storage.deleteProfile(editProfile.id);
+            editingAccountId = null;
+            formErrorMsg = "";
+            renderAll();
+          }
+        });
+      }
+
+      const emptyParentBtn = document.getElementById("btn-empty-open-parent");
+      if (emptyParentBtn) {
+        emptyParentBtn.addEventListener("click", () => {
+          App.Sound.click();
+          editingAccountId = null;
+          currentView = "parent";
+          renderAll();
+        });
+      }
+    } else {
+      const accountCardsHtml = profiles
+        .map((p) => {
+          const g = App.GRADES[p.gradeId] || App.GRADES.d6;
+          const name = App.Storage.getDisplayName(p);
+          const frameCls = p.equippedFrame && p.equippedFrame !== "default" ? `frame-${p.equippedFrame}` : "";
+          const setsDone = Object.keys(p.setBest || {}).length;
+          return `
+            <div class="account-card card-${p.gradeId}" data-pid="${p.id}">
+              <button type="button" class="account-edit-btn" data-edit-id="${p.id}" title="Edit nama, avatar atau darjah">✏️ Edit</button>
+              <div class="acc-avatar-wrap ${frameCls}">${p.avatar || "🦊"}</div>
+              <h3 class="acc-name">${esc(name)}</h3>
+              <span class="acc-grade-pill pill-${p.gradeId}">${esc(g.name)}</span>
+              <div class="acc-mini-stats">
+                <span>🔥 ${p.dailyStreak || 0} hari</span>
+                <span>⭐ ${p.xp || 0} XP</span>
+                <span>🎯 ${setsDone} set</span>
+              </div>
+              <div class="acc-enter-cta">Masuk Ruang Belajar ▶</div>
+            </div>`;
+        })
+        .join("");
+
+      main.innerHTML = `
+        ${heroHtml}
+        <div class="account-grid">
+          ${accountCardsHtml}
+          <button type="button" class="account-card-add" id="btn-add-account-card">
+            <span class="add-plus">＋</span>
+            <strong>Tambah Akaun Anak</strong>
+            <small>Pilih nama, avatar & Darjah / Tingkatan baharu</small>
+          </button>
+        </div>
+
+        <div class="front-parent-card">
+          <div>
+            <strong>👨‍👩‍👧‍👦 Panel Ibu Bapa</strong>
+            <small>Pantau keputusan semua anak, topik perlu fokus, pelan AI & segerak telefon dalam talian.</small>
+          </div>
+          <button type="button" class="btn-secondary" id="btn-front-parent">Buka Dashboard</button>
+        </div>
+      `;
+
+      main.querySelectorAll(".account-card").forEach((card) => {
+        card.addEventListener("click", (e) => {
+          if (e.target.closest(".account-edit-btn")) return;
+          App.Sound.click();
+          const pid = card.getAttribute("data-pid");
+          App.Storage.setActiveProfile(pid);
+          selectedSubject = null;
+          selectedChapter = null;
+          shopMsg = "";
+          currentView = "home";
+          renderAll();
+        });
+      });
+
+      main.querySelectorAll(".account-edit-btn").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          App.Sound.click();
+          openAccountEditor(btn.getAttribute("data-edit-id"));
+        });
+      });
+
+      document.getElementById("btn-add-account-card").addEventListener("click", () => {
+        App.Sound.click();
+        openAccountEditor("NEW");
+      });
+    }
+
+    const inviteBtn = document.getElementById("btn-invite-parent");
+    if (inviteBtn) {
+      inviteBtn.addEventListener("click", () => {
+        App.Sound.click();
+        editingAccountId = null;
+        currentView = "parent";
+        renderAll();
+      });
+    }
+
+    const frontParentBtn = document.getElementById("btn-front-parent");
+    if (frontParentBtn) {
+      frontParentBtn.addEventListener("click", () => {
+        App.Sound.click();
+        editingAccountId = null;
+        currentView = "parent";
+        renderAll();
+      });
+    }
   }
 
   function launchSetGame(main, profile, grade, dlp, isRevision = false) {
@@ -168,7 +534,7 @@
       isRevision,
       onExit: () => {
         currentView = "sets";
-        renderMain();
+        renderAll();
       },
       onComplete: (res) => {
         const subjName = useDlp ? selectedSubject.nameEn : selectedSubject.name;
@@ -195,8 +561,7 @@
           isRevision
         };
         currentView = "results";
-        renderTopBar();
-        renderMain();
+        renderAll();
       }
     });
   }
@@ -221,16 +586,28 @@
     syncBodyMode();
     const main = document.getElementById("main-content");
     const state = App.Storage.getState();
+
+    if (currentView === "parent") {
+      renderParentDashboard(main);
+      return;
+    }
+
     const profile = App.Storage.getActiveProfile();
-    const grade = App.GRADES[profile.gradeId];
+    if (currentView === "accounts" || !profile) {
+      currentView = "accounts";
+      syncBodyMode();
+      renderAccountSelector(main);
+      return;
+    }
+
+    const grade = App.GRADES[profile.gradeId] || App.GRADES.d6;
     const dlp = state.dlpEnabled;
-    const hasCustomName = !!(profile.name && profile.name.trim());
     const displayName = App.Storage.getDisplayName(profile);
 
     if (currentView === "home") {
       const totalSetsPlayed = Object.keys(profile.setBest || {}).length;
       const mascotInfo = App.Mascot ? App.Mascot.getInfo(grade.id) : { name: "Koko", tagline: "" };
-      const mascotHtml = App.Mascot ? App.Mascot.render(grade.id, hasCustomName ? "happy" : "idle", 76) : "";
+      const mascotHtml = App.Mascot ? App.Mascot.render(grade.id, "happy", 76) : "";
       const weekDays = App.Storage.getLast7DaysStatus(profile);
       const leaderboard = App.Storage.getSiblingLeaderboard();
       const resumeTarget = resolveResumeTarget(profile, grade, dlp);
@@ -245,26 +622,38 @@
         )
         .join("");
 
-      const leaderboardHtml = leaderboard
-        .map((row, i) => {
-          const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉";
-          const frameCls = row.equippedFrame && row.equippedFrame !== "default" ? `frame-${row.equippedFrame}` : "";
-          const isMe = row.id === profile.id;
-          return `
-            <div class="lb-row ${isMe ? "lb-me" : ""}">
-              <span class="lb-rank">${medal}</span>
-              <span class="lb-avatar ${frameCls}">${row.avatar}</span>
-              <div class="lb-info">
-                <strong>${esc(row.name)} <small>(${esc(row.gradeName)})</small></strong>
-                <span>🔥 ${row.dailyStreak} hari • ${row.weeklySets} set minggu ini</span>
+      const leaderboardHtml =
+        leaderboard.length >= 2
+          ? `
+            <section class="leaderboard-card">
+              <div class="lb-head">
+                <h3>🏆 Carta Mingguan Adik-Beradik</h3>
+                <span class="lb-sub">Siapa paling banyak jawapan tepat minggu ini?</span>
               </div>
-              <div class="lb-pts">
-                <strong>${row.weeklyMarks}⭐</strong>
-                <small>${row.xp} XP</small>
+              <div class="lb-grid">
+                ${leaderboard
+                  .map((row, i) => {
+                    const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉";
+                    const frameCls = row.equippedFrame && row.equippedFrame !== "default" ? `frame-${row.equippedFrame}` : "";
+                    const isMe = row.id === profile.id;
+                    return `
+                      <div class="lb-row ${isMe ? "lb-me" : ""}">
+                        <span class="lb-rank">${medal}</span>
+                        <span class="lb-avatar ${frameCls}">${row.avatar}</span>
+                        <div class="lb-info">
+                          <strong>${esc(row.name)} <small>(${esc(row.gradeName)})</small></strong>
+                          <span>🔥 ${row.dailyStreak} hari • ${row.weeklySets} set minggu ini</span>
+                        </div>
+                        <div class="lb-pts">
+                          <strong>${row.weeklyMarks}⭐</strong>
+                          <small>${row.xp} XP</small>
+                        </div>
+                      </div>`;
+                  })
+                  .join("")}
               </div>
-            </div>`;
-        })
-        .join("");
+            </section>`
+          : "";
 
       const cards = grade.subjects
         .map((subj) => {
@@ -276,7 +665,7 @@
             const cSets = App.QuestionEngine.getChapterSetCount(grade.id, subj.id, ch.id, useDlp);
             totalUniqueSets += cSets;
             for (let s = 1; s <= cSets; s++) {
-              if (profile.setBest[`${subj.id}:${ch.id}:${s}`]) completed++;
+              if (App.Storage.getSetBest(profile, grade.id, subj.id, ch.id, s)) completed++;
             }
           });
           const subjName = useDlp ? subj.nameEn : subj.name;
@@ -296,55 +685,22 @@
         })
         .join("");
 
-      const showEditor = !hasCustomName || editingProfile;
-      const activeAvatar = draftAvatar || profile.avatar;
-      const avatarButtons = getPlayableAvatars(profile)
-        .map(
-          (av) => `
-          <button type="button" class="avatar-pick ${av === activeAvatar ? "selected" : ""}" data-avatar="${av}">
-            ${av}
-          </button>`
-        )
-        .join("");
-
-      const heroBodyHtml = showEditor
-        ? `
-          <div class="profile-setup-card">
-            <div class="setup-head">
-              <strong>✏️ Isi Nama & Pilih Avatar (${esc(grade.name)})</strong>
-              ${hasCustomName ? `<button type="button" class="btn-ghost btn-sm" id="btn-cancel-edit">Batal</button>` : ""}
-            </div>
-            <div class="setup-input-row">
-              <input
-                type="text"
-                id="inp-kid-name"
-                maxlength="28"
-                placeholder="Taip nama kamu di sini..."
-                value="${esc(profile.name || "")}"
-              />
-              <button type="button" class="btn-tactile btn-true" id="btn-save-kid-name">Simpan</button>
-            </div>
-            <div class="avatar-grid">${avatarButtons}</div>
-          </div>`
-        : `
-          <div class="hero-greet-row">
-            <div>
-              <h1>Hai, ${esc(displayName)}! <span class="hero-av frame-${profile.equippedFrame || "default"}">${profile.avatar}</span></h1>
-              <p class="mascot-line"><strong>${esc(mascotInfo.name)}:</strong> "${esc(mascotInfo.tagline)}"</p>
-            </div>
-            <div class="hero-cta-group">
-              <button type="button" class="btn-tactile btn-true" id="btn-quick-resume">▶ Sambung Latihan</button>
-              <button type="button" class="btn-secondary btn-sm" id="btn-edit-profile">✏️ Profil</button>
-            </div>
-          </div>`;
-
       main.innerHTML = `
         <section class="hero-banner grade-${grade.id}">
           <div class="hero-top-row">
             <div class="hero-mascot-col">${mascotHtml}</div>
             <div class="hero-left">
               <span class="grade-pill">${esc(grade.name)} • ${esc(grade.subtitle)}</span>
-              ${heroBodyHtml}
+              <div class="hero-greet-row">
+                <div>
+                  <h1>Hai, ${esc(displayName)}! <span class="hero-av frame-${profile.equippedFrame || "default"}">${profile.avatar}</span></h1>
+                  <p class="mascot-line"><strong>${esc(mascotInfo.name)}:</strong> "${esc(mascotInfo.tagline)}"</p>
+                </div>
+                <div class="hero-cta-group">
+                  <button type="button" class="btn-tactile btn-true" id="btn-quick-resume">▶ Sambung Latihan</button>
+                  <button type="button" class="btn-secondary btn-sm" id="btn-hero-switch-acc">🔄 Tukar Akaun</button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -363,13 +719,7 @@
           </div>
         </section>
 
-        <section class="leaderboard-card">
-          <div class="lb-head">
-            <h3>🏆 Carta Mingguan Adik-Beradik</h3>
-            <span class="lb-sub">Siapa paling banyak jawapan tepat minggu ini?</span>
-          </div>
-          <div class="lb-grid">${leaderboardHtml}</div>
-        </section>
+        ${leaderboardHtml}
 
         <h2 class="section-title">📚 Semua Subjek (${esc(grade.name)})</h2>
         <div class="subject-grid">${cards}</div>
@@ -382,62 +732,22 @@
         renderMain();
       });
 
-      if (showEditor) {
-        const nameInput = document.getElementById("inp-kid-name");
-        const saveProfile = () => {
-          const val = nameInput.value.trim();
-          App.Storage.updateProfile(profile.id, {
-            name: val,
-            avatar: draftAvatar || profile.avatar
-          });
-          editingProfile = false;
-          draftAvatar = null;
-          App.Sound.unlock();
-          renderAll();
-        };
+      document.getElementById("btn-hero-switch-acc").addEventListener("click", () => {
+        App.Sound.click();
+        selectedSubject = null;
+        selectedChapter = null;
+        editingAccountId = null;
+        currentView = "accounts";
+        renderAll();
+      });
 
-        document.getElementById("btn-save-kid-name").addEventListener("click", saveProfile);
-        nameInput.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            saveProfile();
-          }
-        });
-
-        main.querySelectorAll(".avatar-pick").forEach((avBtn) => {
-          avBtn.addEventListener("click", () => {
-            App.Sound.click();
-            draftAvatar = avBtn.getAttribute("data-avatar");
-            main.querySelectorAll(".avatar-pick").forEach((b) => b.classList.remove("selected"));
-            avBtn.classList.add("selected");
-          });
-        });
-
-        const cancelBtn = document.getElementById("btn-cancel-edit");
-        if (cancelBtn) {
-          cancelBtn.addEventListener("click", () => {
-            App.Sound.click();
-            editingProfile = false;
-            draftAvatar = null;
-            renderMain();
-          });
-        }
-      } else {
-        document.getElementById("btn-edit-profile").addEventListener("click", () => {
-          App.Sound.click();
-          editingProfile = true;
-          draftAvatar = profile.avatar;
-          renderMain();
-        });
-
-        document.getElementById("btn-quick-resume").addEventListener("click", () => {
-          App.Sound.click();
-          selectedSubject = resumeTarget.subj;
-          selectedChapter = resumeTarget.ch;
-          selectedSetNum = resumeTarget.setNum;
-          launchSetGame(main, profile, grade, dlp, false);
-        });
-      }
+      document.getElementById("btn-quick-resume").addEventListener("click", () => {
+        App.Sound.click();
+        selectedSubject = resumeTarget.subj;
+        selectedChapter = resumeTarget.ch;
+        selectedSetNum = resumeTarget.setNum;
+        launchSetGame(main, profile, grade, dlp, false);
+      });
 
       main.querySelectorAll(".subject-card").forEach((card) => {
         card.addEventListener("click", () => {
@@ -531,7 +841,7 @@
           let done = 0;
           let sumPct = 0;
           for (let s = 1; s <= setCount; s++) {
-            const rec = profile.setBest[`${selectedSubject.id}:${ch.id}:${s}`];
+            const rec = App.Storage.getSetBest(profile, grade.id, selectedSubject.id, ch.id, s);
             if (rec) {
               done++;
               sumPct += Math.round((rec.bestScore / rec.total) * 100);
@@ -590,10 +900,9 @@
 
       const activeModeInfo = App.GAME_MODES.find((m) => m.id === selectedMode) || App.GAME_MODES[0];
 
-      // Determine current recommended (first unplayed) node
       let nextPlayable = 1;
       for (let s = 1; s <= setCount; s++) {
-        if (!profile.setBest[`${selectedSubject.id}:${selectedChapter.id}:${s}`]) {
+        if (!App.Storage.getSetBest(profile, grade.id, selectedSubject.id, selectedChapter.id, s)) {
           nextPlayable = s;
           break;
         }
@@ -602,7 +911,7 @@
 
       const pathNodes = Array.from({ length: setCount }, (_, i) => i + 1)
         .map((s, idx) => {
-          const rec = profile.setBest[`${selectedSubject.id}:${selectedChapter.id}:${s}`];
+          const rec = App.Storage.getSetBest(profile, grade.id, selectedSubject.id, selectedChapter.id, s);
           const pct = rec ? Math.round((rec.bestScore / rec.total) * 100) : null;
           const stars = pct === null ? "" : pct >= 90 ? "★★★" : pct >= 60 ? "★★☆" : "★☆☆";
           const isCurrent = s === nextPlayable;
@@ -763,8 +1072,6 @@
         currentView = "sets";
         renderMain();
       });
-    } else if (currentView === "parent") {
-      renderParentDashboard(main);
     }
   }
 
@@ -775,7 +1082,8 @@
       main.innerHTML = `
         <div class="pin-box">
           <h2>🔒 Panel Ibu Bapa</h2>
-          <p>Masukkan kod PIN 4-digit untuk melihat prestasi semua anak, topik perlu fokus, pelan latihan AI & simpanan rekod. (Kod lalai: <code>1234</code>)</p>
+          <p>Masukkan kod PIN 4-digit untuk melihat prestasi semua anak secara dalam talian, topik perlu fokus, pelan latihan AI & tetapan keluarga. (Kod lalai: <code>1234</code>)</p>
+          ${pendingInviteCode ? `<p class="pin-invite-note">🔗 Kod Keluarga <strong>${esc(pendingInviteCode)}</strong> sedia disambungkan selepas PIN dibuka.</p>` : ""}
           <div class="pin-row">
             <input type="password" id="pin-input" maxlength="6" placeholder="PIN (1234)" />
             <button class="btn-tactile btn-primary-3d" id="btn-unlock-pin">Buka</button>
@@ -789,6 +1097,8 @@
         const val = pinInput.value.trim();
         if (App.Storage.verifyParentPin(val)) {
           parentUnlocked = true;
+          parentUnlockedPin = val;
+          parentAutoSyncStarted = false;
           App.Sound.unlock();
           renderParentDashboard(main);
         } else {
@@ -797,8 +1107,8 @@
         }
       };
       document.getElementById("btn-back-kids").addEventListener("click", () => {
-        currentView = "home";
-        renderMain();
+        currentView = App.Storage.getActiveProfile() ? "home" : "accounts";
+        renderAll();
       });
       document.getElementById("btn-unlock-pin").addEventListener("click", tryUnlock);
       pinInput.addEventListener("keydown", (e) => {
@@ -810,82 +1120,176 @@
       return;
     }
 
-    const kidCards = state.profiles
-      .map((p) => {
-        const grade = App.GRADES[p.gradeId];
-        const displayName = App.Storage.getDisplayName(p);
-        const history = p.history || [];
-        const report = App.Storage.getFocusReport(p);
+    const syncSt = App.CloudSync ? App.CloudSync.getStatus() : { configured: false, linked: false };
+    if (syncSt.configured && syncSt.linked && !parentAutoSyncStarted) {
+      parentAutoSyncStarted = true;
+      App.CloudSync.syncNow().then((res) => {
+        if (currentView !== "parent") return;
+        if (res.ok) {
+          parentCloudStatusMsg = `✅ Rekod terkini disegerakkan dari pelayan online (${App.Storage.fmtDate(res.updatedAt)}).`;
+        } else if (res.error) {
+          parentCloudStatusMsg = `⚠️ Gagal muat turun online buat masa ini (${res.error}). Memaparkan rekod peranti.`;
+        }
+        renderTopBar();
+        renderParentDashboard(main);
+      });
+    }
 
-        const chapterStatusHtml =
-          report.allChapters && report.allChapters.length > 0
-            ? `<div class="weak-box">
-                <strong>🚦 Prestasi Mengikut Bab:</strong>
-                <div class="weak-tags">
-                  ${report.allChapters
-                    .slice()
-                    .sort((a, b) => a.avgPct - b.avgPct)
-                    .slice(0, 6)
-                    .map((w) => {
-                      const dot = w.avgPct >= 80 && w.mistakeCount === 0 ? "🟢" : w.avgPct >= 60 ? "🟡" : "🔴";
-                      const cls = w.avgPct >= 80 && w.mistakeCount === 0 ? "tl-green" : w.avgPct >= 60 ? "tl-amber" : "tl-red";
-                      return `<span class="weak-tag ${cls}">${dot} ${esc(w.subjectName)} • ${esc(w.chapterTitle)} (${w.avgPct}%)</span>`;
-                    })
-                    .join("")}
-                </div>
-              </div>`
-            : `<div class="weak-box weak-clear">ℹ️ Anak belum mencuba latihan lagi.</div>`;
+    const profiles = state.profiles || [];
+    let totalSetsAll = 0;
+    let totalPctSum = 0;
+    let pctKidCount = 0;
+    let weakTopicTotal = 0;
 
-        const mistakesHtml =
-          report.recentMistakes.length > 0
-            ? `<div class="mistake-log">
-                ${report.recentMistakes
-                  .slice(0, 5)
-                  .map(
-                    (m) => `
-                  <div class="mistake-item">
-                    <div class="m-meta">${App.Storage.fmtDate(m.ts)} • ${esc(m.subjectName)} (${esc(m.chapterTitle)})</div>
-                    <div class="m-q">${esc(m.q)}</div>
-                    <div class="m-ans">❌ <span>${esc(m.chosen)}</span> → ✅ <strong>${esc(m.correct)}</strong></div>
-                  </div>`
-                  )
-                  .join("")}
-              </div>`
-            : `<p class="empty-note">Tiada kesilapan direkodkan lagi.</p>`;
+    const kidCards =
+      profiles.length > 0
+        ? profiles
+            .map((p) => {
+              const grade = App.GRADES[p.gradeId] || App.GRADES.d6;
+              const displayName = App.Storage.getDisplayName(p);
+              const history = p.history || [];
+              const report = App.Storage.getFocusReport(p);
+              totalSetsAll += report.totalAttempts;
+              if (history.length > 0) {
+                totalPctSum += report.avgPct;
+                pctKidCount++;
+              }
+              weakTopicTotal += report.weakChapters.length;
 
-        const recent = history
-          .slice(0, 4)
-          .map(
-            (h) => `
-          <li>
-            <span>${App.Storage.fmtDate(h.ts)} • ${esc((h.subjectName || h.subjectId).toUpperCase())} Set ${h.setNum}</span>
-            <strong>${App.Storage.fmtScore(h.score)}/${h.total} (${h.pct}%)${h.speedBonus ? ` ⚡+${h.speedBonus}` : ""}</strong>
-          </li>`
-          )
-          .join("");
+              const gradeSelectOpts = Object.values(App.GRADES || {})
+                .map((g) => `<option value="${g.id}" ${p.gradeId === g.id ? "selected" : ""}>${esc(g.name)}</option>`)
+                .join("");
 
-        return `
-          <div class="parent-kid-card">
-            <div class="pk-head">
-              <div>
-                <h3>${p.avatar} ${esc(displayName)}</h3>
-                <small>${esc(grade.name)} • 🔥 ${p.dailyStreak || 0} hari • ⚡ Bonus Pantas: ${report.totalSpeedBonus}</small>
-              </div>
-              <div class="pk-avg">${history.length ? `${report.avgPct}% purata` : "Belum ada rekod"}</div>
-            </div>
-            <div class="pk-edit">
-              <input type="text" class="rename-input" data-pid="${p.id}" placeholder="Nama anak (belum diisi)" value="${esc(p.name || "")}" />
-              <button class="btn-secondary btn-rename" data-pid="${p.id}">Simpan Nama</button>
-            </div>
-            ${chapterStatusHtml}
-            <h4>📝 Kesilapan Terkini Untuk Dibimbing:</h4>
-            ${mistakesHtml}
-            <h4>Aktiviti Terkini:</h4>
-            <ul class="pk-history">${recent || "<li>Tiada latihan direkodkan lagi.</li>"}</ul>
-            <button type="button" class="btn-tactile btn-primary-3d btn-sm btn-ai-kid" data-pid="${p.id}">✨ Cipta Pelan Latihan AI (${esc(displayName)})</button>
+              const chapterStatusHtml =
+                report.allChapters && report.allChapters.length > 0
+                  ? `<div class="weak-box">
+                      <strong>🚦 Prestasi Mengikut Bab:</strong>
+                      <div class="weak-tags">
+                        ${report.allChapters
+                          .slice()
+                          .sort((a, b) => a.avgPct - b.avgPct)
+                          .slice(0, 6)
+                          .map((w) => {
+                            const dot = w.avgPct >= 80 && w.mistakeCount === 0 ? "🟢" : w.avgPct >= 60 ? "🟡" : "🔴";
+                            const cls = w.avgPct >= 80 && w.mistakeCount === 0 ? "tl-green" : w.avgPct >= 60 ? "tl-amber" : "tl-red";
+                            return `<span class="weak-tag ${cls}">${dot} ${esc(w.subjectName)} • ${esc(w.chapterTitle)} (${w.avgPct}%)</span>`;
+                          })
+                          .join("")}
+                      </div>
+                    </div>`
+                  : `<div class="weak-box weak-clear">ℹ️ Anak belum mencuba latihan lagi.</div>`;
+
+              const mistakesHtml =
+                report.recentMistakes.length > 0
+                  ? `<div class="mistake-log">
+                      ${report.recentMistakes
+                        .slice(0, 5)
+                        .map(
+                          (m) => `
+                        <div class="mistake-item">
+                          <div class="m-meta">${App.Storage.fmtDate(m.ts)} • ${esc(m.subjectName)} (${esc(m.chapterTitle)})</div>
+                          <div class="m-q">${esc(m.q)}</div>
+                          <div class="m-ans">❌ <span>${esc(m.chosen)}</span> → ✅ <strong>${esc(m.correct)}</strong></div>
+                        </div>`
+                        )
+                        .join("")}
+                    </div>`
+                  : `<p class="empty-note">Tiada kesilapan direkodkan lagi.</p>`;
+
+              const recent = history
+                .slice(0, 4)
+                .map(
+                  (h) => `
+                <li>
+                  <span>${App.Storage.fmtDate(h.ts)} • ${esc((h.subjectName || h.subjectId).toUpperCase())} Set ${h.setNum}</span>
+                  <strong>${App.Storage.fmtScore(h.score)}/${h.total} (${h.pct}%)${h.speedBonus ? ` ⚡+${h.speedBonus}` : ""}</strong>
+                </li>`
+                )
+                .join("");
+
+              return `
+                <div class="parent-kid-card">
+                  <div class="pk-head">
+                    <div>
+                      <h3>${p.avatar} ${esc(displayName)}</h3>
+                      <small>${esc(grade.name)} • 🔥 ${p.dailyStreak || 0} hari • ⚡ Bonus Pantas: ${report.totalSpeedBonus}</small>
+                    </div>
+                    <div class="pk-avg">${history.length ? `${report.avgPct}% purata` : "Belum ada rekod"}</div>
+                  </div>
+                  <div class="pk-edit">
+                    <input type="text" class="rename-input" data-pid="${p.id}" placeholder="Nama anak" value="${esc(p.name || "")}" />
+                    <select class="grade-select" data-pid="${p.id}">${gradeSelectOpts}</select>
+                    <button class="btn-secondary btn-rename" data-pid="${p.id}">Simpan</button>
+                  </div>
+                  ${chapterStatusHtml}
+                  <h4>📝 Kesilapan Terkini Untuk Dibimbing:</h4>
+                  ${mistakesHtml}
+                  <h4>Aktiviti Terkini:</h4>
+                  <ul class="pk-history">${recent || "<li>Tiada latihan direkodkan lagi.</li>"}</ul>
+                  <button type="button" class="btn-tactile btn-primary-3d btn-sm btn-ai-kid" data-pid="${p.id}">✨ Cipta Pelan Latihan AI (${esc(displayName)})</button>
+                </div>`;
+            })
+            .join("")
+        : `
+          <div class="parent-empty-card">
+            <h3>👶 Belum Ada Akaun Anak Didaftarkan</h3>
+            <p>Pergi ke muka depan untuk menekan <strong>'+ Tambah Akaun Anak'</strong>, atau sambungkan <strong>Kod Keluarga Online</strong> di bawah untuk memuat turun rekod anak daripada telefon lain.</p>
           </div>`;
-      })
-      .join("");
+
+    const overallAvg = pctKidCount > 0 ? Math.round(totalPctSum / pctKidCount) : 0;
+    const overviewHtml = `
+      <div class="parent-overview-strip">
+        <div class="pov-box"><strong>${profiles.length}</strong><span>Akaun Anak</span></div>
+        <div class="pov-box"><strong>${totalSetsAll}</strong><span>Set Selesai</span></div>
+        <div class="pov-box"><strong>${pctKidCount > 0 ? `${overallAvg}%` : "-"}</strong><span>Purata Ketepatan</span></div>
+        <div class="pov-box"><strong>${weakTopicTotal}</strong><span>Topik Perlu Fokus</span></div>
+      </div>
+    `;
+
+    const currentApiUrl = App.getCloudApiUrl ? App.getCloudApiUrl() : "";
+    let onlineCardInner = "";
+    if (syncSt.configured && syncSt.linked) {
+      onlineCardInner = `
+        <div class="cloud-linked-row">
+          <div>
+            <span class="cloud-status-pill is-online">🟢 Disambung Online</span>
+            <div class="family-code-display">Kod Keluarga: <strong>${esc(syncSt.code)}</strong></div>
+            <small>Segerak terakhir: ${syncSt.lastSyncedAt ? App.Storage.fmtDate(syncSt.lastSyncedAt) : "Sedia"}${syncSt.pendingSync ? " • Menunggu segerak..." : ""}</small>
+          </div>
+          <div class="cloud-btn-col">
+            <button type="button" class="btn-tactile btn-true btn-sm" id="btn-cloud-sync-now">🔄 Muat Turun & Segerak Sekarang</button>
+            <button type="button" class="btn-tactile btn-primary-3d btn-sm" id="btn-copy-family-link">📲 Salin / Kongsi Pautan Keluarga</button>
+            <button type="button" class="btn-ghost btn-sm" id="btn-cloud-disconnect">Putuskan Sambungan</button>
+          </div>
+        </div>`;
+    } else if (syncSt.configured) {
+      onlineCardInner = `
+        <div class="cloud-setup-grid">
+          <div class="cloud-option-box">
+            <strong>Telefon Pertama / Akaun Ibu Bapa Utama</strong>
+            <p>Cipta Kod Keluarga baharu supaya semua markah dan kelemahan anak dari mana-mana telefon dikumpul secara online.</p>
+            <button type="button" class="btn-tactile btn-true btn-sm" id="btn-cloud-create">✨ Cipta Kod Keluarga Online</button>
+          </div>
+          <div class="cloud-option-box">
+            <strong>Sambung Ke Keluarga Sedia Ada</strong>
+            <p>Masukkan Kod Keluarga daripada telefon ibu bapa / pautan WhatsApp untuk berkongsi rekod yang sama.</p>
+            <div class="cloud-join-row">
+              <input type="text" id="inp-family-code" maxlength="10" placeholder="Kod (cth: K7M4P9)" value="${esc(pendingInviteCode)}" />
+              <input type="password" id="inp-family-pin" maxlength="6" placeholder="PIN Keluarga" value="${esc(parentUnlockedPin || "")}" />
+              <button type="button" class="btn-tactile btn-primary-3d btn-sm" id="btn-cloud-join">🔗 Sambung</button>
+            </div>
+          </div>
+        </div>`;
+    } else {
+      onlineCardInner = `
+        <div class="cloud-not-configured">
+          <p>Pelayan pantauan online peribadi belum disambungkan ke halaman ini lagi. Anda masih boleh menggunakan butang <strong>Simpan / Gabung Rekod</strong> di bawah pada bila-bila masa, atau masukkan pautan pelayan Cloudflare peribadi anda jika sudah dilancarkan:</p>
+          <div class="cloud-join-row">
+            <input type="url" id="inp-cloud-url" placeholder="https://mykids-study-arena-api.xxx.workers.dev" value="${esc(currentApiUrl)}" />
+            <button type="button" class="btn-secondary btn-sm" id="btn-save-cloud-url">Simpan Pautan Pelayan</button>
+          </div>
+        </div>`;
+    }
 
     const linkedName = App.Storage.getLinkedFileName();
 
@@ -912,7 +1316,15 @@
           <button class="btn-ghost" id="btn-parent-exit">← Keluar Panel Ibu Bapa</button>
           <strong>👨‍👩‍👧‍👦 Dashboard Ibu Bapa & Penjana Pelan Latihan</strong>
         </div>
-        <button type="button" class="btn-tactile btn-primary-3d btn-sm" id="btn-ai-all-kids">✨ Cipta Pelan Latihan (Semua 3 Anak)</button>
+        <button type="button" class="btn-tactile btn-primary-3d btn-sm" id="btn-ai-all-kids" ${profiles.length === 0 ? "disabled" : ""}>✨ Cipta Pelan Latihan (Semua Anak: ${profiles.length})</button>
+      </div>
+
+      ${overviewHtml}
+
+      <div class="sync-panel cloud-sync-card">
+        <h3>☁️ Pantauan Online Semua Anak (Merentas Telefon)</h3>
+        ${onlineCardInner}
+        ${parentCloudStatusMsg ? `<p class="sync-status">${esc(parentCloudStatusMsg)}</p>` : ""}
       </div>
 
       ${aiPanelHtml}
@@ -920,7 +1332,7 @@
       <div class="parent-grid">${kidCards}</div>
 
       <div class="sync-panel">
-        <h3>☁️ Simpan & Gabung Rekod Belajar Anak</h3>
+        <h3>💾 Simpan & Gabung Rekod Secara Manual (Sandaran Drive / WhatsApp)</h3>
         <p>Tekan satu butang untuk simpan salinan rekod ke <strong>Google Drive, OneDrive atau WhatsApp</strong>. Apabila memulihkan rekod dari telefon anak lain, sistem akan <strong>menggabung markah secara automatik</strong> tanpa memadam rekod anak lain.</p>
         <div class="backup-big-actions">
           <button type="button" class="btn-tactile btn-true backup-hero-btn" id="btn-save-backup">
@@ -960,18 +1372,23 @@
 
     document.getElementById("btn-parent-exit").addEventListener("click", () => {
       parentUnlocked = false;
+      parentUnlockedPin = "";
+      parentAutoSyncStarted = false;
       activeAiPromptTitle = "";
       activeAiPromptText = "";
-      currentView = "home";
-      renderMain();
+      currentView = App.Storage.getActiveProfile() ? "home" : "accounts";
+      renderAll();
     });
 
-    document.getElementById("btn-ai-all-kids").addEventListener("click", () => {
-      App.Sound.click();
-      activeAiPromptTitle = "Pelan Latihan AI — Semua 3 Anak";
-      activeAiPromptText = App.Storage.buildAiPromptAllKids();
-      renderParentDashboard(main);
-    });
+    const aiAllBtn = document.getElementById("btn-ai-all-kids");
+    if (aiAllBtn && profiles.length > 0) {
+      aiAllBtn.addEventListener("click", () => {
+        App.Sound.click();
+        activeAiPromptTitle = `Pelan Latihan AI — Semua Anak (${profiles.length})`;
+        activeAiPromptText = App.Storage.buildAiPromptAllKids();
+        renderParentDashboard(main);
+      });
+    }
 
     main.querySelectorAll(".btn-ai-kid").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -987,6 +1404,110 @@
         }
       });
     });
+
+    // Cloud sync actions
+    const saveUrlBtn = document.getElementById("btn-save-cloud-url");
+    if (saveUrlBtn) {
+      saveUrlBtn.addEventListener("click", () => {
+        const val = document.getElementById("inp-cloud-url").value.trim();
+        App.setCloudApiUrl(val);
+        parentCloudStatusMsg = val ? `✅ Pautan pelayan disimpan: ${val}` : "ℹ️ Pautan pelayan dikosongkan.";
+        renderParentDashboard(main);
+      });
+    }
+
+    const createCloudBtn = document.getElementById("btn-cloud-create");
+    if (createCloudBtn) {
+      createCloudBtn.addEventListener("click", async () => {
+        createCloudBtn.disabled = true;
+        parentCloudStatusMsg = "⏳ Mencipta Kod Keluarga online...";
+        renderParentDashboard(main);
+        try {
+          const res = await App.CloudSync.createFamily(parentUnlockedPin || state.parentPin);
+          parentCloudStatusMsg = `✅ Berjaya! Kod Keluarga anda ialah ${res.familyCode}. Kongsikan kod ini ke telefon lain untuk pantauan online.`;
+        } catch (err) {
+          parentCloudStatusMsg = `❌ ${err.message}`;
+        }
+        renderTopBar();
+        renderParentDashboard(main);
+      });
+    }
+
+    const joinCloudBtn = document.getElementById("btn-cloud-join");
+    if (joinCloudBtn) {
+      joinCloudBtn.addEventListener("click", async () => {
+        const code = document.getElementById("inp-family-code").value.trim().toUpperCase();
+        const pin = document.getElementById("inp-family-pin").value.trim() || parentUnlockedPin || state.parentPin;
+        if (!code) {
+          parentCloudStatusMsg = "❌ Sila masukkan Kod Keluarga.";
+          renderParentDashboard(main);
+          return;
+        }
+        joinCloudBtn.disabled = true;
+        try {
+          const res = await App.CloudSync.joinFamily(code, pin);
+          pendingInviteCode = "";
+          parentCloudStatusMsg = `✅ Disambung ke keluarga ${res.familyCode}! (+${res.addedProfiles || 0} akaun anak, +${res.addedHistory || 0} rekod latihan digabung.)`;
+        } catch (err) {
+          parentCloudStatusMsg = `❌ ${err.message}`;
+        }
+        renderTopBar();
+        renderParentDashboard(main);
+      });
+    }
+
+    const syncNowBtn = document.getElementById("btn-cloud-sync-now");
+    if (syncNowBtn) {
+      syncNowBtn.addEventListener("click", async () => {
+        syncNowBtn.disabled = true;
+        const res = await App.CloudSync.syncNow();
+        parentCloudStatusMsg = res.ok
+          ? `✅ Rekod disegerakkan! (+${res.addedProfiles || 0} akaun baharu, +${res.addedHistory || 0} rekod latihan, ${res.updatedSets || 0} set dikemas kini.)`
+          : `❌ ${res.error || "Gagal menyegerak buat masa ini."}`;
+        renderTopBar();
+        renderParentDashboard(main);
+      });
+    }
+
+    const shareLinkBtn = document.getElementById("btn-copy-family-link");
+    if (shareLinkBtn) {
+      shareLinkBtn.addEventListener("click", async () => {
+        const link = `${global.location.origin}${global.location.pathname}?family=${syncSt.code}`;
+        try {
+          if (navigator.share) {
+            await navigator.share({
+              title: "Pautan Keluarga MyKids Study Arena",
+              text: `Buka pautan ini dan masukkan PIN Ibu Bapa untuk menyambung telefon anak (Kod Keluarga: ${syncSt.code})`,
+              url: link
+            });
+            parentCloudStatusMsg = `✅ Pautan keluarga (${syncSt.code}) berjaya dikongsi!`;
+            renderParentDashboard(main);
+            return;
+          }
+        } catch (err) {
+          if (err && err.name === "AbortError") return;
+        }
+        try {
+          await navigator.clipboard.writeText(link);
+          parentCloudStatusMsg = `✅ Pautan keluarga disalin: ${link}`;
+        } catch (e) {
+          parentCloudStatusMsg = `ℹ️ Kod Keluarga: ${syncSt.code} — Pautan: ${link}`;
+        }
+        renderParentDashboard(main);
+      });
+    }
+
+    const disconnectBtn = document.getElementById("btn-cloud-disconnect");
+    if (disconnectBtn) {
+      disconnectBtn.addEventListener("click", () => {
+        if (global.confirm("Putuskan telefon ini daripada segerak keluarga dalam talian? Rekod tempatan dalam peranti tidak akan dipadam.")) {
+          App.CloudSync.disconnect();
+          parentCloudStatusMsg = "ℹ️ Sambungan online diputuskan. Rekod peranti kekal selamat.";
+          renderTopBar();
+          renderParentDashboard(main);
+        }
+      });
+    }
 
     const closeAiBtn = document.getElementById("btn-close-ai-panel");
     if (closeAiBtn) {
@@ -1029,11 +1550,12 @@
             if (e && e.name === "AbortError") return;
           }
         }
+        const stamp = App.Storage.fmtDate(new Date().toISOString()).replace(/\//g, "");
         const blob = new Blob([activeAiPromptText], { type: "text/plain;charset=utf-8" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `Pelan-Latihan-MyKids-${new Date().toISOString().slice(0, 10)}.txt`;
+        a.download = `Pelan-Latihan-MyKids-${stamp}.txt`;
         a.click();
         URL.revokeObjectURL(url);
       });
@@ -1043,8 +1565,12 @@
       btn.addEventListener("click", () => {
         const pid = btn.getAttribute("data-pid");
         const input = main.querySelector(`.rename-input[data-pid="${pid}"]`);
+        const gSel = main.querySelector(`.grade-select[data-pid="${pid}"]`);
         if (input) {
-          App.Storage.updateProfile(pid, { name: input.value.trim() });
+          App.Storage.updateProfile(pid, {
+            name: input.value.trim(),
+            gradeId: gSel ? gSel.value : undefined
+          });
           renderTopBar();
           renderParentDashboard(main);
         }
@@ -1071,7 +1597,7 @@
       loadBtn.addEventListener("click", async () => {
         try {
           const res = await App.Storage.loadFromCloudFile();
-          statusEl.textContent = `✅ Rekod daripada '${res.fileName}' berjaya digabung! (+${res.addedHistory} latihan baharu, ${res.updatedSets} set dikemas kini.)`;
+          statusEl.textContent = `✅ Rekod daripada '${res.fileName}' berjaya digabung! (+${res.addedProfiles || 0} akaun, +${res.addedHistory} latihan baharu, ${res.updatedSets} set dikemas kini.)`;
           renderTopBar();
           renderParentDashboard(main);
         } catch (err) {
@@ -1120,7 +1646,7 @@
       reader.onload = () => {
         try {
           const summary = App.Storage.mergeBackup(reader.result);
-          statusEl.textContent = `✅ Rekod berjaya digabung tanpa memadam markah anak lain! (+${summary.addedHistory} rekod latihan, ${summary.updatedSets} set dikemas kini.)`;
+          statusEl.textContent = `✅ Rekod berjaya digabung tanpa memadam markah anak lain! (+${summary.addedProfiles || 0} akaun, +${summary.addedHistory} rekod latihan, ${summary.updatedSets} set dikemas kini.)`;
           renderTopBar();
           renderParentDashboard(main);
         } catch (err) {
@@ -1130,9 +1656,19 @@
       reader.readAsText(file);
     });
 
-    document.getElementById("btn-save-pin").addEventListener("click", () => {
+    document.getElementById("btn-save-pin").addEventListener("click", async () => {
       const np = document.getElementById("new-pin").value.trim();
+      const oldPin = parentUnlockedPin || state.parentPin;
       if (App.Storage.setParentPin(np)) {
+        parentUnlockedPin = np;
+        if (App.CloudSync && App.CloudSync.isLinked()) {
+          try {
+            await App.CloudSync.updateRemotePin(oldPin, np);
+          } catch (err) {
+            statusEl.textContent = `⚠️ PIN tempatan ditukar, tetapi pelayan online gagal: ${err.message}`;
+            return;
+          }
+        }
         statusEl.textContent = "✅ Kod PIN baharu berjaya disimpan.";
       } else {
         statusEl.textContent = "❌ Kod PIN mesti 4 hingga 6 digit nombor.";
@@ -1146,6 +1682,20 @@
     renderMain();
   }
 
+  function initApp() {
+    try {
+      const params = new URLSearchParams(global.location.search || "");
+      const fam = params.get("family");
+      if (fam) {
+        pendingInviteCode = fam.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10);
+      }
+    } catch (e) {
+      pendingInviteCode = "";
+    }
+    currentView = "accounts";
+    renderAll();
+  }
+
   global.addEventListener("resize", syncViewportMetrics);
   global.addEventListener("orientationchange", syncViewportMetrics);
   if (global.visualViewport) {
@@ -1153,5 +1703,5 @@
     global.visualViewport.addEventListener("scroll", syncViewportMetrics);
   }
 
-  document.addEventListener("DOMContentLoaded", renderAll);
+  document.addEventListener("DOMContentLoaded", initApp);
 })(window);

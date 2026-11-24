@@ -189,7 +189,11 @@
       },
       (rng, dlp) => {
         const d1 = pick(rng, [2, 3, 4, 5, 6, 8]);
-        const n1 = randInt(rng, 1, d1 - 1);
+        const validNums = [];
+        for (let i = 1; i < d1; i++) {
+          if (gcd(i, d1) === 1) validNums.push(i);
+        }
+        const n1 = pick(rng, validNums);
         const whole = randInt(rng, 2, 9);
         const num = n1 * whole;
         const g = gcd(num, d1);
@@ -266,7 +270,7 @@
         const fmt = (h, m) => `${String(h).padStart(2, "0")}:${m}`;
         const q = dlp
           ? `City A is at ${fmt(startH, mins)}. City B is ${diff} hours ahead of City A. What time is it in City B?`
-          : `Bandar A berada pada waktu ${fmt(startH, mins)}. Bandar B adalah ${diff} jam lebih awal daripada Bandar A. Pukul berapakah di Bandar B?`;
+          : `Bandar A berada pada waktu ${fmt(startH, mins)}. Bandar B mendahului Bandar A sebanyak ${diff} jam. Pukul berapakah di Bandar B?`;
         const exp = `${fmt(startH, mins)} + ${diff} jam = ${fmt(endH, mins)}.`;
         return makeMcq(rng, q, fmt(endH, mins), [fmt((startH - diff + 24) % 24, mins), fmt((endH + 1) % 24, mins), fmt((endH + 3) % 24, mins)], exp);
       },
@@ -279,7 +283,15 @@
         const eh = Math.floor(totalMin / 60);
         const em = totalMin % 60;
         const fmt = (h, m) => `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-        const durStr = dlp ? `${dh} hours ${dm} minutes` : `${dh} jam ${dm} minit`;
+        const fmtDur = (h, m) =>
+          m === 0
+            ? dlp
+              ? `${h} hours`
+              : `${h} jam`
+            : dlp
+            ? `${h} hours ${m} minutes`
+            : `${h} jam ${m} minit`;
+        const durStr = fmtDur(dh, dm);
         const q = dlp
           ? `A bus leaves at ${fmt(sh, sm)} and arrives at ${fmt(eh, em)} on the same day. How long was the journey?`
           : `Sebuah bas bertolak pada ${fmt(sh, sm)} dan tiba pada ${fmt(eh, em)} pada hari yang sama. Berapakah tempoh perjalanan itu?`;
@@ -289,9 +301,9 @@
           q,
           durStr,
           [
-            dlp ? `${dh + 1} hours ${dm} minutes` : `${dh + 1} jam ${dm} minit`,
-            dlp ? `${dh} hours ${(dm + 15) % 60} minutes` : `${dh} jam ${(dm + 15) % 60} minit`,
-            dlp ? `${Math.max(1, dh - 1)} hours ${dm + 10} minutes` : `${Math.max(1, dh - 1)} jam ${dm + 10} minit`
+            fmtDur(dh + 1, dm),
+            fmtDur(dh, (dm + 15) % 60),
+            fmtDur(Math.max(1, dh - 1), dm + 10)
           ],
           exp
         );

@@ -268,7 +268,7 @@
     drawFloatingPopups
   };
 
-  function resolveModeForQuestion(selectedMode, setNum, idx, totalQ, gradeId, subjectId, chapterId, qObj, dlp) {
+  function resolveModeForQuestion(selectedMode, setNum, idx, totalQ) {
     if (selectedMode !== "mix") {
       return App.MiniGames[selectedMode] ? selectedMode : "fps";
     }
@@ -280,10 +280,6 @@
     if (idx === totalQ - 1) {
       // Q5 Boss Finale: action-focused finish
       chosen = setNum % 3 === 0 ? "runner" : setNum % 2 === 0 ? "fps" : "sort";
-    }
-    if (chosen === "match" && App.QuestionEngine.getMatchPairsForQuestion) {
-      const pairs = App.QuestionEngine.getMatchPairsForQuestion(gradeId, subjectId, chapterId, qObj, !!dlp, setNum * 13 + idx);
-      if (!pairs) chosen = "builder";
     }
     return App.MiniGames[chosen] ? chosen : "swipe";
   }

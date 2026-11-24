@@ -157,21 +157,27 @@
 
     // Safety fallback if a chapter ever had < qPerSet static items and no generator
     if (sets.length === 0 && shuffledStatic.length > 0) {
-      sets.push(shuffledStatic.slice(0, qPerSet));
+      const slice = shuffledStatic.slice(0, qPerSet);
+      slice.forEach((item) => chapterUsedPrompts.add(normalizePrompt(item.q)));
+      sets.push(slice);
     }
 
-    chapterCache.set(cacheKey, sets);
-    return sets;
+    // Preserve genuinely unused leftover static items (never in any Set 1..K) for 3-pair Match mode
+    const leftoverStatic = shuffledStatic.filter((item) => !chapterUsedPrompts.has(normalizePrompt(item.q)));
+
+    const bundle = { sets, usedPrompts: chapterUsedPrompts, leftoverStatic };
+    chapterCache.set(cacheKey, bundle);
+    return bundle;
   }
 
   App.QuestionEngine = {
     getChapterSetCount: function (gradeId, subjectId, chapterId, dlp = false) {
-      const sets = buildChapterSets(gradeId, subjectId, chapterId, dlp);
-      return sets.length;
+      const bundle = buildChapterSets(gradeId, subjectId, chapterId, dlp);
+      return bundle.sets.length;
     },
 
     getSetQuestions: function (gradeId, subjectId, chapterId, setNum, dlp = false) {
-      const sets = buildChapterSets(gradeId, subjectId, chapterId, dlp);
+      const { sets } = buildChapterSets(gradeId, subjectId, chapterId, dlp);
       if (sets.length === 0) return [];
       const safeIdx = Math.max(0, Math.min(sets.length - 1, (Number(setNum) || 1) - 1));
       return sets[safeIdx].map((q) => ({
@@ -226,11 +232,8 @@
         return null;
       }
 
-      const sets = buildChapterSets(gradeId, subjectId, chapterId, dlp);
-      const rng = mulberry32(hashSeed(`match:${gradeId}:${subjectId}:${chapterId}:${seed}`));
-      const allQs = sets.flat();
-      const shuffledQs = shuffleWithRng(rng, allQs);
-
+      const { usedPrompts, leftoverStatic } = buildChapterSets(gradeId, subjectId, chapterId, dlp);
+      const rng = mulberry32(hashSeed(`match-extra:${gradeId}:${subjectId}:${chapterId}:${dlp ? "en" : "bm"}:${seed}`));
       const usedQ = new Set([normalizePrompt(currentQObj.q)]);
       const usedA = new Set([normalizePrompt(mainAns)]);
       const pairs = [
@@ -241,20 +244,41 @@
         }
       ];
 
-      for (const item of shuffledQs) {
-        if (pairs.length >= 3) break;
-        const ans = item.options && item.options[item.correctIndex];
-        if (!item.q || !ans || item.q.length > 130 || ans.length > 62) continue;
+      const tryAddPair = (item) => {
+        if (!item || !Array.isArray(item.options)) return false;
+        const ans = item.options[item.correctIndex];
+        if (!item.q || !ans || item.q.length > 130 || ans.length > 62) return false;
         const nq = normalizePrompt(item.q);
         const na = normalizePrompt(ans);
-        if (!usedQ.has(nq) && !usedA.has(na)) {
-          usedQ.add(nq);
-          usedA.add(na);
-          pairs.push({
-            prompt: item.q,
-            answer: ans,
-            isMain: false
-          });
+        // Strict guarantee: extra Match pairs must NEVER appear in any Set 1..K of this chapter
+        if (usedPrompts.has(nq) || usedQ.has(nq) || usedA.has(na)) return false;
+        usedQ.add(nq);
+        usedA.add(na);
+        pairs.push({
+          prompt: item.q,
+          answer: ans,
+          isMain: false
+        });
+        return true;
+      };
+
+      const shuffledLeftover = shuffleWithRng(rng, leftoverStatic);
+      for (const item of shuffledLeftover) {
+        if (pairs.length >= 3) break;
+        tryAddPair(item);
+      }
+
+      if (pairs.length < 3) {
+        const gens = getGeneratorPool(gradeId, chapterId);
+        if (gens.length > 0) {
+          const genRng = mulberry32(hashSeed(`match-gen:${gradeId}:${subjectId}:${chapterId}:${dlp ? "en" : "bm"}:${seed}`));
+          let safety = 0;
+          while (pairs.length < 3 && safety < 120) {
+            safety++;
+            const gen = gens[(seed + safety) % gens.length];
+            const item = gen(genRng, dlp);
+            tryAddPair(item);
+          }
         }
       }
 
