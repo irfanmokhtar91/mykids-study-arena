@@ -120,7 +120,7 @@
           icon: "⚙️",
           dlp: false,
           chapters: [
-            { id: "elektromekanikal", title: "Unit 1: Penghasilan Produk Elektromekanikal", titleEn: "Unit 1: Electromechanical Products" },
+            { id: "elektromekanikal", title: "Unit 1: Reka Bentuk Produk Elektromekanikal", titleEn: "Unit 1: Design of Electromechanical Products" },
             { id: "pengaturcaraan", title: "Unit 2: Asas Pengaturcaraan & Robotik", titleEn: "Unit 2: Basic Programming & Robotics" },
             { id: "hidroponik", title: "Unit 3: Teknologi Pertanian (Hidroponik)", titleEn: "Unit 3: Hydroponics" }
           ]
@@ -216,8 +216,8 @@
             { id: "alam_melayu", title: "Bab 1–4: Kerajaan Alam Melayu", titleEn: "Ch 1–4: Malay World Kingdoms" },
             { id: "kesultanan_melaka", title: "Bab 5: Kesultanan Melayu Melaka", titleEn: "Ch 5: Malacca Sultanate" },
             { id: "johor_riau", title: "Bab 6: Kesultanan Johor Riau", titleEn: "Ch 6: Johor-Riau Sultanate" },
-            { id: "kedah_kelantan_perlis", title: "Bab 7–8: Kerajaan Kedah, Kelantan, N9, Perlis & Warisan", titleEn: "Ch 7–8: Malay States Heritage" },
-            { id: "sarawak_sabah", title: "Bab 9–10: Warisan Sarawak & Sabah", titleEn: "Ch 9–10: Sarawak & Sabah Heritage" }
+            { id: "kedah_kelantan_perlis", title: "Bab 8–9: Kerajaan Kedah, Kelantan, Negeri Sembilan, Perlis & Warisan", titleEn: "Ch 8–9: Kedah, Kelantan, Negeri Sembilan, Perlis & Heritage" },
+            { id: "sarawak_sabah", title: "Bab 10: Warisan Sarawak & Sabah", titleEn: "Ch 10: Sarawak & Sabah Heritage" }
           ]
         },
         {
@@ -292,7 +292,7 @@
           chapters: [
             { id: "grammar_spm", title: "Advanced Tenses, Clauses & Conditionals", titleEn: "Advanced Tenses & Clauses" },
             { id: "vocab_collocations", title: "Vocabulary, Collocations & Phrasal Verbs", titleEn: "Vocabulary & Collocations" },
-            { id: "rational_cloze", title: "Rational Cloze & Error Correction", titleEn: "Rational Cloze & Error Correction" }
+            { id: "rational_cloze", title: "Cloze Text & Error Correction (Format Peperiksaan)", titleEn: "Cloze Text & Error Correction (Exam Format)" }
           ]
         },
         {
@@ -380,7 +380,7 @@
             { id: "pembahagian_sel", title: "Bab 6: Pembahagian Sel (Mitosis & Meiosis)", titleEn: "Ch 6: Cell Division (Mitosis & Meiosis)" },
             { id: "respirasi_sel", title: "Bab 7: Respirasi Sel", titleEn: "Ch 7: Cellular Respiration" },
             { id: "respirasi_haiwan", title: "Bab 8–10: Sistem Respirasi, Nutrisi & Pengangkutan", titleEn: "Ch 8–10: Respiration, Nutrition & Transport" },
-            { id: "keimunan_saraf", title: "Bab 11–15: Keimunan, Koordinasi, Homeostasis & Pembiakan", titleEn: "Ch 11–15: Immunity, Coordination & Reproduction" }
+            { id: "keimunan_saraf", title: "Bab 11–15: Keimunan, Koordinasi, Sokongan & Pergerakan, Homeostasis & Pembiakan", titleEn: "Ch 11–15: Immunity, Coordination, Support & Movement, Homeostasis & Reproduction" }
           ]
         },
         {
@@ -393,8 +393,8 @@
             { id: "warisan_negara", title: "Bab 1: Warisan Negara Bangsa", titleEn: "Ch 1: Heritage of the Nation-State" },
             { id: "nasionalisme", title: "Bab 2: Kebangkitan Nasionalisme", titleEn: "Ch 2: Rise of Nationalism" },
             { id: "perang_dunia", title: "Bab 3: Konflik Dunia & Pendudukan Jepun", titleEn: "Ch 3: World Conflict & Japanese Occupation" },
-            { id: "malayan_union", title: "Bab 4–5: Malayan Union & Persekutuan Tanah Melayu 1948", titleEn: "Ch 4–5: Malayan Union & Federation 1948" },
-            { id: "komunis_merdeka", title: "Bab 6–10: Ancaman Komunis, Pilihan Raya & Kemerdekaan 1957", titleEn: "Ch 6–10: Emergency, Elections & Independence 1957" }
+            { id: "malayan_union", title: "Bab 4–5: Era Peralihan Kuasa British (Malayan Union) & Persekutuan Tanah Melayu 1948", titleEn: "Ch 4–5: British Transition Era (Malayan Union) & Federation of Malaya 1948" },
+            { id: "komunis_merdeka", title: "Bab 6–10: Ancaman Komunis, Usaha ke Arah Kemerdekaan, Pilihan Raya, Perlembagaan 1957 & Pemasyhuran Kemerdekaan", titleEn: "Ch 6–10: Emergency, Road to Independence, Elections, 1957 Constitution & Proclamation" }
           ]
         },
         {
