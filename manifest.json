@@ -1,0 +1,16 @@
+{
+  "name": "MyKids Study Arena",
+  "short_name": "Study Arena",
+  "description": "Aplikasi latihan kuiz sekolah KSSR & KSSM 2027 (Darjah 6, Tingkatan 2 & Tingkatan 4 STEM).",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#FBF9F4",
+  "theme_color": "#18181B",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
