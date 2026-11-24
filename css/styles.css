@@ -3574,3 +3574,32 @@ html, body {
 .mock-table .is-muted { color: var(--muted); }
 .mock-review { background: #fefce8; border: 2px solid var(--ink); border-radius: 12px; padding: 10px; margin: 8px 0; overflow-wrap: anywhere; }
 .mock-table th:first-child, .mock-table td:first-child { white-space: nowrap; }
+
+/* Structured questions + parent marking */
+.mock-sub { margin: 8px 0; }
+.mock-work { width: 100%; box-sizing: border-box; font: inherit; font-size: 16px; padding: 10px; border: 2px solid var(--ink); border-radius: 12px; resize: vertical; }
+.mark-modal { position: fixed; inset: 0; z-index: 110; background: rgba(24, 24, 27, 0.6); overflow-y: auto; padding: 10px; box-sizing: border-box; }
+.mark-box { max-width: 720px; margin: 0 auto; background: var(--surface); border: 2.5px solid var(--ink); border-radius: 16px; padding: 14px; box-sizing: border-box; }
+.mark-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.mark-head h2 { margin: 0; font-size: 1.15rem; }
+.mk-note { color: var(--muted); font-size: 0.86rem; }
+.mk-section h3 { margin: 14px 0 6px; }
+.mk-item { border-top: 2px dashed #a1a1aa; padding-top: 8px; margin-top: 8px; }
+.mk-item h4 { margin: 0 0 4px; }
+.mk-part { background: #fffbeb; border: 2px solid var(--ink); border-radius: 12px; padding: 10px; margin: 8px 0; overflow-wrap: anywhere; }
+.mk-child { background: #f0f9ff; border-radius: 8px; padding: 6px 8px; margin: 6px 0; font-size: 0.9rem; }
+.mk-none { color: var(--muted); }
+.mk-model { margin: 4px 0; }
+.mk-steps { list-style: none; padding: 0; margin: 6px 0; }
+.mk-steps li { margin: 4px 0; }
+.mk-steps label { display: flex; gap: 8px; align-items: flex-start; min-height: 40px; }
+.mk-steps input { width: 22px; height: 22px; flex: 0 0 auto; margin-top: 2px; }
+.mk-kind { flex: 0 0 auto; background: #18181b; color: #fde047; border-radius: 6px; padding: 0 6px; font-weight: 800; font-size: 0.8rem; }
+.mk-sub { font-size: 0.86rem; color: var(--muted); }
+.mark-foot { position: sticky; bottom: 0; display: flex; justify-content: space-between; align-items: center; gap: 8px; background: var(--surface); border-top: 2px solid var(--ink); padding: 10px 0 2px; margin-top: 10px; }
+
+/* Maths must show exactly what is written: stop the font turning "3x" into "3×" */
+html, body, button, input, textarea, select {
+  font-variant-ligatures: none;
+  font-feature-settings: "calt" 0, "liga" 0;
+}

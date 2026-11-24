@@ -36,6 +36,15 @@
     "t4:sejarah:k1:A": "all"
   };
 
+  /**
+   * Which subjective sections can be filled from the STRUCTURED pools (original items with model answers).
+   * Only items with status "verified" are ever drawn.
+   */
+  const STRUCTURED_MAP = {
+    "t2:math:k1:B": { pool: "t2_math", part: "B" },
+    "t2:math:k1:C": { pool: "t2_math", part: "C" }
+  };
+
   function hashSeed(str) {
     let h = 2166136261 >>> 0;
     for (let i = 0; i < str.length; i++) {
@@ -65,7 +74,12 @@
   const norm = (s) => String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
 
   function isSupported(gradeId, subjectId, paperId, sectionId) {
-    return !!OBJECTIVE_MAP[`${gradeId}:${subjectId}:${paperId}:${sectionId}`];
+    const k = `${gradeId}:${subjectId}:${paperId}:${sectionId}`;
+    return !!OBJECTIVE_MAP[k] || !!STRUCTURED_MAP[k];
+  }
+
+  function structuredSpec(gradeId, subjectId, paperId, sectionId) {
+    return STRUCTURED_MAP[`${gradeId}:${subjectId}:${paperId}:${sectionId}`] || null;
   }
 
   /**
@@ -79,6 +93,7 @@
     if (!paper) throw new Error(`Unknown paper ${paperId}`);
     const rng = rng32(hashSeed(`${blueprint.gradeId}:${blueprint.subjectId}:${paperId}:${seed}`));
     const used = new Set();
+    const usedStructured = new Set();
 
     const sections = paper.sections.map((s) => {
       const base = {
@@ -92,7 +107,47 @@
         supported: false,
         state: "kosong"
       };
-      if (s.kind !== "objective" || !isSupported(blueprint.gradeId, blueprint.subjectId, paperId, s.id)) return base;
+      const spec = structuredSpec(blueprint.gradeId, blueprint.subjectId, paperId, s.id);
+      if (spec && typeof bank.getStructured === "function") {
+        base.supported = true;
+        base.structured = true;
+        // Never trust the bank to filter: enforce the part, the verified status, and no item reused anywhere in the paper.
+        const pool = (bank.getStructured(spec.pool, spec.part) || []).filter(
+          (it) => it.status === "verified" && it.part === spec.part && !usedStructured.has(it.id)
+        );
+        const byChapter = new Map();
+        shuffle(rng, pool).forEach((it) => {
+          if (!byChapter.has(it.chapterId)) byChapter.set(it.chapterId, []);
+          byChapter.get(it.chapterId).push(it);
+        });
+        const chapters = shuffle(rng, Array.from(byChapter.keys()));
+        while (base.items.length < s.count) {
+          let took = false;
+          for (const cid of chapters) {
+            if (base.items.length >= s.count) break;
+            const q = byChapter.get(cid);
+            if (q.length) {
+              const it = q.shift();
+              usedStructured.add(it.id);
+              base.items.push({
+                id: it.id,
+                type: "structured",
+                chapterId: it.chapterId,
+                part: s.id,
+                level: it.level,
+                stem: it.stem,
+                parts: it.parts,
+                marks: it.parts.reduce((a, p) => a + p.marks, 0)
+              });
+              took = true;
+            }
+          }
+          if (!took) break;
+        }
+        base.state = base.items.length === s.count ? "sedia" : base.items.length > 0 ? "separa" : "kosong";
+        return base;
+      }
+      if (s.kind !== "objective" || !OBJECTIVE_MAP[`${blueprint.gradeId}:${blueprint.subjectId}:${paperId}:${s.id}`]) return base;
       base.supported = true;
 
       // Round-robin across chapters so every chapter is represented, no repeats inside one paper.
@@ -143,15 +198,45 @@
     };
   }
 
+  /** Marks a parent awarded for one structured item: { "0": [stepIdx, ...], "1": [...] } -> earned marks. */
+  function earnedForItem(item, marked) {
+    let earned = 0;
+    item.parts.forEach((p, i) => {
+      const picks = Array.isArray(marked && marked[i]) ? marked[i] : [];
+      const seen = new Set();
+      picks.forEach((k) => {
+        if (Number.isInteger(k) && k >= 0 && k < p.steps.length && !seen.has(k)) {
+          seen.add(k);
+          earned += p.steps[k].marks;
+        }
+      });
+    });
+    return earned;
+  }
+  function isItemMarked(item, marked) {
+    return !!marked && item.parts.every((p, i) => Array.isArray(marked[i]));
+  }
+
   /**
-   * @param paper    result of buildPaper
-   * @param answers  { [itemId]: chosenIndex }
-   * @returns per-section scores, paper completeness and (only when complete) a grade
+   * @param paper        result of buildPaper
+   * @param answers      { [itemId]: chosenIndex }   (objective items)
+   * @param parentMarks  { [itemId]: { "0": [stepIdx...], ... } }   (structured items, entered by a parent)
+   * @returns per-section scores, completeness and (only when complete) a grade
    */
-  function scorePaper(paper, answers) {
+  function scorePaper(paper, answers, parentMarks) {
+    const pm = parentMarks || {};
     const secs = paper.sections.map((s) => {
       if (!s.supported || s.items.length === 0 || s.state === "separa") {
         return { id: s.id, label: s.label, state: s.items.length ? "separa" : "kosong", earned: null, possible: s.marks, counted: 0 };
+      }
+      if (s.structured) {
+        const allMarked = s.items.every((it) => isItemMarked(it, pm[it.id]));
+        if (!allMarked) {
+          const done = s.items.filter((it) => isItemMarked(it, pm[it.id])).length;
+          return { id: s.id, label: s.label, state: "menunggu", earned: null, possible: s.marks, structured: true, marked: done, total: s.items.length };
+        }
+        const earned = s.items.reduce((a, it) => a + earnedForItem(it, pm[it.id]), 0);
+        return { id: s.id, label: s.label, state: "ditanda", earned, possible: s.marks, structured: true, marked: s.items.length, total: s.items.length };
       }
       let earned = 0;
       let correct = 0;
@@ -167,12 +252,13 @@
     const complete = secs.every((x) => x.state === "ditanda");
     const markedEarned = secs.filter((x) => x.state === "ditanda").reduce((a, x) => a + x.earned, 0);
     const markedPossible = secs.filter((x) => x.state === "ditanda").reduce((a, x) => a + x.possible, 0);
+    const markedIds = secs.filter((x) => x.state === "ditanda").map((x) => `Bahagian ${x.id}`);
     const out = {
       sections: secs,
       complete,
       markedEarned,
       markedPossible,
-      markedLabel: secs.filter((x) => x.state === "ditanda").map((x) => `Bahagian ${x.id}`).join(", ") + (complete ? "" : " sahaja"),
+      markedLabel: markedIds.join(", ") + (complete ? "" : " sahaja"),
       pct: complete ? Math.round((markedEarned / paper.marks) * 100) : null,
       grade: null,
       missing: secs.filter((x) => x.state !== "ditanda").map((x) => ({ id: x.id, state: x.state }))
@@ -181,11 +267,42 @@
     return out;
   }
 
+  /**
+   * Recompute a STORED result record after a parent has marked structured items.
+   * Objective sections keep their recorded scores; structured sections are recomputed from parentMarks.
+   * @param record     { gradeId, paperMarks, sections:[{id,state,earned,possible,structured,items:[{id,parts:[{marks,steps}]}]}] }
+   */
+  function rescoreRecord(record, parentMarks) {
+    const pm = parentMarks || {};
+    const sections = record.sections.map((s) => {
+      if (!s.structured) return s;
+      const items = s.items || [];
+      const allMarked = items.length > 0 && items.every((it) => isItemMarked(it, pm[it.id]));
+      if (!allMarked) {
+        return { ...s, state: "menunggu", earned: null, marked: items.filter((it) => isItemMarked(it, pm[it.id])).length };
+      }
+      return { ...s, state: "ditanda", earned: items.reduce((a, it) => a + earnedForItem(it, pm[it.id]), 0), marked: items.length };
+    });
+    const complete = sections.every((x) => x.state === "ditanda");
+    const earned = sections.filter((x) => x.state === "ditanda").reduce((a, x) => a + x.earned, 0);
+    const pct = complete ? Math.round((earned / record.paperMarks) * 100) : null;
+    const g = complete ? GradeBands.gradeFor(record.gradeId, pct) : null;
+    return { ...record, sections, parentMarks: pm, complete, pct, grade: g ? g.grade : null };
+  }
+
   /** Flat per-item records for the weakness engine (answered objective items only). */
-  function itemRecords(paper, answers) {
+  function itemRecords(paper, answers /* , parentMarks */) {
     const recs = [];
+    const pm = arguments[2] || {};
     paper.sections.forEach((s) =>
       s.items.forEach((it) => {
+        if (it.type === "structured") {
+          // Awaiting a parent's mark is NOT wrong. Only marked items produce a record.
+          if (isItemMarked(it, pm[it.id])) {
+            recs.push({ chapterId: it.chapterId, part: it.part, earned: earnedForItem(it, pm[it.id]), possible: it.marks });
+          }
+          return;
+        }
         if (answers[it.id] === undefined) return; // unanswered: not counted as wrong or right here
         recs.push({ chapterId: it.chapterId, part: it.part, correct: answers[it.id] === it.correctIndex });
       })
@@ -193,5 +310,5 @@
     return recs;
   }
 
-  return { OBJECTIVE_MAP, isSupported, buildPaper, scorePaper, itemRecords };
+  return { OBJECTIVE_MAP, STRUCTURED_MAP, isSupported, buildPaper, scorePaper, rescoreRecord, earnedForItem, isItemMarked, itemRecords };
 });

@@ -1312,6 +1312,24 @@
                     </div>`
                   : "";
 
+              const pendingMarks = App.MarkingUI ? App.MarkingUI.pendingRecords(p) : [];
+              const markHtml = pendingMarks.length
+                ? `<div class="tasks-box">
+                    <h4>📝 Kertas Menunggu Tanda</h4>
+                    ${pendingMarks
+                      .slice(0, 4)
+                      .map(
+                        (r) => `
+                      <div class="task-card">
+                        <div class="task-title">${esc(r.subjectName || r.subjectId)} • ${App.Storage.fmtDate(r.ts)}</div>
+                        <div class="task-meta">Bahagian ${esc(r.sections.filter((x) => x.state === "menunggu").map((x) => x.id).join(", "))} perlu ditanda oleh ibu bapa.</div>
+                        <div class="task-actions"><button type="button" class="btn-tactile btn-true btn-sm" data-mark-pid="${p.id}" data-mark-ts="${esc(r.ts)}">✍️ Tanda sekarang</button></div>
+                      </div>`
+                      )
+                      .join("")}
+                  </div>`
+                : "";
+
               const mistakesHtml =
                 report.recentMistakes.length > 0
                   ? `<div class="mistake-log">
@@ -1356,6 +1374,7 @@
                   </div>
                   ${chapterStatusHtml}
                   ${tasksHtml}
+                  ${markHtml}
                   <h4>📝 Kesilapan Terkini Untuk Dibimbing:</h4>
                   ${mistakesHtml}
                   <h4>Aktiviti Terkini:</h4>
@@ -1694,6 +1713,21 @@
         URL.revokeObjectURL(url);
       });
     }
+
+    main.querySelectorAll("[data-mark-ts]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        App.Sound.click();
+        const pid = btn.getAttribute("data-mark-pid");
+        const ts = btn.getAttribute("data-mark-ts");
+        const prof = (App.Storage.getState().profiles || []).find((x) => x.id === pid);
+        const rec = prof && (prof.mockResults || []).find((r) => r.ts === ts);
+        if (!rec) return;
+        App.MarkingUI.open(prof, rec, (updated) => {
+          App.Storage.updateMockResult(pid, ts, updated);
+          renderMain();
+        });
+      });
+    });
 
     main.querySelectorAll("[data-task-action]").forEach((btn) => {
       btn.addEventListener("click", () => {

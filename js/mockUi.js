@@ -69,6 +69,10 @@
     const gradeId = ctx.profile.gradeId;
     return {
       chapterIds: subject.chapters.map((c) => c.id),
+      getStructured: (pool) => {
+        const p = App.Data && App.Data.structured && App.Data.structured[pool];
+        return p ? p.ITEMS : [];
+      },
       getQuestions: (cid) => {
         const n = App.QuestionEngine.getChapterSetCount(gradeId, subject.id, cid, false);
         const all = [];
@@ -265,14 +269,15 @@
     const tabs = session.sectionIds
       .map((id) => {
         const s = lastPaper.sections.find((x) => x.id === id);
-        const done = s.items.filter((it) => session.answers[it.id] !== undefined).length;
+        const done = s.items.filter((it) => session.answers[it.id] !== undefined && (typeof session.answers[it.id] !== "object" || Object.values(session.answers[it.id]).some((v) => String(v).trim()))).length;
         return `<button type="button" class="mock-tab ${id === session.cur.sec ? "is-on" : ""}" data-tab="${esc(id)}">Bahagian ${esc(id)} <small>${done}/${s.items.length}</small></button>`;
       })
       .join("");
     const dots = sec.items
-      .map((it, i) => `<button type="button" class="mock-dot ${i === session.cur.idx ? "is-on" : ""} ${session.answers[it.id] !== undefined ? "is-done" : ""}" data-idx="${i}" aria-label="Soalan ${i + 1}">${i + 1}</button>`)
+      .map((it, i) => `<button type="button" class="mock-dot ${i === session.cur.idx ? "is-on" : ""} ${session.answers[it.id] !== undefined && (typeof session.answers[it.id] !== "object" || Object.values(session.answers[it.id]).some((v) => String(v).trim())) ? "is-done" : ""}" data-idx="${i}" aria-label="Soalan ${i + 1}">${i + 1}</button>`)
       .join("");
-    const opts = item.options
+    const isStructured = item.type === "structured";
+    const opts = (item.options || [])
       .map(
         (o, i) => `<button type="button" class="mock-opt ${session.answers[item.id] === i ? "is-picked" : ""}" data-opt="${i}"><span class="mo-key">${"ABCD"[i] || i + 1}</span><span>${esc(o)}</span></button>`
       )
@@ -286,9 +291,22 @@
         </div>
         <div class="mock-tabs">${tabs}</div>
         <div class="mock-qcard">
-          <div class="mock-qno">Soalan ${session.cur.idx + 1} / ${sec.items.length}</div>
-          <p class="mock-q">${esc(item.q)}</p>
-          <div class="mock-opts">${opts}</div>
+          <div class="mock-qno">Soalan ${session.cur.idx + 1} / ${sec.items.length}${isStructured ? ` • ${item.marks} markah` : ""}</div>
+          ${
+            isStructured
+              ? `${item.stem ? `<p class="mock-q">${esc(item.stem).replace(/\n/g, "<br>")}</p>` : ""}
+                 ${item.parts
+                   .map(
+                     (p, i) => `
+                   <div class="mock-sub">
+                     <p class="mock-q">${p.label ? `<strong>${esc(p.label)}</strong> ` : ""}${esc(p.q).replace(/\n/g, "<br>")} <small>[${p.marks} markah]</small></p>
+                     <textarea class="mock-work" data-part="${i}" rows="4" placeholder="Tulis jalan kerja dan jawapan di sini">${esc((session.answers[item.id] || {})[i] || "")}</textarea>
+                   </div>`
+                   )
+                   .join("")}
+                 <p class="mock-note">Jalan kerja ditanda oleh ibu bapa selepas kertas dihantar.</p>`
+              : `<p class="mock-q">${esc(item.q)}</p><div class="mock-opts">${opts}</div>`
+          }
         </div>
         <div class="mock-dots">${dots}</div>
         <div class="mock-nav">
@@ -297,6 +315,14 @@
           <button type="button" class="btn-tactile btn-true btn-sm" id="mock-submit">Hantar</button>
         </div>
       </section>`;
+    main.querySelectorAll(".mock-work").forEach((ta) =>
+      ta.addEventListener("input", () => {
+        const cur = session.answers[item.id] && typeof session.answers[item.id] === "object" ? session.answers[item.id] : {};
+        cur[ta.getAttribute("data-part")] = ta.value.slice(0, 1500);
+        session.answers[item.id] = cur;
+        saveSession();
+      })
+    );
     main.querySelectorAll("[data-opt]").forEach((b) =>
       b.addEventListener("click", () => {
         session.answers[item.id] = Number(b.getAttribute("data-opt"));
@@ -332,7 +358,7 @@
     });
     document.getElementById("mock-submit").addEventListener("click", () => {
       const unanswered = session.sectionIds.reduce(
-        (n, id) => n + lastPaper.sections.find((x) => x.id === id).items.filter((it) => session.answers[it.id] === undefined).length,
+        (n, id) => n + lastPaper.sections.find((x) => x.id === id).items.filter((it) => session.answers[it.id] === undefined || (typeof session.answers[it.id] === "object" && !Object.values(session.answers[it.id]).some((v) => String(v).trim()))).length,
         0
       );
       const msg = unanswered ? `Masih ada ${unanswered} soalan belum dijawab. Hantar sekarang?` : "Hantar jawapan sekarang?";
@@ -358,7 +384,31 @@
       subjectName: pickedSubject.name,
       paperId: session.paperId,
       mode: session.mode,
-      sections: lastScore.sections.map((x) => ({ id: x.id, state: x.state, earned: x.earned, possible: x.possible })),
+      paperMarks: scoped.marks,
+      typed: (() => {
+        const t = {};
+        scoped.sections.forEach((s) =>
+          s.items.forEach((it) => {
+            if (it.type === "structured" && session.answers[it.id] && typeof session.answers[it.id] === "object") t[it.id] = session.answers[it.id];
+          })
+        );
+        return t;
+      })(),
+      sections: lastScore.sections.map((x) => {
+        const base = { id: x.id, state: x.state, earned: x.earned, possible: x.possible };
+        const sec = scoped.sections.find((s) => s.id === x.id);
+        if (sec && sec.structured && sec.items.length) {
+          base.structured = true;
+          base.items = sec.items.map((it) => ({
+            id: it.id,
+            chapterId: it.chapterId,
+            part: it.part,
+            marks: it.marks,
+            parts: it.parts.map((p) => ({ marks: p.marks, steps: p.steps.map((st) => ({ marks: st.marks })) }))
+          }));
+        }
+        return base;
+      }),
       complete: lastScore.complete,
       pct: lastScore.pct,
       grade: lastScore.grade ? lastScore.grade.grade : null,
@@ -378,7 +428,10 @@
     const rows = sc.sections
       .map((s) => {
         if (s.state === "ditanda") {
-          return `<tr><td>Bahagian ${esc(s.id)}</td><td>${s.earned}/${s.possible}</td><td>${s.correct}/${s.total} betul</td></tr>`;
+          return `<tr><td>Bahagian ${esc(s.id)}</td><td>${s.earned}/${s.possible}</td><td>${s.structured ? "ditanda ibu bapa" : `${s.correct}/${s.total} betul`}</td></tr>`;
+        }
+        if (s.state === "menunggu") {
+          return `<tr class="is-muted"><td>Bahagian ${esc(s.id)}</td><td>-/${s.possible}</td><td>⏳ Menunggu ibu bapa menanda (Panel Ibu Bapa → Tanda Kertas)</td></tr>`;
         }
         if (!lastPaper.sections.find((x) => x.id === s.id).items.length) {
           return `<tr class="is-muted"><td>Bahagian ${esc(s.id)}</td><td>-/${s.possible}</td><td>Tidak dinilai: belum ada soalan atau perlu ditanda ibu bapa</td></tr>`;
@@ -388,10 +441,11 @@
       .join("");
     const gradeBlock = sc.complete
       ? `<div class="mock-grade"><strong>${sc.grade.grade}</strong><span>${sc.pct}% • ${esc(sc.grade.label)}</span>${lastPapersInSubject > 1 ? `<small>Gred bagi kertas ini sahaja (bukan gred subjek). Gred subjek memerlukan semua kertas.</small>` : ""}${sc.grade.verified ? "" : `<small>Skala gred belum disahkan dengan slip sebenar.</small>`}</div>`
-      : `<div class="mock-grade is-partial"><strong>Tiada gred keseluruhan</strong><span>Hanya ${esc(sc.markedLabel)} dinilai (${sc.markedEarned}/${sc.markedPossible} markah). Bahagian lain belum ada soalan atau belum ditanda, jadi gred kertas penuh tidak boleh dikira dengan jujur.</span></div>`;
+      : `<div class="mock-grade is-partial"><strong>Tiada gred keseluruhan</strong><span>${sc.markedLabel ? `Hanya ${esc(sc.markedLabel)} dinilai (${sc.markedEarned}/${sc.markedPossible} markah). ` : ""}Bahagian lain belum ada soalan atau belum ditanda ibu bapa, jadi gred kertas penuh tidak boleh dikira dengan jujur.</span></div>`;
     const wrong = [];
     lastPaper.sections.forEach((s) =>
       s.items.forEach((it) => {
+        if (it.type === "structured") return; // marked by a parent, never auto-judged here
         const a = session.answers[it.id];
         if (a !== it.correctIndex) wrong.push({ it, a });
       })

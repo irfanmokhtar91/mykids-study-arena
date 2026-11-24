@@ -92,5 +92,87 @@ const recs = M.itemRecords(paper, { A1: paper.sections[0].items[0].correctIndex 
 eq("only answered items produce records", recs.length, 1);
 eq("record has chapter + part + correct flag", Object.keys(recs[0]).sort(), ["chapterId", "correct", "part"]);
 
+// ======================= STRUCTURED SECTIONS (Tingkatan 2 Matematik pilot) =======================
+const S = require("../js/data/structured_t2_math.js");
+const sbank = (items) => ({
+  chapterIds: ["c1", "c2", "c3", "c4"],
+  getQuestions: (cid) => Array.from({ length: 10 }, (_, i) => mkQ(cid, i)),
+  getStructured: (pool, part) => items.filter((it) => it.part === part)
+});
+const verified = S.ITEMS.filter((i) => i.status === "verified");
+// A CARELESS bank that ignores the requested part and returns every item (this is what the real UI bank did)
+const carelessBank = { chapterIds: ["c1"], getQuestions: () => [], getStructured: () => verified };
+const cp = M.buildPaper(t2math, "k1", carelessBank, "careless");
+eq("careless bank: Bahagian B only gets B items", cp.sections[1].items.every((i) => i.id.includes("-B")), true);
+eq("careless bank: Bahagian C only gets C items", cp.sections[2].items.every((i) => i.id.includes("-C")), true);
+eq("careless bank: no item appears in two sections", new Set([...cp.sections[1].items, ...cp.sections[2].items].map((i) => i.id)).size, cp.sections[1].items.length + cp.sections[2].items.length);
+eq("careless bank: B = 20 marks, C = 60 marks", [cp.sections[1].items.reduce((a, i) => a + i.marks, 0), cp.sections[2].items.reduce((a, i) => a + i.marks, 0)], [20, 60]);
+let sp = M.buildPaper(t2math, "k1", sbank(verified), "sx");
+eq("B filled with 5 structured items", [sp.sections[1].items.length, sp.sections[1].state, sp.sections[1].structured], [5, "sedia", true]);
+eq("C filled with 6 structured items", [sp.sections[2].items.length, sp.sections[2].state], [6, "sedia"]);
+eq("B items sum to 20 marks, C items to 60", [sp.sections[1].items.reduce((a, i) => a + i.marks, 0), sp.sections[2].items.reduce((a, i) => a + i.marks, 0)], [20, 60]);
+eq("no repeated structured item in one paper", new Set([...sp.sections[1].items, ...sp.sections[2].items].map((i) => i.id)).size, 11);
+eq("B items only from pool part B", sp.sections[1].items.every((i) => i.id.includes("-B")), true);
+// drafts are never drawn
+const drafts = S.ITEMS.map((i) => ({ ...i, status: "draft" }));
+sp = M.buildPaper(t2math, "k1", sbank(drafts), "sx");
+eq("draft items are never drawn", [sp.sections[1].items.length, sp.sections[1].state], [0, "kosong"]);
+// short pool -> partial, never padded
+sp = M.buildPaper(t2math, "k1", sbank(verified.filter((i) => i.part === "B").slice(0, 3)), "sx");
+eq("3 verified B items -> separa, not padded", [sp.sections[1].items.length, sp.sections[1].state], [3, "separa"]);
+
+// scoring: objective all right, structured not yet marked -> menunggu, no grade, not counted wrong
+sp = M.buildPaper(t2math, "k1", sbank(verified), "sx");
+const ans = {};
+sp.sections[0].items.forEach((i) => (ans[i.id] = i.correctIndex));
+let sc2 = M.scorePaper(sp, ans, {});
+eq("unmarked structured sections are menunggu", [sc2.sections[1].state, sc2.sections[2].state], ["menunggu", "menunggu"]);
+eq("no grade while waiting for parent", [sc2.complete, sc2.pct, sc2.grade], [false, null, null]);
+eq("waiting sections are not scored as 0 earned", [sc2.sections[1].earned, sc2.sections[2].earned], [null, null]);
+eq("itemRecords ignore unmarked structured items", M.itemRecords(sp, ans, {}).every((r) => r.correct !== undefined), true);
+
+// parent marks every step of every item -> full marks
+const full = {};
+[...sp.sections[1].items, ...sp.sections[2].items].forEach((it) => {
+  full[it.id] = {};
+  it.parts.forEach((p, i) => (full[it.id][i] = p.steps.map((_, k) => k)));
+});
+sc2 = M.scorePaper(sp, ans, full);
+eq("all steps ticked -> B 20/20, C 60/60", [sc2.sections[1].earned, sc2.sections[2].earned], [20, 60]);
+eq("complete paper with full marks -> 100% grade A", [sc2.complete, sc2.pct, sc2.grade && sc2.grade.grade], [true, 100, "A"]);
+// partially marked section stays menunggu
+const partial = { ...full };
+delete partial[sp.sections[1].items[0].id];
+sc2 = M.scorePaper(sp, ans, partial);
+eq("one unmarked item keeps the whole section menunggu", sc2.sections[1].state, "menunggu");
+eq("and blocks the grade", sc2.grade, null);
+// half the steps in B, none in C
+const half2 = {};
+sp.sections[1].items.forEach((it) => { half2[it.id] = {}; it.parts.forEach((p, i) => (half2[it.id][i] = [0, 1])); });
+sp.sections[2].items.forEach((it) => { half2[it.id] = {}; it.parts.forEach((p, i) => (half2[it.id][i] = [])); });
+sc2 = M.scorePaper(sp, ans, half2);
+eq("B 2 of 4 steps each = 10/20; C none ticked = 0/60", [sc2.sections[1].earned, sc2.sections[2].earned], [10, 0]);
+eq("grade = (20 + 10 + 0)/100 = 30% -> E (20-34)", [sc2.pct, sc2.grade && sc2.grade.grade], [30, "E"]);
+// invalid / duplicate step indices cannot inflate marks
+const cheat = { [sp.sections[1].items[0].id]: { 0: [0, 0, 0, 99, -1, 1.5] } };
+eq("duplicate/invalid step indices count at most once", M.earnedForItem(sp.sections[1].items[0], cheat[sp.sections[1].items[0].id]), 1);
+// itemRecords for marked structured items carry earned/possible
+const recsS = M.itemRecords(sp, ans, full);
+eq("marked structured items produce earned/possible records", recsS.filter((r) => r.possible !== undefined).length, 11);
+
+// rescoreRecord: stored result updated after parent marks
+const record = {
+  gradeId: "t2", paperMarks: 100,
+  sections: [
+    { id: "A", state: "ditanda", earned: 12, possible: 20 },
+    { id: "B", state: "menunggu", earned: null, possible: 20, structured: true, items: sp.sections[1].items },
+    { id: "C", state: "menunggu", earned: null, possible: 60, structured: true, items: sp.sections[2].items }
+  ]
+};
+let rr = M.rescoreRecord(record, {});
+eq("rescore with no marks keeps waiting", [rr.complete, rr.pct, rr.grade], [false, null, null]);
+rr = M.rescoreRecord(record, full);
+eq("rescore after full marks: 12+20+60 = 92% -> A", [rr.complete, rr.pct, rr.grade], [true, 92, "A"]);
+
 console.log(failed === 0 ? "MOCK_TESTS_PASSED" : `MOCK_TESTS_FAILED (${failed})`);
 process.exit(failed === 0 ? 0 : 1);

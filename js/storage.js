@@ -1033,6 +1033,16 @@
       p.updatedAt = new Date().toISOString();
       save();
     },
+    updateMockResult: (profileId, ts, rec) => {
+      const p = state.profiles.find((x) => x.id === profileId);
+      if (!p || !Array.isArray(p.mockResults)) return false;
+      const i = p.mockResults.findIndex((r) => r.ts === ts);
+      if (i < 0) return false;
+      p.mockResults[i] = rec;
+      p.updatedAt = new Date().toISOString();
+      save();
+      return true;
+    },
     getMockResults: (profileId) => {
       const p = state.profiles.find((x) => x.id === profileId);
       return p && Array.isArray(p.mockResults) ? p.mockResults : [];
