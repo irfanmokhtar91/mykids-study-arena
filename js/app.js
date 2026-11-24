@@ -1334,6 +1334,52 @@
                     </div>`
                   : `<div class="weak-box weak-clear">ℹ️ Anak belum mencuba latihan lagi.</div>`;
 
+              const mockWk = App.Weakness.analyseMock(p, (id) => (App.MarkingUI ? App.MarkingUI.findItem(id) : null));
+              const mockWkHtml = mockWk.papers.length
+                ? `<div class="weak-box wk-mock">
+                    <strong>📑 Prestasi Mengikut Bahagian Kertas (Ujian Percubaan):</strong>
+                    ${mockWk.papers
+                      .map((paper) => {
+                        const bp = App.Blueprints.find(paper.gradeId, paper.subjectId);
+                        const bpPaper = bp && bp.papers.find((x) => x.id === paper.paperId);
+                        const partRows = paper.parts
+                          .map((pt) => {
+                            const sec = bpPaper && bpPaper.sections.find((x) => x.id === pt.part);
+                            const label = sec ? sec.label : "";
+                            return `
+                          <div class="wk-chapter">
+                            <div>${statusDot[pt.status]} <strong>Bahagian ${esc(pt.part)}</strong>${label ? ` (${esc(label)})` : ""} — ${pt.pct}% <small>(${pt.earned}/${pt.possible} markah)</small></div>
+                            <div class="wk-bar"><span class="${statusCls[pt.status]}" style="width:${Math.max(3, pt.pct)}%"></span></div>
+                          </div>`;
+                          })
+                          .join("");
+                        const lostTotal = paper.lost.M + paper.lost.A;
+                        const lostHtml = lostTotal
+                          ? `<div class="wk-chapter"><small>Markah struktur yang hilang: kaedah (M) ${paper.lost.M}, jawapan tepat (A) ${paper.lost.A}.</small></div>`
+                          : "";
+                        const weakCh = paper.chapters.filter((c) => c.possible >= 2 && c.pct < App.Weakness.WEAK_BELOW).slice(0, 3);
+                        const chHtml = weakCh.length
+                          ? `<div class="wk-chapter"><small>Bab yang lemah dalam kertas ini: ${weakCh
+                              .map((c) => {
+                                const sub = (App.GRADES[paper.gradeId] || { subjects: [] }).subjects.find((x) => x.id === paper.subjectId);
+                                const chap = sub && sub.chapters.find((x) => x.id === c.chapterId);
+                                return `${esc(chap ? chap.title : c.chapterId)} (${c.pct}%)`;
+                              })
+                              .join("; ")}</small></div>`
+                          : "";
+                        const advice = App.Weakness.mockAdvice(paper);
+                        return `
+                        <div class="wk-subject">
+                          <div class="wk-subject-head"><span>${esc(paper.subjectName || paper.subjectId)} • ${esc(bpPaper ? bpPaper.name : paper.paperId)}</span><small>${paper.attempts} percubaan</small></div>
+                          ${partRows}${lostHtml}${chHtml}
+                          ${advice.length ? `<ul class="wk-advice">${advice.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+                        </div>`;
+                      })
+                      .join("")}
+                    <small class="wk-note">Berdasarkan 3 kertas terkini yang sudah ditanda. Bahagian yang menunggu tanda ibu bapa tidak dikira sebagai salah.</small>
+                  </div>`
+                : "";
+
               const kidTasks = App.Storage.refreshTasks(p.id);
               const openTasks = kidTasks.filter((t) => t.status === "aktif" || t.status === "rujuk_guru").slice(0, 4);
               const doneTasks = kidTasks.filter((t) => t.status === "selesai" || t.status === "tamat").slice(-3).reverse();
@@ -1440,6 +1486,7 @@
                     <button class="btn-secondary btn-rename" data-pid="${p.id}">Simpan</button>
                   </div>
                   ${chapterStatusHtml}
+                  ${mockWkHtml}
                   ${tasksHtml}
                   ${markHtml}
                   <h4>📝 Kesilapan Terkini Untuk Dibimbing:</h4>

@@ -16,3 +16,4 @@ Run all unit tests first: `node scripts/test-weakness.mjs`, `test-tasks`, `test-
 - scroll-one-finger.mjs: real one-finger touch scrolling on the long screens (regression test: overflow hidden on html/body broke it)
 - mock-t4-k2.mjs: a full Tingkatan 4 Matematik Kertas 2 (A, B, C answer 1 of 2), parent marking, SPM grade
 - photo-answers.mjs: photo answers: camera/gallery, automatic compression (2 MB -> ~240 KB), 3-photo limit, resume, parent viewer, orphan clean-up
+- mock-weakness-view.mjs: parent dashboard weakness by paper part (Bahagian A/B/C), method-vs-accuracy mark loss, advice

@@ -178,6 +178,131 @@
     return out.sort((a, b) => b.times - a.times).slice(0, limit);
   }
 
+  /** Marks earned on one stored structured item (slim snapshot) given the parent's ticked steps. */
+  function itemEarned(item, marked) {
+    let e = 0;
+    (item.parts || []).forEach((p, i) => {
+      const picks = Array.isArray(marked && marked[i]) ? marked[i] : [];
+      new Set(picks).forEach((k) => {
+        if (Number.isInteger(k) && p.steps && p.steps[k]) e += p.steps[k].marks || 0;
+      });
+    });
+    return e;
+  }
+
+  /**
+   * Mock-exam weakness by PAPER PART (Bahagian A/B/C) and by chapter, plus where structured marks are lost (method vs accuracy).
+   * Uses the last RECENT_ATTEMPTS marked results per subject+paper. Sections still waiting for a parent's mark are ignored (never counted as wrong).
+   * @param profile  { mockResults: [newest first] }
+   * @param lookup   optional fn(itemId) -> full structured item (to read M/A step kinds)
+   */
+  function analyseMock(profile, lookup) {
+    const recs = Array.isArray(profile && profile.mockResults) ? profile.mockResults : [];
+    const groups = new Map();
+    recs.forEach((r) => {
+      const key = `${r.gradeId}:${r.subjectId}:${r.paperId}`;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(r);
+    });
+    const papers = [];
+    groups.forEach((list, key) => {
+      const recent = list.slice(0, RECENT_ATTEMPTS);
+      const parts = new Map();
+      const chapters = new Map();
+      const lost = { M: 0, A: 0 };
+      const gained = { M: 0, A: 0 };
+      let markedAttempts = 0;
+      recent.forEach((r) => {
+        let any = false;
+        (r.sections || []).forEach((sec) => {
+          if (sec.state !== "ditanda") return;
+          any = true;
+          const p = parts.get(sec.id) || { part: sec.id, earned: 0, possible: 0, attempts: 0, structured: !!sec.structured };
+          p.earned += Number(sec.earned) || 0;
+          p.possible += Number(sec.possible) || 0;
+          p.attempts++;
+          parts.set(sec.id, p);
+          if (sec.structured) {
+            (sec.items || []).forEach((it) => {
+              const marked = (r.parentMarks || {})[it.id];
+              if (!marked) return;
+              const earned = itemEarned(it, marked);
+              if (sec.choose && earned === 0) return; // an unanswered "answer N of M" question is not a weakness
+              const ch = chapters.get(it.chapterId) || { chapterId: it.chapterId, earned: 0, possible: 0 };
+              ch.earned += earned;
+              ch.possible += it.marks || 0;
+              chapters.set(it.chapterId, ch);
+              const full = typeof lookup === "function" ? lookup(it.id) : null;
+              if (full) {
+                full.parts.forEach((fp, i) => {
+                  const picks = new Set(Array.isArray(marked[i]) ? marked[i] : []);
+                  fp.steps.forEach((st, k) => {
+                    const bucket = picks.has(k) ? gained : lost;
+                    if (st.kind === "M" || st.kind === "A") bucket[st.kind] += st.marks || 1;
+                  });
+                });
+              }
+            });
+          }
+        });
+        if (any) markedAttempts++;
+        // answered objective items give chapter-level evidence too
+        (r.items || []).forEach((it) => {
+          if (typeof it.correct !== "boolean") return;
+          const ch = chapters.get(it.chapterId) || { chapterId: it.chapterId, earned: 0, possible: 0 };
+          ch.earned += it.correct ? 1 : 0;
+          ch.possible += 1;
+          chapters.set(it.chapterId, ch);
+        });
+      });
+      if (!markedAttempts) return;
+      const partList = Array.from(parts.values())
+        .map((p) => {
+          const pct = pctOf(p.earned, p.possible);
+          return { ...p, pct, status: statusFor(pct, p.attempts) };
+        })
+        .sort((a, b) => (a.part < b.part ? -1 : 1));
+      const chapterList = Array.from(chapters.values())
+        .map((c) => ({ ...c, pct: pctOf(c.earned, c.possible) }))
+        .sort((a, b) => a.pct - b.pct);
+      const first = recent[0];
+      const weakest = partList.slice().sort((a, b) => a.pct - b.pct)[0] || null;
+      papers.push({
+        key,
+        gradeId: first.gradeId,
+        subjectId: first.subjectId,
+        subjectName: first.subjectName,
+        paperId: first.paperId,
+        attempts: markedAttempts,
+        parts: partList,
+        weakestPart: weakest && weakest.status === "lemah" ? weakest.part : null,
+        chapters: chapterList,
+        lost,
+        gained
+      });
+    });
+    return { papers };
+  }
+
+  /** Plain-language, evidence-based action sentences for a paper analysis (no subject facts). */
+  function mockAdvice(paper) {
+    const out = [];
+    const obj = paper.parts.filter((p) => !p.structured);
+    const str = paper.parts.filter((p) => p.structured);
+    const avg = (arr) => (arr.length ? arr.reduce((a, p) => a + p.pct, 0) / arr.length : null);
+    const o = avg(obj);
+    const st = avg(str);
+    if (o !== null && st !== null && o - st >= 25) out.push("Anak mahir soalan objektif tetapi lemah soalan berstruktur. Tambah latihan menulis langkah kerja penuh.");
+    const totalLost = paper.lost.M + paper.lost.A;
+    if (totalLost >= 4) {
+      if (paper.lost.M >= paper.lost.A * 1.5) out.push("Banyak markah kaedah (M) hilang: anak sering tidak menunjukkan langkah kerja. Minta dia tulis setiap langkah walaupun jawapan nampak mudah.");
+      else if (paper.lost.A >= paper.lost.M * 1.5) out.push("Kaedah betul tetapi jawapan akhir salah (markah A hilang): latih menyemak pengiraan, unit dan pembundaran.");
+      else out.push("Markah kaedah (M) dan jawapan (A) sama-sama hilang: ulang kaji konsep bab yang paling lemah di bawah, kemudian latih langkah kerja.");
+    }
+    if (paper.weakestPart) out.push(`Bahagian ${paper.weakestPart} paling lemah. Mulakan latihan di bahagian ini.`);
+    return out;
+  }
+
   return {
     WEAK_BELOW,
     STRONG_AT,
@@ -185,6 +310,8 @@
     CARELESS_SEC,
     statusFor,
     analyse,
-    repeatedMistakes
+    repeatedMistakes,
+    analyseMock,
+    mockAdvice
   };
 });

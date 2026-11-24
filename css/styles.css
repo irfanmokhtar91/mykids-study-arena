@@ -3632,3 +3632,8 @@ html, body, button, input, textarea, select {
 .pv-scroll { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y pinch-zoom; }
 .pv-scroll img { display: block; width: 100%; height: auto; margin: 0 auto; }
 .pv-scroll img.is-zoomed { width: 250%; max-width: none; }
+
+/* Mock exam weakness by paper part */
+.wk-advice { margin: 6px 0 0; padding-left: 18px; font-size: 0.88rem; }
+.wk-advice li { margin: 3px 0; overflow-wrap: anywhere; }
+.wk-mock .wk-bar { margin-bottom: 8px; }
