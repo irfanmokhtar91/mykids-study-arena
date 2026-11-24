@@ -648,6 +648,19 @@
     const dlp = state.dlpEnabled;
     const displayName = App.Storage.getDisplayName(profile);
 
+    if (currentView === "mock") {
+      App.MockUI.open(main, {
+        profile,
+        grade,
+        onExit: () => {
+          App.MockUI.stop();
+          currentView = "home";
+          renderAll();
+        }
+      });
+      return;
+    }
+
     if (currentView === "home") {
       const totalSetsPlayed = Object.keys(profile.setBest || {}).length;
       const mascotInfo = App.Mascot ? App.Mascot.getInfo(grade.id) : { name: "Koko", tagline: "" };
@@ -755,6 +768,7 @@
               <div class="stat-box"><strong>${profile.dailyStreak || 0} 🔥</strong><span>Streak Hari</span></div>
               <div class="stat-box"><strong>${totalSetsPlayed}</strong><span>Set Selesai</span></div>
               <button type="button" class="btn-tactile btn-shop-cta" id="btn-open-shop">🛍️ Kedai Ganjaran</button>
+              <button type="button" class="btn-tactile btn-mock-cta" id="btn-open-mock">📝 Ujian Percubaan</button>
             </div>
             <div class="streak-calendar">
               <span class="sc-title">Kalendar 7 Hari:</span>
@@ -768,6 +782,12 @@
         <h2 class="section-title">📚 Semua Subjek (${esc(grade.name)})</h2>
         <div class="subject-grid">${cards}</div>
       `;
+
+      document.getElementById("btn-open-mock").addEventListener("click", () => {
+        App.Sound.click();
+        currentView = "mock";
+        renderAll();
+      });
 
       document.getElementById("btn-open-shop").addEventListener("click", () => {
         App.Sound.click();

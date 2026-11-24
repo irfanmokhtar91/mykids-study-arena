@@ -129,6 +129,7 @@
       history: [],
       mistakeLog: [],
       tasks: [],
+      mockResults: [],
       setBest: {},
       updatedAt: new Date().toISOString()
     };
@@ -165,6 +166,10 @@
     let changed = false;
     if (!Array.isArray(p.tasks)) {
       p.tasks = [];
+      changed = true;
+    }
+    if (!Array.isArray(p.mockResults)) {
+      p.mockResults = [];
       changed = true;
     }
     if (!p.id) {
@@ -1019,6 +1024,19 @@
       };
     },
     getFocusReport,
+    saveMockResult: (profileId, rec) => {
+      const p = state.profiles.find((x) => x.id === profileId);
+      if (!p) return;
+      normalizeProfileFields(p);
+      p.mockResults.unshift(rec);
+      if (p.mockResults.length > 40) p.mockResults.length = 40;
+      p.updatedAt = new Date().toISOString();
+      save();
+    },
+    getMockResults: (profileId) => {
+      const p = state.profiles.find((x) => x.id === profileId);
+      return p && Array.isArray(p.mockResults) ? p.mockResults : [];
+    },
     refreshTasks: (profileId) => {
       const p = state.profiles.find((x) => x.id === profileId);
       if (!p || !App.Tasks) return [];
