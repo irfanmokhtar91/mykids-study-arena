@@ -15,6 +15,8 @@
   let parentUnlocked = false;
   let editingProfile = false;
   let draftAvatar = null;
+  let activeAiPromptTitle = "";
+  let activeAiPromptText = "";
 
   function esc(str) {
     return String(str || "")
@@ -139,15 +141,21 @@
         renderMain();
       },
       onComplete: (res) => {
+        const subjName = dlp && selectedSubject.dlp ? selectedSubject.nameEn : selectedSubject.name;
+        const chTitle = dlp && selectedSubject.dlp ? selectedChapter.titleEn : selectedChapter.title;
         const reward = App.Storage.recordAttempt(profile.id, {
           gradeId: profile.gradeId,
           subjectId: selectedSubject.id,
+          subjectName: subjName,
           chapterId: selectedChapter.id,
+          chapterTitle: chTitle,
           setNum: selectedSetNum,
           score: res.score,
           total: res.total,
+          speedBonus: res.speedBonus || 0,
           maxStreak: res.maxStreak,
-          mode: selectedMode
+          mode: selectedMode,
+          answers: res.answers
         });
         lastResult = { ...res, earnedXp: reward ? reward.earnedXp : 0 };
         currentView = "results";
@@ -377,11 +385,12 @@
           const rec = profile.setBest[`${selectedSubject.id}:${selectedChapter.id}:${s}`];
           const pct = rec ? Math.round((rec.bestScore / rec.total) * 100) : null;
           const stars = pct === null ? "☆☆☆" : pct >= 90 ? "★★★" : pct >= 70 ? "★★☆" : "★☆☆";
+          const bonusTxt = rec && rec.bestBonus ? ` ⚡+${rec.bestBonus}` : "";
           return `
             <button class="set-card ${rec ? "played" : ""}" data-set="${s}">
               <div class="set-num">Set ${s}</div>
               <div class="set-stars">${stars}</div>
-              <div class="set-score">${rec ? `${App.Storage.fmtScore(rec.bestScore)}/${rec.total} (${pct}%)` : "Mula Set"}</div>
+              <div class="set-score">${rec ? `${App.Storage.fmtScore(rec.bestScore)}/${rec.total} (${pct}%)${bonusTxt}` : "Mula Set"}</div>
             </button>`;
         })
         .join("");
@@ -424,7 +433,7 @@
         });
       });
     } else if (currentView === "results" && lastResult) {
-      const { score, total, maxStreak, answers, pct, earnedXp } = lastResult;
+      const { score, total, speedBonus = 0, maxStreak, answers, pct, earnedXp } = lastResult;
       const rank = pct >= 90 ? "S" : pct >= 80 ? "A" : pct >= 65 ? "B" : "C";
       const emoji = pct >= 90 ? "🏆" : pct >= 70 ? "🌟" : pct >= 50 ? "👍" : "💪";
       const confettiHtml =
@@ -432,15 +441,20 @@
           ? `<div class="confetti-burst" aria-hidden="true">${Array.from({ length: 16 }, (_, i) => `<span class="confetti-dot c-${i % 4}" style="--i:${i}"></span>`).join("")}</div>`
           : "";
 
+      const chTitle = dlp && selectedSubject.dlp ? selectedChapter.titleEn : selectedChapter.title;
+      const studyTip = App.GameUtil_getStudyGuidance
+        ? App.GameUtil_getStudyGuidance(selectedSubject.id, chTitle)
+        : "";
+
       const reviewHtml = answers
         .map((a, i) => {
           const userAns = a.qObj.options[a.selectedIndex];
           const trueAns = a.qObj.options[a.qObj.correctIndex];
           const ptsLabel = a.isCorrect
-            ? a.points === 1
-              ? `✅ +1.0 (${a.elapsedSec.toFixed(1)}s)`
-              : `⏱️ +0.5 (>10s: ${a.elapsedSec.toFixed(1)}s)`
-            : "❌ 0";
+            ? a.gotBonus
+              ? `✅ Betul (+1) • ⚡ Bonus Pantas (${a.elapsedSec.toFixed(1)}s)`
+              : `✅ Betul (+1) • ⏱️ ${a.elapsedSec.toFixed(1)}s`
+            : `❌ Salah (${a.elapsedSec.toFixed(1)}s)`;
           return `
             <div class="review-item ${a.isCorrect ? "rev-ok" : "rev-bad"}">
               <div class="rev-q"><strong>S${i + 1}:</strong> ${esc(a.qObj.q)}</div>
@@ -449,6 +463,7 @@
                 ${!a.isCorrect ? `<span>Jawapan tepat: <strong class="true-ans">${esc(trueAns)}</strong></span>` : ""}
               </div>
               <div class="rev-exp">💡 ${esc(a.qObj.explanation)}</div>
+              ${!a.isCorrect && studyTip ? `<div class="rev-tip">🎯 <strong>Cara faham:</strong> ${esc(studyTip)}</div>` : ""}
             </div>`;
         })
         .join("");
@@ -460,8 +475,11 @@
             <span class="result-emoji">${emoji}</span>
             <span class="rank-badge rank-${rank}">Gred ${rank}</span>
           </div>
-          <h2>Markah: ${App.Storage.fmtScore(score)} / ${total} (${pct}%)</h2>
-          <p>+${earnedXp} XP diperoleh • Streak Terbaik: ${maxStreak} 🔥</p>
+          <h2>Markah Ketepatan: ${App.Storage.fmtScore(score)} / ${total} (${pct}%)</h2>
+          <div class="result-bonus-row">
+            <span class="result-bonus-badge">⚡ Bonus Pantas (≤10s, kiraan berasingan): +${speedBonus}</span>
+            <span class="result-xp-badge">+${earnedXp} XP • 🔥 Streak ${maxStreak}</span>
+          </div>
           <div class="result-actions">
             <button class="btn-primary" id="btn-retry-set">🔄 Main Semula Set ${selectedSetNum}</button>
             <button class="btn-secondary" id="btn-other-sets">📚 Pilih Set Lain</button>
@@ -486,27 +504,6 @@
     }
   }
 
-  function getWeakChapters(profile) {
-    const byChapter = {};
-    const setBest = profile.setBest || {};
-    Object.entries(setBest).forEach(([key, rec]) => {
-      const [subjId, chId] = key.split(":");
-      const chKey = `${subjId}:${chId}`;
-      if (!byChapter[chKey]) byChapter[chKey] = { subjId, chId, sumPct: 0, count: 0 };
-      byChapter[chKey].sumPct += Math.round((rec.bestScore / rec.total) * 100);
-      byChapter[chKey].count++;
-    });
-
-    return Object.values(byChapter)
-      .map((item) => ({
-        ...item,
-        avgPct: Math.round(item.sumPct / item.count)
-      }))
-      .filter((item) => item.avgPct < 70)
-      .sort((a, b) => a.avgPct - b.avgPct)
-      .slice(0, 4);
-  }
-
   function renderParentDashboard(main) {
     const state = App.Storage.getState();
 
@@ -514,7 +511,7 @@
       main.innerHTML = `
         <div class="pin-box">
           <h2>🔒 Panel Ibu Bapa</h2>
-          <p>Masukkan PIN 4-digit untuk melihat prestasi semua anak & tetapan sandaran Cloud Drive. (PIN lalai: <code>1234</code>)</p>
+          <p>Masukkan PIN 4-digit untuk melihat prestasi semua anak, log kesilapan, penjana prompt AI & sandaran Cloud Drive. (PIN lalai: <code>1234</code>)</p>
           <div class="pin-row">
             <input type="password" id="pin-input" maxlength="6" placeholder="PIN (1234)" />
             <button class="btn-primary" id="btn-unlock-pin">Buka</button>
@@ -554,26 +551,47 @@
         const grade = App.GRADES[p.gradeId];
         const displayName = App.Storage.getDisplayName(p);
         const history = p.history || [];
-        const avgPct =
-          history.length > 0 ? Math.round(history.reduce((s, h) => s + h.pct, 0) / history.length) : 0;
-        const weak = getWeakChapters(p);
+        const report = App.Storage.getFocusReport(p);
+
         const weakHtml =
-          weak.length > 0
+          report.weakChapters.length > 0
             ? `<div class="weak-box">
-                <strong>⚠️ Bab Perlu Perhatian (&lt;70%):</strong>
+                <strong>🎯 Bab Perlu Fokus (&lt;80% atau ada silap):</strong>
                 <div class="weak-tags">
-                  ${weak.map((w) => `<span class="weak-tag">${esc(w.subjId.toUpperCase())} • ${esc(w.chId)} (${w.avgPct}%)</span>`).join("")}
+                  ${report.weakChapters
+                    .map(
+                      (w) =>
+                        `<span class="weak-tag">${esc(w.subjectName)} • ${esc(w.chapterTitle)} (${w.avgPct}%, ${w.mistakeCount} silap)</span>`
+                    )
+                    .join("")}
                 </div>
               </div>`
-            : "";
+            : `<div class="weak-box weak-clear">✅ Tiada bab lemah dikesan lagi.</div>`;
+
+        const mistakesHtml =
+          report.recentMistakes.length > 0
+            ? `<div class="mistake-log">
+                ${report.recentMistakes
+                  .slice(0, 5)
+                  .map(
+                    (m) => `
+                  <div class="mistake-item">
+                    <div class="m-meta">${App.Storage.fmtDate(m.ts)} • ${esc(m.subjectName)} (${esc(m.chapterTitle)})</div>
+                    <div class="m-q">${esc(m.q)}</div>
+                    <div class="m-ans">❌ <span>${esc(m.chosen)}</span> → ✅ <strong>${esc(m.correct)}</strong></div>
+                  </div>`
+                  )
+                  .join("")}
+              </div>`
+            : `<p class="empty-note">Tiada kesilapan direkodkan lagi.</p>`;
 
         const recent = history
-          .slice(0, 6)
+          .slice(0, 5)
           .map(
             (h) => `
           <li>
-            <span>${h.subjectId.toUpperCase()} (${h.chapterId}) Set ${h.setNum}</span>
-            <strong>${App.Storage.fmtScore(h.score)}/${h.total} (${h.pct}%)</strong>
+            <span>${App.Storage.fmtDate(h.ts)} • ${esc((h.subjectName || h.subjectId).toUpperCase())} Set ${h.setNum}</span>
+            <strong>${App.Storage.fmtScore(h.score)}/${h.total} (${h.pct}%)${h.speedBonus ? ` ⚡+${h.speedBonus}` : ""}</strong>
           </li>`
           )
           .join("");
@@ -583,34 +601,59 @@
             <div class="pk-head">
               <div>
                 <h3>${p.avatar} ${esc(displayName)}</h3>
-                <small>${esc(grade.name)} • ${p.xp || 0} XP</small>
+                <small>${esc(grade.name)} • ${p.xp || 0} XP • ⚡ Bonus Pantas: ${report.totalSpeedBonus}</small>
               </div>
-              <div class="pk-avg">${history.length ? `${avgPct}% purata` : "Belum ada rekod"}</div>
+              <div class="pk-avg">${history.length ? `${report.avgPct}% purata` : "Belum ada rekod"}</div>
             </div>
             <div class="pk-edit">
               <input type="text" class="rename-input" data-pid="${p.id}" placeholder="Nama anak (belum diisi)" value="${esc(p.name || "")}" />
               <button class="btn-secondary btn-rename" data-pid="${p.id}">Simpan Nama</button>
             </div>
             ${weakHtml}
+            <h4>📝 Log Kesilapan Terkini:</h4>
+            ${mistakesHtml}
             <h4>Aktiviti Terkini:</h4>
             <ul class="pk-history">${recent || "<li>Tiada latihan direkodkan lagi.</li>"}</ul>
+            <button type="button" class="btn-primary btn-sm btn-ai-kid" data-pid="${p.id}">🤖 Jana Prompt AI (${esc(displayName)})</button>
           </div>`;
       })
       .join("");
 
     const linkedName = App.Storage.getLinkedFileName();
 
+    const aiPanelHtml = activeAiPromptText
+      ? `
+        <div class="ai-prompt-panel" id="ai-prompt-panel">
+          <div class="ai-panel-head">
+            <h3>🤖 ${esc(activeAiPromptTitle)}</h3>
+            <button type="button" class="btn-ghost btn-sm" id="btn-close-ai-panel">✕ Tutup</button>
+          </div>
+          <p class="ai-panel-desc">Salin prompt di bawah dan tampal ke dalam AI pilihan anda untuk membina projek permainan pemulihan interaktif seterusnya:</p>
+          <textarea class="ai-prompt-textarea" id="ai-prompt-textarea" rows="10" readonly>${esc(activeAiPromptText)}</textarea>
+          <div class="sync-actions">
+            <button type="button" class="btn-primary" id="btn-copy-ai-prompt">📋 Salin Prompt</button>
+            <button type="button" class="btn-secondary" id="btn-dl-ai-prompt">⬇️ Muat Turun Prompt (.md)</button>
+            <span class="copy-msg" id="ai-copy-msg"></span>
+          </div>
+        </div>`
+      : "";
+
     main.innerHTML = `
-      <div class="breadcrumb">
-        <button class="btn-ghost" id="btn-parent-exit">← Keluar Panel Ibu Bapa</button>
-        <strong>👨‍👩‍👧‍👦 Dashboard Ibu Bapa & Sandaran Cloud Drive</strong>
+      <div class="breadcrumb parent-top-bar">
+        <div class="breadcrumb-left">
+          <button class="btn-ghost" id="btn-parent-exit">← Keluar Panel Ibu Bapa</button>
+          <strong>👨‍👩‍👧‍👦 Dashboard Ibu Bapa, Log Kelemahan & Penjana Prompt AI</strong>
+        </div>
+        <button type="button" class="btn-primary btn-sm" id="btn-ai-all-kids">🤖 Jana Prompt AI (Semua 3 Anak)</button>
       </div>
+
+      ${aiPanelHtml}
 
       <div class="parent-grid">${kidCards}</div>
 
       <div class="sync-panel">
         <h3>☁️ Simpan & Segerak Markah (Google Drive / OneDrive / Peranti Lain)</h3>
-        <p>Anda boleh pautkan fail JSON terus ke folder <strong>OneDrive</strong> atau <strong>Google Drive</strong> anda di PC supaya setiap markah disimpan automatik, atau eksport/import fail JSON secara manual.</p>
+        <p>Anda boleh pautkan fail JSON terus ke folder <strong>OneDrive</strong> atau <strong>Google Drive</strong> anda di PC supaya setiap markah & log kesilapan disimpan automatik, atau eksport/import fail JSON secara manual.</p>
         <div class="sync-actions">
           ${
             App.Storage.supportsCloudFileSync()
@@ -635,9 +678,76 @@
 
     document.getElementById("btn-parent-exit").addEventListener("click", () => {
       parentUnlocked = false;
+      activeAiPromptTitle = "";
+      activeAiPromptText = "";
       currentView = "home";
       renderMain();
     });
+
+    document.getElementById("btn-ai-all-kids").addEventListener("click", () => {
+      App.Sound.click();
+      activeAiPromptTitle = "Prompt Projek AI — Semua 3 Anak";
+      activeAiPromptText = App.Storage.buildAiPromptAllKids();
+      renderParentDashboard(main);
+    });
+
+    main.querySelectorAll(".btn-ai-kid").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        App.Sound.click();
+        const pid = btn.getAttribute("data-pid");
+        const kid = state.profiles.find((x) => x.id === pid);
+        if (kid) {
+          activeAiPromptTitle = `Prompt Projek AI — ${App.Storage.getDisplayName(kid)}`;
+          activeAiPromptText = App.Storage.buildAiPromptForKid(kid);
+          renderParentDashboard(main);
+          const panel = document.getElementById("ai-prompt-panel");
+          if (panel) panel.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+    });
+
+    const closeAiBtn = document.getElementById("btn-close-ai-panel");
+    if (closeAiBtn) {
+      closeAiBtn.addEventListener("click", () => {
+        activeAiPromptTitle = "";
+        activeAiPromptText = "";
+        renderParentDashboard(main);
+      });
+    }
+
+    const copyAiBtn = document.getElementById("btn-copy-ai-prompt");
+    if (copyAiBtn) {
+      copyAiBtn.addEventListener("click", async () => {
+        const ta = document.getElementById("ai-prompt-textarea");
+        const msg = document.getElementById("ai-copy-msg");
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(ta.value);
+          } else {
+            ta.select();
+            document.execCommand("copy");
+          }
+          msg.textContent = "✅ Prompt berjaya disalin!";
+        } catch (err) {
+          ta.select();
+          document.execCommand("copy");
+          msg.textContent = "✅ Prompt dipilih — tekan Salin jika perlu.";
+        }
+      });
+    }
+
+    const dlAiBtn = document.getElementById("btn-dl-ai-prompt");
+    if (dlAiBtn) {
+      dlAiBtn.addEventListener("click", () => {
+        const blob = new Blob([activeAiPromptText], { type: "text/markdown;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `ai-next-project-prompt-${new Date().toISOString().slice(0, 10)}.md`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    }
 
     main.querySelectorAll(".btn-rename").forEach((btn) => {
       btn.addEventListener("click", () => {

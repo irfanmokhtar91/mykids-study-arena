@@ -21,6 +21,7 @@
     { id: "puzzle", name: "Reactor Puzzle", icon: "🧲", desc: "Seret & pasangkan teras jawapan ke reaktor!" }
   ];
 
+  const SPEED_BONUS_SEC = 10;
   const BOSS_EMOJIS = ["👾", "🤖", "🐉", "🦖", "🐙"];
 
   function pickBossEmoji(chapterId) {
@@ -28,6 +29,27 @@
     for (let i = 0; i < chapterId.length; i++) sum += chapterId.charCodeAt(i);
     return BOSS_EMOJIS[sum % BOSS_EMOJIS.length];
   }
+
+  function getStudyGuidance(subjectId, chapterTitle) {
+    if (subjectId === "math" || subjectId === "addmath") {
+      return `Semak semula rumus dan langkah pengiraan dalam ${chapterTitle}. Tulis setiap langkah di atas kertas sebelum memilih jawapan.`;
+    }
+    if (subjectId === "fizik" || subjectId === "kimia") {
+      return `Periksa definisi, unit SI atau formula bagi ${chapterTitle}, dan kaitkan dengan prinsip asas yang diterangkan di atas.`;
+    }
+    if (subjectId === "sains" || subjectId === "biologi") {
+      return `Fahami proses dan kata kunci utama dalam ${chapterTitle} (bukan sekadar menghafal). Buat peta minda ringkas bagi konsep ini.`;
+    }
+    if (subjectId === "bm" || subjectId === "bi") {
+      return `Baca keseluruhan ayat dan kenal pasti petunjuk masa, subjek/objek, atau imbuhan yang tepat dalam ${chapterTitle}.`;
+    }
+    if (subjectId === "pi") {
+      return `Rujuk semula hukum, dalil atau sirah berkaitan dalam ${chapterTitle} dan ulang kaji perbezaan istilah pentingnya.`;
+    }
+    return `Ulang kaji nota ringkas dan fakta utama bagi ${chapterTitle}, kemudian perhatikan perbezaan antara pilihan kamu dan jawapan tepat.`;
+  }
+
+  App.GameUtil_getStudyGuidance = getStudyGuidance;
 
   function escapeHtml(str) {
     return String(str)
@@ -220,6 +242,7 @@
     startSession: function ({ container, profile, grade, subject, chapter, setNum, mode, questions, onComplete, onExit }) {
       let idx = 0;
       let score = 0;
+      let speedBonus = 0;
       let streak = 0;
       let maxStreak = 0;
       let hearts = 3;
@@ -289,10 +312,10 @@
 
         if (idx >= questions.length) {
           cleanupAll();
-          const cleanScore = Math.round(score * 2) / 2;
+          const cleanScore = Math.round(score);
           const pct = Math.round((cleanScore / questions.length) * 100);
           App.Sound.finish(pct >= 60);
-          onComplete({ score: cleanScore, total: questions.length, maxStreak, answers, pct });
+          onComplete({ score: cleanScore, total: questions.length, speedBonus, maxStreak, answers, pct });
           return;
         }
 
@@ -322,8 +345,9 @@
 
               <div class="game-stats">
                 ${renderHeartsHtml()}
-                <span class="pill pill-timer" id="speed-timer-pill">⏱️ 10.0s</span>
-                <span class="pill pill-score" id="live-score-pill">Skor: ${App.Storage.fmtScore(score)}</span>
+                <span class="pill pill-timer" id="speed-timer-pill">⚡ 10.0s</span>
+                <span class="pill pill-score" id="live-score-pill">Skor: ${score}</span>
+                <span class="pill pill-bonus" id="live-bonus-pill" title="Bonus Pantas (≤10s) — kiraan berasingan">⚡ +${speedBonus}</span>
                 <span class="pill pill-streak">🔥 ${streak}</span>
               </div>
             </div>
@@ -332,7 +356,7 @@
               <div class="progress-track" title="Kemajuan Set">
                 <div class="progress-fill" style="width:${progressPct}%"></div>
               </div>
-              <div class="speed-track" title="Jawab dalam 10 saat untuk markah penuh (1.0); lebih 10s dapat ½ markah (0.5)">
+              <div class="speed-track" title="Jawab dalam 10 saat untuk mendapat +1 Bonus Pantas (kiraan berasingan)">
                 <div class="speed-fill" id="speed-bar-fill" style="width:100%"></div>
               </div>
             </div>
@@ -364,22 +388,22 @@
           soundBtn.textContent = App.Sound.isMuted() ? "🔇" : "🔊";
         });
 
-        // Start 10.0s Speed Mark timer
+        // Start 10.0s Speed Bonus timer (accuracy mark stays 1 regardless)
         qStartMs = performance.now();
         const timerPill = container.querySelector("#speed-timer-pill");
         const speedFill = container.querySelector("#speed-bar-fill");
 
         const updateTimerDisplay = () => {
           const elapsed = (performance.now() - qStartMs) / 1000;
-          const rem = Math.max(0, 10 - elapsed);
+          const rem = Math.max(0, SPEED_BONUS_SEC - elapsed);
           const narrow = global.innerWidth <= 640;
           if (rem > 0) {
-            timerPill.textContent = narrow ? `⏱️ ${rem.toFixed(1)}s` : `⏱️ ${rem.toFixed(1)}s • 1.0★`;
+            timerPill.textContent = narrow ? `⚡ ${rem.toFixed(1)}s` : `⚡ Bonus ${rem.toFixed(1)}s`;
             timerPill.classList.remove("half-mark");
-            speedFill.style.width = `${Math.round((rem / 10) * 100)}%`;
+            speedFill.style.width = `${Math.round((rem / SPEED_BONUS_SEC) * 100)}%`;
             speedFill.classList.remove("half-mark");
           } else {
-            timerPill.textContent = narrow ? `⏱️ ½` : `⏱️ >10s • ½ Markah`;
+            timerPill.textContent = narrow ? `⏱️ Biasa` : `⏱️ Masa Biasa (+1)`;
             timerPill.classList.add("half-mark");
             speedFill.style.width = "100%";
             speedFill.classList.add("half-mark");
@@ -412,25 +436,27 @@
             }
 
             if (isCorrect) {
-              const points = elapsedSec <= 10 ? 1 : 0.5;
-              score = Math.round((score + points) * 2) / 2;
+              score += 1;
+              const gotBonus = elapsedSec <= SPEED_BONUS_SEC;
+              if (gotBonus) speedBonus += 1;
               streak++;
               if (streak > maxStreak) maxStreak = streak;
               setTimeout(() => App.Sound.correct(streak), 60);
 
-              answers.push({ qObj, selectedIndex: chosenIdx, isCorrect: true, points, elapsedSec });
+              answers.push({ qObj, selectedIndex: chosenIdx, isCorrect: true, gotBonus, elapsedSec });
 
               const scorePill = container.querySelector("#live-score-pill");
-              if (scorePill) scorePill.textContent = `Skor: ${App.Storage.fmtScore(score)}`;
+              if (scorePill) scorePill.textContent = `Skor: ${score}`;
+              const bonusPill = container.querySelector("#live-bonus-pill");
+              if (bonusPill) bonusPill.textContent = `⚡ +${speedBonus}`;
 
               const toast = container.querySelector("#game-toast");
               if (toast) {
                 toast.classList.remove("hidden");
-                toast.className = `toast-banner ${points === 1 ? "toast-full" : "toast-half"}`;
-                toast.textContent =
-                  points === 1
-                    ? `✨ TEPAT! +1.0 Markah (${elapsedSec.toFixed(1)}s)`
-                    : `⏱️ BETUL! +0.5 Markah (>10s)`;
+                toast.className = `toast-banner ${gotBonus ? "toast-full" : "toast-half"}`;
+                toast.textContent = gotBonus
+                  ? `✨ TEPAT! +1 Markah • ⚡ +1 Bonus (${elapsedSec.toFixed(1)}s)`
+                  : `✅ TEPAT! +1 Markah (${elapsedSec.toFixed(1)}s)`;
               }
 
               advanceTimeout = setTimeout(() => {
@@ -442,13 +468,16 @@
               hearts = Math.max(0, hearts - 1);
               setTimeout(() => App.Sound.wrong(), 60);
 
-              answers.push({ qObj, selectedIndex: chosenIdx, isCorrect: false, points: 0, elapsedSec });
+              answers.push({ qObj, selectedIndex: chosenIdx, isCorrect: false, gotBonus: false, elapsedSec });
 
               if (activeMini && activeMini.setPaused) activeMini.setPaused(true);
 
+              const wrongChosen = qObj.options[chosenIdx] || "-";
               const trueAnswer = qObj.options[qObj.correctIndex];
+              const studyTip = getStudyGuidance(subject.id, chapter.title);
               const overlay = container.querySelector("#learning-overlay");
               let secLeft = 10;
+              let countdownPaused = false;
 
               const proceedNext = () => {
                 overlayDismissFn = null;
@@ -469,20 +498,39 @@
                     <strong>${hearts === 0 ? "🛡️ Mod Latihan — Teruskan!" : "❌ Kurang Tepat (-1 ❤️)"}</strong>
                     <span class="countdown-pill" id="overlay-cd">10s</span>
                   </div>
+                  <div class="learning-wrong">
+                    <span>Kenapa salah — jawapan yang kamu pilih:</span>
+                    <strong>❌ ${escapeHtml(wrongChosen)}</strong>
+                  </div>
                   <div class="learning-answer">
-                    <span>Jawapan Tepat:</span>
+                    <span>Jawapan tepat yang sebenar:</span>
                     <strong>✅ ${escapeHtml(trueAnswer)}</strong>
                   </div>
-                  <p class="learning-exp">💡 ${escapeHtml(qObj.explanation)}</p>
-                  <button type="button" class="btn-primary" id="btn-overlay-continue">
-                    Teruskan (<span id="btn-cd-num">10</span>s) →
-                  </button>
+                  <p class="learning-exp"><strong>💡 Penerangan:</strong> ${escapeHtml(qObj.explanation)}</p>
+                  <div class="learning-tip">
+                    <strong>🎯 Cara untuk faham:</strong> ${escapeHtml(studyTip)}
+                  </div>
+                  <div class="learning-actions">
+                    <button type="button" class="btn-secondary" id="btn-overlay-pause">⏸️ Henti Masa</button>
+                    <button type="button" class="btn-primary" id="btn-overlay-continue">
+                      Teruskan (<span id="btn-cd-num">10</span>s) →
+                    </button>
+                  </div>
                 </div>
               `;
+
+              const pauseBtn = overlay.querySelector("#btn-overlay-pause");
+              pauseBtn.addEventListener("click", () => {
+                countdownPaused = !countdownPaused;
+                pauseBtn.textContent = countdownPaused ? "▶️ Sambung Masa" : "⏸️ Henti Masa";
+                const cd1 = overlay.querySelector("#overlay-cd");
+                if (cd1) cd1.textContent = countdownPaused ? "⏸️ Jeda" : `${secLeft}s`;
+              });
 
               overlay.querySelector("#btn-overlay-continue").addEventListener("click", proceedNext);
 
               overlayInterval = setInterval(() => {
+                if (countdownPaused) return;
                 secLeft--;
                 const cd1 = overlay.querySelector("#overlay-cd");
                 const cd2 = overlay.querySelector("#btn-cd-num");

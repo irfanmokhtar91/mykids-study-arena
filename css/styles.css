@@ -791,6 +791,11 @@ body.is-playing .game-shell {
   color: #065f46;
 }
 
+.pill-bonus {
+  background: #fef08a;
+  color: #854d0e;
+}
+
 .pill-streak {
   background: var(--warning-bg);
   color: #92400e;
@@ -917,15 +922,17 @@ body.is-playing .game-shell {
 
 .learning-card {
   width: 100%;
-  max-width: 520px;
+  max-width: 540px;
+  max-height: 92%;
+  overflow-y: auto;
   background: var(--surface);
   border: 2px solid var(--ink);
   box-shadow: var(--shadow);
   border-radius: var(--radius);
-  padding: 18px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .learning-head {
@@ -933,7 +940,7 @@ body.is-playing .game-shell {
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  font-size: 1.02rem;
+  font-size: 1rem;
 }
 
 .countdown-pill {
@@ -947,28 +954,62 @@ body.is-playing .game-shell {
   font-size: 0.85rem;
 }
 
+.learning-wrong {
+  padding: 8px 11px;
+  border-radius: 12px;
+  background: var(--danger-bg);
+  border: 2px solid var(--danger);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.9rem;
+}
+
+.learning-wrong span {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #991b1b;
+}
+
 .learning-answer {
-  padding: 10px 12px;
+  padding: 9px 11px;
   border-radius: 12px;
   background: var(--success-bg);
   border: 2px solid var(--ink);
   display: flex;
   flex-direction: column;
   gap: 2px;
-  font-size: 0.94rem;
+  font-size: 0.92rem;
 }
 
 .learning-answer span {
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   font-weight: 700;
   color: #065f46;
 }
 
 .learning-exp {
   margin: 0;
-  font-size: 0.88rem;
-  line-height: 1.45;
-  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.42;
+  color: var(--ink);
+}
+
+.learning-tip {
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #fef9c3;
+  border: 1.5px solid var(--ink);
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+
+.learning-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 2px;
 }
 
 .game-controls-bar {
@@ -1124,6 +1165,41 @@ body.is-playing .game-shell {
 .rev-exp {
   font-size: 0.85rem;
   color: var(--muted);
+}
+
+.rev-tip {
+  margin-top: 5px;
+  font-size: 0.83rem;
+  color: #854d0e;
+  background: #fef9c3;
+  padding: 5px 8px;
+  border-radius: 8px;
+  border: 1px solid #eab308;
+}
+
+.result-bonus-row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 4px;
+}
+
+.result-bonus-badge,
+.result-xp-badge {
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 2px solid var(--ink);
+  font-weight: 800;
+  font-size: 0.84rem;
+}
+
+.result-bonus-badge {
+  background: #fef08a;
+}
+
+.result-xp-badge {
+  background: #e0e7ff;
 }
 
 /* Confetti */
@@ -1293,8 +1369,118 @@ body.is-playing .game-shell {
 .pk-history li {
   display: flex;
   justify-content: space-between;
+  gap: 8px;
   padding: 5px 0;
   border-bottom: 1px solid #e4e4e7;
+}
+
+.weak-box.weak-clear {
+  background: var(--success-bg);
+  border-color: var(--success);
+  color: #065f46;
+}
+
+.mistake-log {
+  max-height: 180px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.mistake-item {
+  background: #fffbeb;
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  padding: 7px 9px;
+  font-size: 0.78rem;
+}
+
+.m-meta {
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+.m-q {
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.m-ans span {
+  color: var(--danger);
+}
+
+.m-ans strong {
+  color: #047857;
+}
+
+.empty-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 4px 0 10px;
+}
+
+.btn-ai-kid {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.parent-top-bar {
+  justify-content: space-between;
+}
+
+.breadcrumb-left {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ai-prompt-panel {
+  background: #eff6ff;
+  border: 2px solid var(--ink);
+  box-shadow: var(--shadow);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 18px;
+}
+
+.ai-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.ai-panel-head h3 {
+  margin: 0;
+}
+
+.ai-panel-desc {
+  margin: 6px 0 10px;
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+
+.ai-prompt-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 2px solid var(--ink);
+  background: #ffffff;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+.copy-msg {
+  font-weight: 800;
+  color: var(--success);
+  font-size: 0.86rem;
 }
 
 .sync-panel {
@@ -1417,9 +1603,9 @@ body.is-playing .game-shell {
     padding: 12px 6px;
   }
 
-  /* Ultra-compact single-row phone game HUD */
+  /* Ultra-compact phone game HUD */
   .game-topbar {
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     gap: 4px;
   }
 
@@ -1434,13 +1620,13 @@ body.is-playing .game-shell {
   }
 
   .game-nav-actions .btn-sm {
-    padding: 4px 8px;
-    font-size: 0.76rem;
+    padding: 4px 7px;
+    font-size: 0.74rem;
   }
 
   .pill {
-    padding: 3px 7px;
-    font-size: 0.72rem;
+    padding: 2px 6px;
+    font-size: 0.7rem;
     white-space: nowrap;
   }
 

@@ -194,8 +194,8 @@
           playerLanePos += (targetLane - playerLanePos) * Math.min(1, dt * 16);
 
           if (!answered) {
-            // Crates enter swiftly into readable zone, then march at readable speed (~14s total)
-            const speed = boosting ? 2.6 : crateProgress < 0.22 ? 0.24 : 0.056;
+            // Crates enter swiftly into readable zone, then march at readable speed (~16s total)
+            const speed = boosting ? 2.6 : crateProgress < 0.22 ? 0.24 : 0.050;
             crateProgress += speed * dt;
 
             // Collect coins along the way

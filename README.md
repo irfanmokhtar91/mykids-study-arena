@@ -13,7 +13,8 @@ Aplikasi permainan pendidikan interaktif HTML5 Canvas mengikut silibus **KSSR Se
 3. **🧭 Maze Runner (Top-Down Maze)** — Navigasi pagar sesat ke portal jawapan tepat dengan D-Pad, kekunci arah, Gamepad, atau ketik laluan.
 4. **🧲 Reactor Puzzle (Drag-and-Drop)** — Seret dan pasangkan teras tenaga jawapan ke dalam reaktor.
 
-## Sistem Pemarkahan & Pembelajaran Tepat
-- **Pemasa Kelajuan 10 Saat:** Jawapan tepat dalam **10 saat** mendapat **1.0 markah penuh**; melebihi 10 saat mendapat **0.5 (½) markah**.
-- **Semakan Pantas 10 Saat:** Jika tersalah pilih, permainan berhenti seketika (maksimum 10 saat) untuk memaparkan jawapan sebenar dan penerangan sebelum disambung semula.
-- **3 Profil Pelajar (Isi Nama & Avatar Sendiri)** + **Panel Ibu Bapa Berkunci PIN** (PIN lalai: `1234`) dengan analisis bab lemah & sandaran **Google Drive / OneDrive / JSON**.
+## Sistem Pemarkahan, Bimbingan & Penjana Prompt AI
+- **Pemarkahan Tepat + Bonus Pantas 10 Saat (Berasingan):** Setiap jawapan betul mendapat **1 markah penuh**. Jawapan betul dalam **10 saat** menerima **+1 Bonus Pantas** yang direkodkan secara berasingan (tidak bercampur dalam jumlah markah ketepatan).
+- **Semakan Kesilapan Terperinci:** Apabila tersilap, permainan memberi bimbingan tentang jawapan salah yang dipilih, jawapan sebenar, penerangan, dan cara untuk memahaminya (dengan pemasa 10 saat atau butang jeda).
+- **Log Penuh & Penjana Prompt AI Ibu Bapa:** Panel Ibu Bapa (PIN lalai: `1234`) merekodkan semua kesilapan dan bab lemah dengan tarikh `dd/Mon/yyyy`, serta membolehkan ibu bapa menjana & menyalin **Prompt Projek AI** berdasarkan kelemahan sebenar anak untuk membina latihan interaktif susulan.
+- **3 Profil Pelajar (Isi Nama & Avatar Sendiri)** + sandaran **Google Drive / OneDrive / Eksport-Import JSON**.
