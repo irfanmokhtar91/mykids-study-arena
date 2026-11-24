@@ -26,6 +26,11 @@
   box-sizing: border-box;
 }
 
+html, body {
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   margin: 0;
   font-family: var(--font-sans);
@@ -33,7 +38,7 @@ body {
   background-color: var(--bg);
   background-image: radial-gradient(var(--dot) 1.3px, transparent 1.3px);
   background-size: 22px 22px;
-  min-height: 100vh;
+  min-height: 100svh;
 }
 
 h1, h2, h3, h4, .brand-title, .set-num, .rank-badge {
@@ -681,7 +686,8 @@ button {
 
 /* Focused Single-Viewport Interactive Game Mode (Zero Scroll) */
 body.is-playing {
-  height: 100dvh;
+  height: var(--app-height, 100svh);
+  max-height: var(--app-height, 100svh);
   overflow: hidden;
 }
 
@@ -690,9 +696,12 @@ body.is-playing .topbar {
 }
 
 body.is-playing .main-content {
-  height: 100dvh;
+  height: var(--app-height, 100svh);
   max-width: 1040px;
-  padding: 10px 14px;
+  padding: calc(8px + env(safe-area-inset-top) + var(--vv-top, 0px))
+    calc(8px + env(safe-area-inset-right))
+    calc(12px + env(safe-area-inset-bottom))
+    calc(8px + env(safe-area-inset-left));
   display: flex;
   flex-direction: column;
 }
@@ -721,6 +730,11 @@ body.is-playing .game-shell {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.pill-qcount {
+  display: none;
+  background: #dbeafe;
 }
 
 .game-meta {
@@ -973,16 +987,20 @@ body.is-playing .game-shell {
 }
 
 .dpad-console {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  grid-template-areas:
+    ". up ."
+    "left down right";
+  justify-content: center;
   align-items: center;
-  gap: 4px;
+  gap: 4px 6px;
 }
 
-.dpad-mid {
-  display: flex;
-  gap: 6px;
-}
+.dpad-left { grid-area: left; }
+.dpad-up { grid-area: up; }
+.dpad-down { grid-area: down; }
+.dpad-right { grid-area: right; }
 
 .ctrl-btn {
   padding: 8px 16px;
@@ -1324,44 +1342,154 @@ body.is-playing .game-shell {
 @media (max-width: 768px) {
   .topbar {
     position: static;
-    padding: 8px 12px;
+    padding: calc(8px + env(safe-area-inset-top)) 12px 8px;
+  }
+  .main-content {
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
   }
 }
 
-@media (max-width: 600px), (max-height: 760px) {
-  body.is-playing .main-content {
-    padding: 6px 8px;
+@media (max-width: 640px) {
+  input[type="text"],
+  input[type="password"] {
+    font-size: 16px;
   }
+
+  .topbar {
+    gap: 8px;
+    padding: calc(8px + env(safe-area-inset-top)) 10px 8px;
+  }
+
+  .brand {
+    order: 1;
+  }
+
+  .topbar-actions {
+    order: 2;
+  }
+
+  .profile-switcher {
+    order: 3;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    width: 100%;
+    gap: 6px;
+  }
+
+  .profile-chip {
+    justify-content: center;
+    padding: 6px 6px;
+    font-size: 0.76rem;
+    min-width: 0;
+  }
+
+  .profile-chip span:nth-child(2) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .chip-dot {
+    display: none;
+  }
+
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    width: 100%;
+  }
+
+  .stat-box {
+    min-width: 0;
+    padding: 8px 6px;
+  }
+
+  .subject-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .set-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .set-card {
+    padding: 12px 6px;
+  }
+
+  /* Ultra-compact single-row phone game HUD */
+  .game-topbar {
+    flex-wrap: nowrap;
+    gap: 4px;
+  }
+
+  .game-meta,
+  .pill-mode,
+  .pill-streak {
+    display: none;
+  }
+
+  .pill-qcount {
+    display: inline-flex;
+  }
+
+  .game-nav-actions .btn-sm {
+    padding: 4px 8px;
+    font-size: 0.76rem;
+  }
+
+  .pill {
+    padding: 3px 7px;
+    font-size: 0.72rem;
+    white-space: nowrap;
+  }
+
+  .question-banner {
+    max-height: 22%;
+    overflow-y: auto;
+    padding: 7px 10px;
+    gap: 8px;
+  }
+
+  .question-text {
+    font-size: 0.94rem;
+    line-height: 1.3;
+  }
+
+  .dpad-console {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .ctrl-btn {
+    padding: 6px 12px;
+    min-width: 48px;
+    min-height: 36px;
+    font-size: 0.84rem;
+  }
+}
+
+@media (max-height: 760px) {
   body.is-playing .game-shell {
     gap: 6px;
   }
-  .game-meta {
-    display: none;
-  }
   .question-banner {
-    padding: 8px 10px;
+    padding: 7px 10px;
   }
   .pill {
     padding: 3px 8px;
     font-size: 0.72rem;
   }
-  .ctrl-btn {
-    padding: 6px 12px;
-    min-width: 46px;
-    min-height: 36px;
-    font-size: 0.82rem;
-  }
 }
 
 @media (max-width: 520px) {
   .main-content {
-    padding: 16px 12px 48px;
-  }
-  body.is-playing .main-content {
-    padding: 6px 8px;
+    padding: 14px 10px calc(24px + env(safe-area-inset-bottom));
   }
   .hero-banner {
-    padding: 18px 14px;
+    padding: 16px 12px;
   }
 }
 

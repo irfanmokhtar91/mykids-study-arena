@@ -195,18 +195,19 @@
         }
 
         // Layout drones cleanly inside safe 2x2 quadrants
-        const topReserved = Math.max(58, h * 0.21);
-        const botReserved = Math.max(52, h * 0.18);
-        const arenaH = Math.max(120, h - topReserved - botReserved);
-        const cellW = (w - 28) / 2;
+        const compactH = h < 390;
+        const topReserved = compactH ? 44 : Math.max(58, h * 0.21);
+        const botReserved = compactH ? 36 : Math.max(52, h * 0.18);
+        const arenaH = Math.max(110, h - topReserved - botReserved);
+        const cellW = (w - 22) / 2;
         const cellH = arenaH / 2;
-        const cardW = Math.min(340, Math.max(115, cellW - 18));
-        const cardH = Math.min(86, Math.max(48, cellH - 18));
-        const ampX = Math.max(4, Math.min(18, (cellW - cardW) * 0.4));
-        const ampY = Math.max(3, Math.min(10, (cellH - cardH) * 0.35));
+        const cardW = Math.min(340, Math.max(115, cellW - 14));
+        const cardH = Math.min(86, Math.max(46, cellH - 12));
+        const ampX = Math.max(3, Math.min(18, (cellW - cardW) * 0.4));
+        const ampY = Math.max(2, Math.min(10, (cellH - cardH) * 0.35));
 
         drones.forEach((d) => {
-          const cx = 14 + d.col * cellW + cellW / 2;
+          const cx = 11 + d.col * cellW + cellW / 2;
           const cy = topReserved + d.row * cellH + cellH / 2;
           const bobX = Math.sin(time * 1.45 + d.phase) * ampX;
           const bobY = Math.cos(time * 1.9 + d.phase) * ampY;
@@ -252,7 +253,7 @@
 
         // Hovering Chapter Boss in upper center
         const bossX = w * 0.5 + Math.sin(time * 1.6) * 28;
-        const bossY = 28 + Math.sin(time * 3.1) * 4;
+        const bossY = (compactH ? 18 : 28) + Math.sin(time * 3.1) * 3;
         ctx.save();
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -260,16 +261,17 @@
           ctx.shadowColor = "#ef4444";
           ctx.shadowBlur = 18;
         }
-        ctx.font = "34px 'Segoe UI Emoji', sans-serif";
+        ctx.font = `${compactH ? 26 : 34}px 'Segoe UI Emoji', sans-serif`;
         ctx.fillText(bossEmoji || "👾", bossX, bossY);
         ctx.restore();
 
         // Boss mini-shield indicator
+        const barY = compactH ? 34 : 48;
         ctx.fillStyle = "rgba(255,255,255,0.14)";
-        App.GameUtil.drawRoundedRect(ctx, w * 0.5 - 56, 48, 112, 8, 4);
+        App.GameUtil.drawRoundedRect(ctx, w * 0.5 - 56, barY, 112, 7, 4);
         ctx.fill();
         ctx.fillStyle = bossHp > 40 ? "#ef4444" : "#f59e0b";
-        App.GameUtil.drawRoundedRect(ctx, w * 0.5 - 56, 48, Math.max(0, 112 * (bossHp / 100)), 8, 4);
+        App.GameUtil.drawRoundedRect(ctx, w * 0.5 - 56, barY, Math.max(0, 112 * (bossHp / 100)), 7, 4);
         ctx.fill();
 
         // Draw drones

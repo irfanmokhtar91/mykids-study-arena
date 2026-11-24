@@ -99,8 +99,20 @@
     });
   }
 
+  function syncViewportMetrics() {
+    const vv = global.visualViewport;
+    const h = vv ? Math.round(vv.height) : global.innerHeight;
+    const top = vv ? Math.max(0, Math.round(vv.offsetTop)) : 0;
+    document.documentElement.style.setProperty("--app-height", `${h}px`);
+    document.documentElement.style.setProperty("--vv-top", `${top}px`);
+  }
+
   function syncBodyMode() {
     document.body.classList.toggle("is-playing", currentView === "playing");
+    syncViewportMetrics();
+    if (currentView === "playing") {
+      global.scrollTo(0, 0);
+    }
   }
 
   function launchSetGame(main, profile, grade, dlp) {
@@ -707,8 +719,16 @@
   }
 
   function renderAll() {
+    syncViewportMetrics();
     renderTopBar();
     renderMain();
+  }
+
+  global.addEventListener("resize", syncViewportMetrics);
+  global.addEventListener("orientationchange", syncViewportMetrics);
+  if (global.visualViewport) {
+    global.visualViewport.addEventListener("resize", syncViewportMetrics);
+    global.visualViewport.addEventListener("scroll", syncViewportMetrics);
   }
 
   document.addEventListener("DOMContentLoaded", renderAll);

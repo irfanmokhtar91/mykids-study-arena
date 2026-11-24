@@ -129,12 +129,10 @@
       if (controlsEl) {
         controlsEl.innerHTML = `
           <div class="dpad-console">
+            <button type="button" class="ctrl-btn dpad-left" data-dx="-1" data-dy="0">◀</button>
             <button type="button" class="ctrl-btn dpad-up" data-dx="0" data-dy="-1">▲</button>
-            <div class="dpad-mid">
-              <button type="button" class="ctrl-btn" data-dx="-1" data-dy="0">◀</button>
-              <button type="button" class="ctrl-btn" data-dx="0" data-dy="1">▼</button>
-              <button type="button" class="ctrl-btn" data-dx="1" data-dy="0">▶</button>
-            </div>
+            <button type="button" class="ctrl-btn dpad-down" data-dx="0" data-dy="1">▼</button>
+            <button type="button" class="ctrl-btn dpad-right" data-dx="1" data-dy="0">▶</button>
           </div>`;
         controlsEl.querySelectorAll(".ctrl-btn").forEach((btn) => {
           const dx = Number(btn.getAttribute("data-dx"));

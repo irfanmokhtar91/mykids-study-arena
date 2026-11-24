@@ -29,7 +29,8 @@
       const crates = qObj.options.map((text, lane) => ({
         lane,
         text,
-        hitState: null
+        hitState: null,
+        cardRect: { x: 0, y: 0, w: 80, h: 60 }
       }));
 
       // Decorative collectible coins between player and crates
@@ -111,11 +112,24 @@
         const x = clientX - rect.left;
         const y = clientY - rect.top;
         const { w, h } = cm.getSize();
-        const lane = Math.max(0, Math.min(3, Math.floor(((x - 12) / Math.max(1, w - 24)) * 4)));
+
+        // Check staggered/crate answer card hit first so phone taps hit the right lane accurately
+        let hitLane = -1;
+        for (const c of crates) {
+          const r = c.cardRect;
+          if (x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h) {
+            hitLane = c.lane;
+            break;
+          }
+        }
+        const lane =
+          hitLane >= 0
+            ? hitLane
+            : Math.max(0, Math.min(3, Math.floor(((x - 12) / Math.max(1, w - 24)) * 4)));
         const wasSameLane = lane === targetLane;
         targetLane = lane;
-        // Tapping upper half (crates) or tapping the current lane dashes straight into the crate
-        if (y < h * 0.55 || wasSameLane) {
+        // Tapping a crate/card or tapping the current lane dashes straight into the crate
+        if (hitLane >= 0 || y < h * 0.55 || wasSameLane) {
           triggerBoost();
         } else {
           App.Sound.click();
@@ -264,49 +278,126 @@
           ctx.stroke();
         });
 
-        // Draw 4 Crates (1 per lane)
-        const crateH = Math.min(110, Math.max(66, h * 0.27));
-        const crateW = Math.max(64, laneW - 10);
-        const startY = 8;
-        const endY = h * 0.8 - crateH * 0.55;
-        const curY = startY + crateProgress * (endY - startY);
+        // Draw 4 Crates (1 per lane); on narrow phones (<500px), stagger wide cards in 2 rows
+        const narrowPhone = w < 500;
+        if (narrowPhone) {
+          const boxW = Math.max(46, laneW - 10);
+          const boxH = 30;
+          const cardW = Math.min(200, Math.round(w * 0.45));
+          const cardH = Math.min(76, Math.max(48, Math.round(h * 0.19)));
+          const totalBlockH = boxH + 8 + cardH * 2 + 6;
+          const startY = 8;
+          const endY = Math.max(startY + 12, h * 0.77 - totalBlockH);
+          const curY = startY + crateProgress * (endY - startY);
 
-        crates.forEach((c) => {
-          const cx = trackX + c.lane * laneW + (laneW - crateW) / 2;
-          const cy = curY;
+          crates.forEach((c) => {
+            const laneCx = trackX + c.lane * laneW + laneW / 2;
+            const bx = laneCx - boxW / 2;
+            const by = curY;
 
-          // Wooden crate frame
-          ctx.fillStyle = c.lane === targetLane ? "#f59e0b" : "#b45309";
-          ctx.strokeStyle = "#18181b";
-          ctx.lineWidth = 2.5;
-          App.GameUtil.drawRoundedRect(ctx, cx, cy, crateW, crateH, 10);
-          ctx.fill();
-          ctx.stroke();
+            // Physical wooden crate in the lane
+            ctx.fillStyle = c.lane === targetLane ? "#f59e0b" : "#b45309";
+            ctx.strokeStyle = "#18181b";
+            ctx.lineWidth = 2.2;
+            App.GameUtil.drawRoundedRect(ctx, bx, by, boxW, boxH, 7);
+            ctx.fill();
+            ctx.stroke();
 
-          // Inner answer card on crate
-          const bgCard =
-            c.hitState === "ok"
-              ? "#dcfce7"
-              : c.hitState === "bad"
-              ? "#fee2e2"
-              : c.lane === targetLane
-              ? "#fffbeb"
-              : "#ffffff";
-          const borderCard =
-            c.hitState === "ok"
-              ? "#059669"
-              : c.hitState === "bad"
-              ? "#dc2626"
-              : "#18181b";
+            // Staggered wide answer card
+            const isRow1 = c.lane === 1 || c.lane === 3;
+            const cardY = by + boxH + 8 + (isRow1 ? cardH + 6 : 0);
+            let cardX;
+            if (c.lane === 0) cardX = 8;
+            else if (c.lane === 1) cardX = Math.max(8, Math.round(w * 0.5 - cardW - 4));
+            else if (c.lane === 2) cardX = Math.min(w - cardW - 8, Math.round(w * 0.5 + 4));
+            else cardX = w - cardW - 8;
 
-          App.GameUtil.drawWrappedCard(ctx, cx + 4, cy + 4, crateW - 8, crateH - 8, c.text, {
-            bg: bgCard,
-            border: borderCard,
-            shadowColor: "#78350f",
-            maxFont: 13.5,
-            minFont: 9
+            c.cardRect = { x: cardX, y: cardY, w: cardW, h: cardH };
+
+            // Stem connecting crate to wide answer card
+            ctx.save();
+            ctx.strokeStyle = c.lane === targetLane ? "#d97706" : "#18181b";
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(laneCx, by + boxH);
+            ctx.lineTo(cardX + cardW / 2, cardY);
+            ctx.stroke();
+            ctx.restore();
           });
-        });
+
+          // Draw wide cards after stems so cards always sit cleanly on top
+          crates.forEach((c) => {
+            const r = c.cardRect;
+            const bgCard =
+              c.hitState === "ok"
+                ? "#dcfce7"
+                : c.hitState === "bad"
+                ? "#fee2e2"
+                : c.lane === targetLane
+                ? "#fffbeb"
+                : "#ffffff";
+            const borderCard =
+              c.hitState === "ok"
+                ? "#059669"
+                : c.hitState === "bad"
+                ? "#dc2626"
+                : c.lane === targetLane
+                ? "#d97706"
+                : "#18181b";
+
+            App.GameUtil.drawWrappedCard(ctx, r.x, r.y, r.w, r.h, c.text, {
+              bg: bgCard,
+              border: borderCard,
+              shadowColor: "#78350f",
+              maxFont: 13,
+              minFont: 9.5
+            });
+          });
+        } else {
+          const crateH = Math.min(110, Math.max(66, h * 0.27));
+          const crateW = Math.max(64, laneW - 10);
+          const startY = 8;
+          const endY = h * 0.8 - crateH * 0.55;
+          const curY = startY + crateProgress * (endY - startY);
+
+          crates.forEach((c) => {
+            const cx = trackX + c.lane * laneW + (laneW - crateW) / 2;
+            const cy = curY;
+            c.cardRect = { x: cx, y: cy, w: crateW, h: crateH };
+
+            // Wooden crate frame
+            ctx.fillStyle = c.lane === targetLane ? "#f59e0b" : "#b45309";
+            ctx.strokeStyle = "#18181b";
+            ctx.lineWidth = 2.5;
+            App.GameUtil.drawRoundedRect(ctx, cx, cy, crateW, crateH, 10);
+            ctx.fill();
+            ctx.stroke();
+
+            // Inner answer card on crate
+            const bgCard =
+              c.hitState === "ok"
+                ? "#dcfce7"
+                : c.hitState === "bad"
+                ? "#fee2e2"
+                : c.lane === targetLane
+                ? "#fffbeb"
+                : "#ffffff";
+            const borderCard =
+              c.hitState === "ok"
+                ? "#059669"
+                : c.hitState === "bad"
+                ? "#dc2626"
+                : "#18181b";
+
+            App.GameUtil.drawWrappedCard(ctx, cx + 4, cy + 4, crateW - 8, crateH - 8, c.text, {
+              bg: bgCard,
+              border: borderCard,
+              shadowColor: "#78350f",
+              maxFont: 13.5,
+              minFont: 9
+            });
+          });
+        }
 
         // Player Avatar at bottom
         const px = trackX + playerLanePos * laneW + laneW / 2;

@@ -294,10 +294,11 @@
         ctx.stroke();
 
         ctx.fillStyle = nearSock ? "#18181b" : "#f8fafc";
-        ctx.font = "700 13px 'Fredoka', 'Plus Jakarta Sans', sans-serif";
+        const sockLabel = w < 440 ? "⚡ SERET KE REAKTOR" : "⚡ SERET JAWAPAN KE REAKTOR (ATAU TAP 2×)";
+        ctx.font = `700 ${w < 440 ? 12 : 13}px 'Fredoka', 'Plus Jakarta Sans', sans-serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText("⚡ SERET JAWAPAN KE REAKTOR (ATAU TAP 2×)", sock.cx, sock.cy);
+        ctx.fillText(sockLabel, sock.cx, sock.cy);
         ctx.restore();
 
         // Tether beam while dragging near socket

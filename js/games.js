@@ -308,6 +308,7 @@
               <div class="game-nav-actions">
                 <button type="button" class="btn-ghost btn-sm" id="btn-quit-game">← Keluar</button>
                 <button type="button" class="btn-ghost btn-sm" id="btn-game-sound" title="Bunyi">${muted ? "🔇" : "🔊"}</button>
+                <span class="pill pill-qcount">S${idx + 1}/${questions.length}</span>
                 <span class="pill pill-mode">${modeInfo.icon} ${escapeHtml(modeInfo.name)}</span>
               </div>
 
@@ -321,7 +322,7 @@
 
               <div class="game-stats">
                 ${renderHeartsHtml()}
-                <span class="pill pill-timer" id="speed-timer-pill">⏱️ 10.0s • 1.0★</span>
+                <span class="pill pill-timer" id="speed-timer-pill">⏱️ 10.0s</span>
                 <span class="pill pill-score" id="live-score-pill">Skor: ${App.Storage.fmtScore(score)}</span>
                 <span class="pill pill-streak">🔥 ${streak}</span>
               </div>
@@ -368,21 +369,24 @@
         const timerPill = container.querySelector("#speed-timer-pill");
         const speedFill = container.querySelector("#speed-bar-fill");
 
-        timerInterval = setInterval(() => {
+        const updateTimerDisplay = () => {
           const elapsed = (performance.now() - qStartMs) / 1000;
           const rem = Math.max(0, 10 - elapsed);
+          const narrow = global.innerWidth <= 640;
           if (rem > 0) {
-            timerPill.textContent = `⏱️ ${rem.toFixed(1)}s • 1.0★`;
+            timerPill.textContent = narrow ? `⏱️ ${rem.toFixed(1)}s` : `⏱️ ${rem.toFixed(1)}s • 1.0★`;
             timerPill.classList.remove("half-mark");
             speedFill.style.width = `${Math.round((rem / 10) * 100)}%`;
             speedFill.classList.remove("half-mark");
           } else {
-            timerPill.textContent = `⏱️ >10s • ½ Markah`;
+            timerPill.textContent = narrow ? `⏱️ ½` : `⏱️ >10s • ½ Markah`;
             timerPill.classList.add("half-mark");
             speedFill.style.width = "100%";
             speedFill.classList.add("half-mark");
           }
-        }, 100);
+        };
+        updateTimerDisplay();
+        timerInterval = setInterval(updateTimerDisplay, 100);
 
         const canvasEl = container.querySelector("#game-canvas");
         const controlsEl = container.querySelector("#game-controls-bar");
