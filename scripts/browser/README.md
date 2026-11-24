@@ -13,3 +13,5 @@ Run all unit tests first: `node scripts/test-weakness.mjs`, `test-tasks`, `test-
 - pin-and-marking-safety.mjs: no default PIN, weak PINs rejected, partial marking never yields a grade
 - pin-gate.mjs: PIN needed to change grade or delete a profile
 - parent-tasks.mjs, weakness-dashboard.mjs: parent task cards and weakness report
+- scroll-one-finger.mjs: real one-finger touch scrolling on the long screens (regression test: overflow hidden on html/body broke it)
+- mock-t4-k2.mjs: a full Tingkatan 4 Matematik Kertas 2 (A, B, C answer 1 of 2), parent marking, SPM grade

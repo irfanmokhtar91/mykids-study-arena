@@ -3433,10 +3433,9 @@ body.is-playing .game-shell {
   }
 }
 
-/* Never let content push past the screen */
-html, body {
+/* Never let content push past the screen (do NOT use overflow hidden on html/body: it breaks one-finger scrolling on phones) */
+body {
   max-width: 100%;
-  overflow-x: hidden;
 }
 .main-content img, .main-content svg, .main-content canvas {
   max-width: 100%;
