@@ -124,6 +124,11 @@
       const grade = App.GRADES && profile ? App.GRADES[profile.gradeId] : null;
       return grade ? grade.name : "Pelajar";
     },
+    fmtScore: (n) => {
+      const num = Number(n) || 0;
+      const rounded = Math.round(num * 2) / 2;
+      return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+    },
     setActiveProfile: (id) => {
       state.activeProfileId = id;
       save();
@@ -151,15 +156,16 @@
     recordAttempt: (profileId, { gradeId, subjectId, chapterId, setNum, score, total, maxStreak, mode }) => {
       const p = state.profiles.find((x) => x.id === profileId);
       if (!p) return;
-      const pct = Math.round((score / total) * 100);
-      const earnedXp = score * 15 + (pct >= 80 ? 40 : 0) + maxStreak * 5;
+      const cleanScore = Math.round((Number(score) || 0) * 2) / 2;
+      const pct = Math.round((cleanScore / total) * 100);
+      const earnedXp = Math.round(cleanScore * 15) + (pct >= 80 ? 40 : 0) + maxStreak * 5;
       p.xp = (p.xp || 0) + earnedXp;
       if (maxStreak > (p.streakBest || 0)) p.streakBest = maxStreak;
 
       const key = `${subjectId}:${chapterId}:${setNum}`;
       const prev = p.setBest[key];
       p.setBest[key] = {
-        bestScore: prev ? Math.max(prev.bestScore, score) : score,
+        bestScore: prev ? Math.max(prev.bestScore, cleanScore) : cleanScore,
         total,
         attempts: (prev ? prev.attempts : 0) + 1,
         lastPlayed: new Date().toISOString()
@@ -172,7 +178,7 @@
         subjectId,
         chapterId,
         setNum,
-        score,
+        score: cleanScore,
         total,
         pct,
         mode,
@@ -180,7 +186,7 @@
       });
       if (p.history.length > 150) p.history.length = 150;
       save();
-      return { earnedXp, pct };
+      return { earnedXp, pct, score: cleanScore };
     },
     exportJson: () => JSON.stringify(state, null, 2),
     importJson: (text) => {

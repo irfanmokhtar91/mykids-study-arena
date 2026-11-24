@@ -369,7 +369,7 @@
             <button class="set-card ${rec ? "played" : ""}" data-set="${s}">
               <div class="set-num">Set ${s}</div>
               <div class="set-stars">${stars}</div>
-              <div class="set-score">${rec ? `${rec.bestScore}/${rec.total} (${pct}%)` : "Mula Set"}</div>
+              <div class="set-score">${rec ? `${App.Storage.fmtScore(rec.bestScore)}/${rec.total} (${pct}%)` : "Mula Set"}</div>
             </button>`;
         })
         .join("");
@@ -424,11 +424,16 @@
         .map((a, i) => {
           const userAns = a.qObj.options[a.selectedIndex];
           const trueAns = a.qObj.options[a.qObj.correctIndex];
+          const ptsLabel = a.isCorrect
+            ? a.points === 1
+              ? `✅ +1.0 (${a.elapsedSec.toFixed(1)}s)`
+              : `⏱️ +0.5 (>10s: ${a.elapsedSec.toFixed(1)}s)`
+            : "❌ 0";
           return `
             <div class="review-item ${a.isCorrect ? "rev-ok" : "rev-bad"}">
               <div class="rev-q"><strong>S${i + 1}:</strong> ${esc(a.qObj.q)}</div>
               <div class="rev-ans">
-                <span>Jawapan anda: <strong>${esc(userAns)}</strong> ${a.isCorrect ? "✅" : "❌"}</span>
+                <span>Jawapan anda: <strong>${esc(userAns)}</strong> (${ptsLabel})</span>
                 ${!a.isCorrect ? `<span>Jawapan tepat: <strong class="true-ans">${esc(trueAns)}</strong></span>` : ""}
               </div>
               <div class="rev-exp">💡 ${esc(a.qObj.explanation)}</div>
@@ -443,10 +448,10 @@
             <span class="result-emoji">${emoji}</span>
             <span class="rank-badge rank-${rank}">Gred ${rank}</span>
           </div>
-          <h2>Markah: ${score} / ${total} (${pct}%)</h2>
+          <h2>Markah: ${App.Storage.fmtScore(score)} / ${total} (${pct}%)</h2>
           <p>+${earnedXp} XP diperoleh • Streak Terbaik: ${maxStreak} 🔥</p>
           <div class="result-actions">
-            <button class="btn-primary" id="btn-retry-set">🔄 Cuba Semula Set ${selectedSetNum}</button>
+            <button class="btn-primary" id="btn-retry-set">🔄 Main Semula Set ${selectedSetNum}</button>
             <button class="btn-secondary" id="btn-other-sets">📚 Pilih Set Lain</button>
           </div>
         </div>
@@ -556,7 +561,7 @@
             (h) => `
           <li>
             <span>${h.subjectId.toUpperCase()} (${h.chapterId}) Set ${h.setNum}</span>
-            <strong>${h.score}/${h.total} (${h.pct}%)</strong>
+            <strong>${App.Storage.fmtScore(h.score)}/${h.total} (${h.pct}%)</strong>
           </li>`
           )
           .join("");

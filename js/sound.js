@@ -54,6 +54,10 @@
       tone(659.25, 0.08, "sine", 0.1, 0.07);
       tone(783.99, 0.14, "sine", 0.12, 0.14);
     },
+    coin: () => {
+      tone(988, 0.06, "sine", 0.08, 0);
+      tone(1319, 0.09, "sine", 0.09, 0.05);
+    },
     correct: (streak = 1) => {
       const boost = Math.min(streak - 1, 6) * 45;
       tone(523.25 + boost, 0.09, "triangle", 0.12, 0);
