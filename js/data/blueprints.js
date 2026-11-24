@@ -20,6 +20,7 @@
 })(typeof window !== "undefined" ? window : globalThis, function () {
   const R = "KPM Format Pentaksiran UASA Sekolah Rendah";
   const M = "KPM Format Pentaksiran UASA Sekolah Menengah";
+  const S = "DICERAP (bukan fail rasmi LP): salinan sekolah bagi Format Instrumen Peperiksaan SPM Mulai Tahun 2021,";
   const sec = (id, label, types, count, marks, kind, extra = {}) => ({ id, label, types, count, marks, kind, ...extra });
 
   const BLUEPRINTS = [
@@ -218,6 +219,142 @@
           sec("E", "Penulisan karangan", ["SRTb"], 1, 20, "subjective")
         ]
       }]
+    },
+
+    // ------------------------------ TINGKATAN 4 (SPM-style, KSSM mulai SPM 2021) ------------------------------
+    // OBSERVED, not official: read from a school-hosted copy of "Format Instrumen Peperiksaan SPM Mulai Tahun 2021"
+    // (LP Surat Siaran Bil 4 Tahun 2020). Matematik 1449/2 also matched a real 2023 PAT Tingkatan 4 paper.
+    {
+      gradeId: "t4", subjectId: "math", source: S + " Lampiran 14 (Matematik 1449)",
+      papers: [
+        { id: "k1", name: "Kertas 1 (1449/1)", minutes: 90, marks: 40, sections: [sec("A", "Objektif aneka pilihan", ["OAP"], 40, 40, "objective")] },
+        {
+          id: "k2", name: "Kertas 2 (1449/2)", minutes: 150, marks: 100,
+          sections: [
+            sec("A", "Respons terhad", ["SRT"], 10, 40, "subjective"),
+            sec("B", "Berstruktur", ["SRT"], 5, 45, "subjective"),
+            sec("C", "Berstruktur", ["SRT"], 2, 15, "subjective", { choose: 1, of: 2 })
+          ]
+        }
+      ]
+    },
+    {
+      gradeId: "t4", subjectId: "addmath", source: S + " Lampiran 15 (Matematik Tambahan 3472)",
+      papers: [
+        {
+          id: "k1", name: "Kertas 1 (3472/1)", minutes: 120, marks: 80,
+          sections: [
+            sec("A", "Respons terhad", ["SRT"], 12, 64, "subjective"),
+            sec("B", "Berstruktur", ["SRT"], 3, 16, "subjective", { choose: 2, of: 3 })
+          ]
+        },
+        {
+          id: "k2", name: "Kertas 2 (3472/2)", minutes: 150, marks: 100,
+          sections: [
+            sec("A", "Respons terhad", ["SRT"], 7, 50, "subjective"),
+            sec("B", "Berstruktur", ["SRT"], 4, 30, "subjective", { choose: 3, of: 4 }),
+            sec("C", "Berstruktur", ["SRT"], 4, 20, "subjective", { choose: 2, of: 4 })
+          ]
+        }
+      ]
+    },
+    {
+      gradeId: "t4", subjectId: "fizik", source: S + " Lampiran 17 (Fizik 4531; jadual sama untuk Kimia, Biologi, Sains Tambahan)",
+      papers: [
+        { id: "k1", name: "Kertas 1 (4531/1)", minutes: 75, marks: 40, sections: [sec("A", "Objektif aneka pilihan", ["OAP"], 40, 40, "objective")] },
+        {
+          id: "k2", name: "Kertas 2 (4531/2)", minutes: 150, marks: 100,
+          sections: [
+            sec("A", "Berstruktur", ["SRT"], 8, 60, "subjective"),
+            sec("B", "Respons terhad", ["SRT"], 2, 20, "subjective", { choose: 1, of: 2 }),
+            sec("C", "Respons terbuka", ["SRTb"], 1, 20, "subjective")
+          ]
+        }
+      ]
+    },
+    {
+      gradeId: "t4", subjectId: "kimia", source: S + " Lampiran 17 (Kimia 4541; jadual sama dengan Fizik)",
+      papers: [
+        { id: "k1", name: "Kertas 1 (4541/1)", minutes: 75, marks: 40, sections: [sec("A", "Objektif aneka pilihan", ["OAP"], 40, 40, "objective")] },
+        {
+          id: "k2", name: "Kertas 2 (4541/2)", minutes: 150, marks: 100,
+          sections: [
+            sec("A", "Berstruktur", ["SRT"], 8, 60, "subjective"),
+            sec("B", "Respons terhad", ["SRT"], 2, 20, "subjective", { choose: 1, of: 2 }),
+            sec("C", "Respons terbuka", ["SRTb"], 1, 20, "subjective")
+          ]
+        }
+      ]
+    },
+    {
+      gradeId: "t4", subjectId: "biologi", source: S + " Lampiran 17 (Biologi 4551; jadual sama dengan Fizik)",
+      papers: [
+        { id: "k1", name: "Kertas 1 (4551/1)", minutes: 75, marks: 40, sections: [sec("A", "Objektif aneka pilihan", ["OAP"], 40, 40, "objective")] },
+        {
+          id: "k2", name: "Kertas 2 (4551/2)", minutes: 150, marks: 100,
+          sections: [
+            sec("A", "Berstruktur", ["SRT"], 8, 60, "subjective"),
+            sec("B", "Respons terhad", ["SRT"], 2, 20, "subjective", { choose: 1, of: 2 }),
+            sec("C", "Respons terbuka", ["SRTb"], 1, 20, "subjective")
+          ]
+        }
+      ]
+    },
+    {
+      gradeId: "t4", subjectId: "sejarah", source: S + " Lampiran 23 (Sejarah 1249)",
+      papers: [
+        { id: "k1", name: "Kertas 1 (1249/1)", minutes: 60, marks: 40, sections: [sec("A", "Objektif aneka pilihan", ["OAP"], 40, 40, "objective")] },
+        {
+          id: "k2", name: "Kertas 2 (1249/2)", minutes: 150, marks: 100,
+          sections: [
+            sec("A", "Respons terhad", ["SRT"], 4, 40, "subjective"),
+            sec("B", "Respons terbuka", ["SRTb"], 5, 60, "subjective", { choose: 3, of: 5 })
+          ]
+        }
+      ]
+    },
+    {
+      gradeId: "t4", subjectId: "bm", source: S + " Lampiran 1 (Bahasa Melayu 1103/1, 1103/2; Kertas 3 dan 4 tidak dimasukkan)",
+      papers: [
+        {
+          id: "k1", name: "Kertas 1 (1103/1) Penulisan", minutes: 120, marks: 100,
+          sections: [
+            sec("A", "Kombinasi bahan rangsangan", ["SRT"], 1, 30, "subjective"),
+            sec("B", "Karangan", ["SRTb"], 4, 70, "subjective", { choose: 1, of: 4 })
+          ]
+        },
+        {
+          id: "k2", name: "Kertas 2 (1103/2) Pemahaman", minutes: 150, marks: 100,
+          sections: [
+            sec("A", "Sistem dan aplikasi bahasa", ["SRT"], 5, 35, "subjective"),
+            sec("B", "Pemahaman", ["SRT"], 3, 35, "subjective"),
+            sec("C", "Rumusan", ["SRTb"], 1, 30, "subjective")
+          ]
+        }
+      ]
+    },
+    {
+      gradeId: "t4", subjectId: "bi", source: S + " Lampiran 2 (Bahasa Inggeris 1119/1, 1119/2; Speaking dan Listening tidak dimasukkan)",
+      papers: [
+        {
+          id: "k1", name: "Kertas 1 (1119/1) Reading and Use of English", minutes: 90, marks: 40,
+          sections: [
+            sec("1", "Bahagian 1", ["OAP"], 8, 8, "objective"),
+            sec("2", "Bahagian 2", ["OPB"], 10, 10, "objective"),
+            sec("3", "Bahagian 3", ["OAP", "OPB"], 8, 8, "objective"),
+            sec("4", "Bahagian 4", ["SRT"], 6, 6, "subjective"),
+            sec("5", "Bahagian 5", ["OPB"], 8, 8, "objective")
+          ]
+        },
+        {
+          id: "k2", name: "Kertas 2 (1119/2) Writing", minutes: 90, marks: 60,
+          sections: [
+            sec("1", "Bahagian 1", ["SRT"], 1, 20, "subjective"),
+            sec("2", "Bahagian 2", ["SRTb"], 1, 20, "subjective"),
+            sec("3", "Bahagian 3", ["SRTb"], 3, 20, "subjective", { choose: 1, of: 3 })
+          ]
+        }
+      ]
     }
   ];
 

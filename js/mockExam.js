@@ -28,7 +28,12 @@
     "t2:sains:k1:A": "all",
     "t2:sejarah:k1:A": "all",
     "t2:geografi:k1:A": "all",
-    "t2:pi:k1:A": "all"
+    "t2:pi:k1:A": "all",
+    "t4:math:k1:A": "all",
+    "t4:fizik:k1:A": "all",
+    "t4:kimia:k1:A": "all",
+    "t4:biologi:k1:A": "all",
+    "t4:sejarah:k1:A": "all"
   };
 
   function hashSeed(str) {

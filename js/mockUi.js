@@ -13,6 +13,7 @@
   let lastScore = null;
   let lastPaper = null;
   let timerHandle = null;
+  let lastPapersInSubject = 1;
 
   const esc = (s) =>
     String(s === undefined || s === null ? "" : s)
@@ -346,6 +347,7 @@
       ...lastPaper,
       sections: lastPaper.sections.map((s) => (session.sectionIds.includes(s.id) ? s : { ...s, items: [], supported: false, state: "kosong" }))
     };
+    lastPapersInSubject = App.Blueprints.find(session.gradeId, session.subjectId).papers.length;
     lastScore = App.MockExam.scorePaper(scoped, session.answers);
     lastScore.timedOut = !!timedOut;
     lastScore.scoped = scoped;
@@ -385,7 +387,7 @@
       })
       .join("");
     const gradeBlock = sc.complete
-      ? `<div class="mock-grade"><strong>${sc.grade.grade}</strong><span>${sc.pct}% • ${esc(sc.grade.label)}</span>${sc.grade.verified ? "" : `<small>Skala gred belum disahkan dengan slip sebenar.</small>`}</div>`
+      ? `<div class="mock-grade"><strong>${sc.grade.grade}</strong><span>${sc.pct}% • ${esc(sc.grade.label)}</span>${lastPapersInSubject > 1 ? `<small>Gred bagi kertas ini sahaja (bukan gred subjek). Gred subjek memerlukan semua kertas.</small>` : ""}${sc.grade.verified ? "" : `<small>Skala gred belum disahkan dengan slip sebenar.</small>`}</div>`
       : `<div class="mock-grade is-partial"><strong>Tiada gred keseluruhan</strong><span>Hanya ${esc(sc.markedLabel)} dinilai (${sc.markedEarned}/${sc.markedPossible} markah). Bahagian lain belum ada soalan atau belum ditanda, jadi gred kertas penuh tidak boleh dikira dengan jujur.</span></div>`;
     const wrong = [];
     lastPaper.sections.forEach((s) =>
