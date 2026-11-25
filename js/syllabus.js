@@ -258,6 +258,20 @@
             { id: "aplikasi_teknologi", title: "Bab 2: Teknologi Pembuatan, Mekanikal & Elektrik", titleEn: "Ch 2: Manufacturing, Mechanical & Electrical Tech" },
             { id: "elektronik_akuaponik", title: "Bab 3: Reka Bentuk Elektronik, Akuaponik & Makanan", titleEn: "Ch 3: Electronics, Aquaponics & Food Design" }
           ]
+        },
+        {
+          id: "ask",
+          name: "Asas Sains Komputer",
+          nameEn: "Computer Science Basics (ASK)",
+          icon: "💻",
+          dlp: false,
+          chapters: [
+            { id: "sistem_perlapanan", title: "1.1 Sistem Nombor Perlapanan", titleEn: "1.1 Octal Number System" },
+            { id: "sistem_perenambelasan", title: "1.2 Sistem Nombor Perenambelasan", titleEn: "1.2 Hexadecimal Number System" },
+            { id: "algoritma", title: "2.1 Pembangunan Algoritma", titleEn: "2.1 Algorithm Development" },
+            { id: "kod_data", title: "3.1 Persekitaran Kod Arahan", titleEn: "3.1 Coding Environment" },
+            { id: "kod_struktur", title: "3.2 Struktur Kod Arahan", titleEn: "3.2 Coding Structures" }
+          ]
         }
       ]
     },

@@ -40,6 +40,7 @@ const files = [
   "js/data/t2.js",
   "js/data/t4.js",
   "js/data/t4_extra.js",
+  "js/data/ask_t2.js",
   "js/data/fact_tables.js",
   "js/questionEngine.js"
 ];
