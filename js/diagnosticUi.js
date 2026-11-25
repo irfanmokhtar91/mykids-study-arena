@@ -91,6 +91,7 @@
       summary.sessionRecord,
       summary.attemptLogs
     );
+    if (ctx && typeof ctx.onProfileUpdate === "function") ctx.onProfileUpdate();
     clearSession();
     lastSummary = summary;
     lastReward = reward;
@@ -328,8 +329,8 @@
   }
 
   App.DiagnosticUI = {
-    open(container, { profile, grade, onExit }) {
-      ctx = { container, profile, grade, onExit };
+    open(container, { profile, grade, onExit, onProfileUpdate }) {
+      ctx = { container, profile, grade, onExit, onProfileUpdate };
       session = null;
       lastSummary = null;
       lastReward = null;

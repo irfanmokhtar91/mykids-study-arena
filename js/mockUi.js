@@ -57,6 +57,28 @@
     }
   }
 
+  function stop() {
+    if (screen === "run" && session && ctx) saveSession();
+    stopTimer();
+  }
+
+  function backToPick(main) {
+    if (ctx && typeof ctx.onBackToPick === "function") {
+      ctx.onBackToPick();
+    } else {
+      screen = "pick";
+      render(main);
+    }
+  }
+
+  function getValidResumableSession(profile, grade) {
+    if (!profile || !grade) return null;
+    const s = loadSession(profile.id);
+    if (!s || s.gradeId !== profile.gradeId) return null;
+    if (!Array.isArray(grade.subjects) || !grade.subjects.some((x) => x.id === s.subjectId)) return null;
+    return s;
+  }
+
   function fmtClock(ms) {
     const s = Math.max(0, Math.ceil(ms / 1000));
     const h = Math.floor(s / 3600);
@@ -102,11 +124,11 @@
   }
 
   // ------------------------------------------------------------------ screens
-  function renderPick(main) {
-    const gradeId = ctx.profile.gradeId;
+  function buildPickerBodyHtml(profile, grade) {
+    const gradeId = profile.gradeId;
     const none = (App.Blueprints.NO_NATIONAL_FORMAT[gradeId] || []);
-    const resumable = loadSession(ctx.profile.id);
-    const rows = ctx.grade.subjects
+    const resumable = getValidResumableSession(profile, grade);
+    const rows = grade.subjects
       .map((sub) => {
         const bp = App.Blueprints.find(gradeId, sub.id);
         let badge;
@@ -137,27 +159,57 @@
           </button>`;
       })
       .join("");
+    const html = `
+      <p class="mock-note">Format kertas diambil daripada dokumen rasmi KPM. Gred keseluruhan hanya dipaparkan apabila semua bahagian ada soalan dan telah ditanda.</p>
+      ${resumable ? `<div class="mock-resume"><span>Ada ujian belum selesai.</span><button type="button" class="btn-tactile btn-true btn-sm" id="mock-resume">▶ Sambung</button></div>` : ""}
+      <div class="mock-subjects">${rows}</div>
+    `;
+    return { resumable, html };
+  }
+
+  function wirePickerBody(container, grade, { onResume, onSelectSubject }) {
+    const rb = container.querySelector("#mock-resume");
+    if (rb && typeof onResume === "function") {
+      rb.addEventListener("click", () => {
+        App.Sound.click();
+        onResume();
+      });
+    }
+    container.querySelectorAll(".mock-subject:not([disabled])").forEach((b) =>
+      b.addEventListener("click", () => {
+        App.Sound.click();
+        const sub = grade.subjects.find((s) => s.id === b.getAttribute("data-sub"));
+        if (sub && typeof onSelectSubject === "function") onSelectSubject(sub);
+      })
+    );
+  }
+
+  function renderPick(main) {
+    const { html } = buildPickerBodyHtml(ctx.profile, ctx.grade);
     main.innerHTML = `
       <section class="mock-wrap">
         <div class="mock-head">
           <button type="button" class="btn-ghost btn-sm" id="mock-exit">← Kembali</button>
           <h2>📝 Ujian Percubaan</h2>
         </div>
-        <p class="mock-note">Format kertas diambil daripada dokumen rasmi KPM. Gred keseluruhan hanya dipaparkan apabila semua bahagian ada soalan dan telah ditanda.</p>
-        ${resumable ? `<div class="mock-resume"><span>Ada ujian belum selesai.</span><button type="button" class="btn-tactile btn-true btn-sm" id="mock-resume">▶ Sambung</button></div>` : ""}
-        <div class="mock-subjects">${rows}</div>
+        ${html}
       </section>`;
     document.getElementById("mock-exit").addEventListener("click", () => ctx.onExit());
-    const rb = document.getElementById("mock-resume");
-    if (rb) rb.addEventListener("click", resume);
-    main.querySelectorAll(".mock-subject:not([disabled])").forEach((b) =>
-      b.addEventListener("click", () => {
-        App.Sound.click();
-        pickedSubject = ctx.grade.subjects.find((s) => s.id === b.getAttribute("data-sub"));
+    wirePickerBody(main, ctx.grade, {
+      onResume: () => resume(main),
+      onSelectSubject: (sub) => {
+        pickedSubject = sub;
         screen = "paper";
         render(main);
-      })
-    );
+      }
+    });
+  }
+
+  function renderInlinePicker(container, { profile, grade, onSelectSubject, onResume }) {
+    if (!container || !profile || !grade) return;
+    const { html } = buildPickerBodyHtml(profile, grade);
+    container.innerHTML = `<div class="mock-inline-wrap">${html}</div>`;
+    wirePickerBody(container, grade, { onResume, onSelectSubject });
   }
 
   function renderPaper(main) {
@@ -204,8 +256,7 @@
         ${paperCards}
       </section>`;
     document.getElementById("mock-back").addEventListener("click", () => {
-      screen = "pick";
-      render(main);
+      backToPick(main);
     });
     main.querySelectorAll("[data-start]").forEach((b) =>
       b.addEventListener("click", () => {
@@ -233,14 +284,14 @@
     );
   }
 
-  function resume() {
-    const s = loadSession(ctx.profile.id);
-    if (!s) return;
+  function resume(targetMain) {
+    const s = getValidResumableSession(ctx.profile, ctx.grade);
+    if (!s) return false;
     const sub = ctx.grade.subjects.find((x) => x.id === s.subjectId);
-    if (!sub || s.gradeId !== ctx.profile.gradeId) return;
     session = s;
     pickedSubject = sub;
-    startRun(document.getElementById("main-content"));
+    startRun(targetMain || document.getElementById("main-content"));
+    return true;
   }
 
   function startRun(main) {
@@ -444,8 +495,7 @@
     document.getElementById("mock-pause").addEventListener("click", () => {
       stopTimer();
       saveSession();
-      screen = "pick";
-      render(main);
+      backToPick(main);
     });
     document.getElementById("mock-submit").addEventListener("click", () => {
       const unanswered = session.sectionIds.reduce(
@@ -602,8 +652,7 @@
       })
     );
     document.getElementById("mock-again").addEventListener("click", () => {
-      screen = "pick";
-      render(main);
+      backToPick(main);
     });
     document.getElementById("mock-home").addEventListener("click", () => ctx.onExit());
   }
@@ -623,11 +672,29 @@
       session = null;
       render(main);
     },
+    openSubject(main, context) {
+      ctx = context;
+      pickedSubject = context.subject;
+      session = null;
+      screen = "paper";
+      render(main);
+    },
+    openResume(main, context) {
+      ctx = context;
+      session = null;
+      if (!resume(main)) {
+        backToPick(main);
+      }
+    },
+    hasResumable(profile, grade) {
+      return !!getValidResumableSession(profile, grade);
+    },
+    renderInlinePicker,
     render(main, context) {
       ctx = context;
       render(main);
     },
-    stop: stopTimer,
+    stop,
     keepPhotoIds
   };
 })(window);

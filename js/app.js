@@ -10,6 +10,8 @@
   const App = (global.App = global.App || {});
 
   let currentView = "accounts"; // 'accounts' | 'home' | 'chapters' | 'sets' | 'shop' | 'playing' | 'results' | 'parent'
+  let homeMode = "normal"; // 'normal' | 'mock'
+  let pendingMockLaunch = null; // null | { type: 'subject', subject } | { type: 'resume' }
   let selectedSubject = null;
   let selectedChapter = null;
   let selectedSetNum = 1;
@@ -90,6 +92,12 @@
     renderMain();
   }
 
+  function leaveActiveSubViews() {
+    if (App.MockUI) App.MockUI.stop();
+    if (App.DiagnosticUI) App.DiagnosticUI.stop();
+    pendingMockLaunch = null;
+  }
+
   function renderTopBar() {
     const state = App.Storage.getState();
     const profile = App.Storage.getActiveProfile();
@@ -106,12 +114,20 @@
       const frameCls = profile.equippedFrame && profile.equippedFrame !== "default" ? `frame-${profile.equippedFrame}` : "";
       centerHtml = `
         <div class="active-account-bar">
-          <div class="active-kid-pill pill-${profile.gradeId}">
+          <button type="button" class="active-kid-pill pill-${profile.gradeId}" id="btn-top-profile" title="${esc(displayName)} (${esc(grade ? grade.name : profile.gradeId)}) — Laman Utama" aria-label="Profil ${esc(displayName)}, kembali ke Laman Utama">
             <span class="chip-avatar ${frameCls}">${profile.avatar}</span>
             <span class="ak-name">${esc(displayName)}</span>
             <span class="ak-grade">${esc(grade ? grade.name : profile.gradeId)}</span>
+          </button>
+          <div class="top-kid-stats" aria-label="XP dan Syiling">
+            <span class="top-stat-pill top-stat-xp" id="top-stat-xp" title="${profile.xp || 0} XP">
+              <span aria-hidden="true">⚡</span><strong>${profile.xp || 0}</strong><span class="ts-unit">XP</span>
+            </span>
+            <button type="button" class="top-stat-pill top-stat-coin" id="btn-top-coins" title="${profile.coins || 0} Syiling — Buka Kedai Ganjaran" aria-label="${profile.coins || 0} Syiling, buka Kedai Ganjaran">
+              <span aria-hidden="true">🪙</span><strong>${profile.coins || 0}</strong>
+            </button>
           </div>
-          <button type="button" class="btn-switch-acc" id="btn-switch-account" title="Tukar ke akaun anak lain">
+          <button type="button" class="btn-switch-acc" id="btn-switch-account" title="Tukar ke akaun anak lain" aria-label="Tukar akaun">
             <span aria-hidden="true">🔄</span><span class="lbl"> Tukar Akaun</span>
           </button>
         </div>
@@ -153,6 +169,7 @@
 
     document.getElementById("nav-brand").addEventListener("click", () => {
       App.Sound.click();
+      leaveActiveSubViews();
       if (inKidSpace) {
         currentView = "home";
       } else {
@@ -162,13 +179,36 @@
       renderAll();
     });
 
+    const topProfileBtn = document.getElementById("btn-top-profile");
+    if (topProfileBtn) {
+      topProfileBtn.addEventListener("click", () => {
+        App.Sound.click();
+        leaveActiveSubViews();
+        currentView = "home";
+        renderAll();
+      });
+    }
+
+    const topCoinsBtn = document.getElementById("btn-top-coins");
+    if (topCoinsBtn) {
+      topCoinsBtn.addEventListener("click", () => {
+        App.Sound.click();
+        leaveActiveSubViews();
+        shopMsg = "";
+        currentView = "shop";
+        renderAll();
+      });
+    }
+
     const switchBtn = document.getElementById("btn-switch-account");
     if (switchBtn) {
       switchBtn.addEventListener("click", () => {
         App.Sound.click();
+        leaveActiveSubViews();
         selectedSubject = null;
         selectedChapter = null;
         editingAccountId = null;
+        homeMode = "normal";
         shopMsg = "";
         currentView = "accounts";
         renderAll();
@@ -190,6 +230,7 @@
 
     document.getElementById("btn-parent-dash").addEventListener("click", () => {
       App.Sound.click();
+      leaveActiveSubViews();
       currentView = "parent";
       renderAll();
     });
@@ -423,6 +464,8 @@
             editingAccountId = null;
             selectedSubject = null;
             selectedChapter = null;
+            homeMode = "normal";
+            pendingMockLaunch = null;
             currentView = "home";
           } else {
             App.Storage.updateProfile(editingAccountId, {
@@ -527,6 +570,8 @@
           App.Storage.setActiveProfile(pid);
           selectedSubject = null;
           selectedChapter = null;
+          homeMode = "normal";
+          pendingMockLaunch = null;
           shopMsg = "";
           currentView = "home";
           renderAll();
@@ -672,15 +717,27 @@
     const displayName = App.Storage.getDisplayName(profile);
 
     if (currentView === "mock") {
-      App.MockUI.open(main, {
-        profile,
-        grade,
-        onExit: () => {
-          App.MockUI.stop();
-          currentView = "home";
-          renderAll();
-        }
-      });
+      const onBackToPick = () => {
+        App.MockUI.stop();
+        homeMode = "mock";
+        currentView = "home";
+        renderAll();
+      };
+      const onExit = () => {
+        App.MockUI.stop();
+        homeMode = "normal";
+        currentView = "home";
+        renderAll();
+      };
+      const launch = pendingMockLaunch;
+      pendingMockLaunch = null;
+      if (launch && launch.type === "subject" && launch.subject) {
+        App.MockUI.openSubject(main, { profile, grade, subject: launch.subject, onBackToPick, onExit });
+      } else if (launch && launch.type === "resume") {
+        App.MockUI.openResume(main, { profile, grade, onBackToPick, onExit });
+      } else {
+        App.MockUI.open(main, { profile, grade, onBackToPick, onExit });
+      }
       return;
     }
 
@@ -688,6 +745,7 @@
       App.DiagnosticUI.open(main, {
         profile,
         grade,
+        onProfileUpdate: () => renderTopBar(),
         onExit: () => {
           App.DiagnosticUI.stop();
           currentView = "home";
@@ -704,6 +762,7 @@
       const weekDays = App.Storage.getLast7DaysStatus(profile);
       const leaderboard = App.Storage.getSiblingLeaderboard();
       const resumeTarget = resolveResumeTarget(profile, grade, dlp);
+      const hasResumableMock = !!(App.MockUI && App.MockUI.hasResumable && App.MockUI.hasResumable(profile, grade));
 
       const streakCalHtml = weekDays
         .map(
@@ -778,6 +837,11 @@
         })
         .join("");
 
+      const modePanelHtml =
+        homeMode === "mock"
+          ? `<h2 class="section-title">📝 Ujian Percubaan (${esc(grade.name)})</h2><div id="home-mock-picker"></div>`
+          : `<h2 class="section-title">📚 Pilih Subjek (${esc(grade.name)})</h2><div class="subject-grid">${cards}</div>`;
+
       main.innerHTML = `
         <section class="hero-banner grade-${grade.id}">
           <div class="hero-top-row">
@@ -798,37 +862,81 @@
           </div>
 
           <div class="hero-bottom-bar">
-            <div class="hero-stats">
-              <div class="stat-box"><strong>${profile.xp || 0}</strong><span>XP</span></div>
-              <div class="stat-box stat-coin"><strong>${profile.coins || 0} 🪙</strong><span>Syiling</span></div>
-              <div class="stat-box"><strong>${profile.dailyStreak || 0} 🔥</strong><span>Streak Hari</span></div>
-              <div class="stat-box"><strong>${totalSetsPlayed}</strong><span>Set Selesai</span></div>
-              <button type="button" class="btn-tactile btn-shop-cta" id="btn-open-shop">🛍️ Kedai Ganjaran</button>
-              <button type="button" class="btn-tactile btn-mock-cta" id="btn-open-mock">📝 Ujian Percubaan</button>
-              <button type="button" class="btn-tactile btn-diag-cta" id="btn-open-diagnostic">🩺 Semakan Diagnostik</button>
+            <div class="hero-progress-pills">
+              <span class="hero-mini-pill">🔥 ${profile.dailyStreak || 0} hari</span>
+              <span class="hero-mini-pill">✅ ${totalSetsPlayed} set</span>
             </div>
             <div class="streak-calendar">
               <span class="sc-title">Kalendar 7 Hari:</span>
               <div class="sc-days">${streakCalHtml}</div>
             </div>
+            <div class="hero-utility-actions">
+              <button type="button" class="btn-tactile btn-shop-cta btn-sm" id="btn-open-shop">🛍️ Kedai Ganjaran</button>
+              <button type="button" class="btn-tactile btn-diag-cta btn-sm" id="btn-open-diagnostic">🩺 Semakan Diagnostik</button>
+            </div>
           </div>
         </section>
 
-        ${leaderboardHtml}
+        <section class="home-mode-picker" role="tablist" aria-label="Pilih mod latihan">
+          <button type="button" class="home-mode-card ${homeMode === "normal" ? "is-active" : ""}" id="btn-mode-normal" role="tab" aria-selected="${homeMode === "normal" ? "true" : "false"}" aria-controls="home-mode-panel">
+            <span class="hm-head">
+              <span class="hm-icon" aria-hidden="true">📚</span>
+              <strong>Soalan Biasa</strong>
+            </span>
+            <small>Latihan mengikut bab &amp; permainan</small>
+          </button>
+          <button type="button" class="home-mode-card ${homeMode === "mock" ? "is-active" : ""}" id="btn-open-mock" role="tab" aria-selected="${homeMode === "mock" ? "true" : "false"}" aria-controls="home-mode-panel">
+            <span class="hm-head">
+              <span class="hm-icon" aria-hidden="true">📝</span>
+              <strong>Ujian Percubaan</strong>
+            </span>
+            <small>${hasResumableMock ? "⏸ Ada ujian belum selesai" : "Format kertas peperiksaan KPM"}</small>
+          </button>
+        </section>
 
-        <h2 class="section-title">📚 Semua Subjek (${esc(grade.name)})</h2>
-        <div class="subject-grid">${cards}</div>
+        <section id="home-mode-panel" class="home-mode-panel" role="tabpanel" aria-labelledby="${homeMode === "mock" ? "btn-open-mock" : "btn-mode-normal"}">
+          ${modePanelHtml}
+        </section>
+
+        ${leaderboardHtml}
       `;
+
+      if (homeMode === "mock" && App.MockUI && App.MockUI.renderInlinePicker) {
+        App.MockUI.renderInlinePicker(document.getElementById("home-mock-picker"), {
+          profile,
+          grade,
+          onSelectSubject: (subject) => {
+            pendingMockLaunch = { type: "subject", subject };
+            currentView = "mock";
+            renderAll();
+          },
+          onResume: () => {
+            pendingMockLaunch = { type: "resume" };
+            currentView = "mock";
+            renderAll();
+          }
+        });
+      }
+
+      document.getElementById("btn-mode-normal").addEventListener("click", () => {
+        if (homeMode !== "normal") {
+          App.Sound.click();
+          homeMode = "normal";
+          renderMain();
+        }
+      });
+
+      document.getElementById("btn-open-mock").addEventListener("click", () => {
+        if (homeMode !== "mock") {
+          App.Sound.click();
+          homeMode = "mock";
+          renderMain();
+        }
+      });
 
       document.getElementById("btn-open-diagnostic").addEventListener("click", () => {
         App.Sound.click();
         currentView = "diagnostic";
-        renderAll();
-      });
-
-      document.getElementById("btn-open-mock").addEventListener("click", () => {
-        App.Sound.click();
-        currentView = "mock";
         renderAll();
       });
 
@@ -844,6 +952,8 @@
         selectedSubject = null;
         selectedChapter = null;
         editingAccountId = null;
+        homeMode = "normal";
+        pendingMockLaunch = null;
         currentView = "accounts";
         renderAll();
       });
