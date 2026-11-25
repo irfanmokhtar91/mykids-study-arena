@@ -493,6 +493,20 @@
             { id: "ibadah", title: "Ibadah (Haji, Umrah, Sembelihan, Korban & Muamalat)", titleEn: "Ibadah" },
             { id: "sirah_adab", title: "Sirah (Khulafa ar-Rasyidin, Kerajaan Umaiyah/Abbasiyah) & Adab", titleEn: "Sirah & Adab" }
           ]
+        },
+        {
+          id: "pjpk",
+          name: "Pendidikan Jasmani & Kesihatan",
+          nameEn: "Physical & Health Education (PJPK)",
+          icon: "🏃",
+          dlp: false,
+          chapters: [
+            { id: "kecergasan", title: "Kecergasan Fizikal Berdasarkan Kesihatan (Unit 6)", titleEn: "Health-Based Physical Fitness" },
+            { id: "kesihatan_reproduktif", title: "Kesihatan Diri & Penyalahgunaan Bahan (Jerat Dadah)", titleEn: "Personal Health & Substance Abuse" },
+            { id: "mental_keluarga", title: "Mental & Emosi, Kekeluargaan, Perhubungan", titleEn: "Mental Health, Family & Relationships" },
+            { id: "penyakit_keselamatan", title: "Penyakit (Talasemia) & Keselamatan (Pemerdagangan Manusia)", titleEn: "Disease & Safety" },
+            { id: "pemakanan_pertolongan", title: "Pemakanan (Suplemen) & Pertolongan Cemas (CPR)", titleEn: "Nutrition & First Aid" }
+          ]
         }
       ]
     }
