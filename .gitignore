@@ -1,3 +1,6 @@
 worker/.wrangler/
 node_modules/
 .dev.vars
+
+# copyrighted textbook text kept locally only
+docs/sources-private/
