@@ -124,6 +124,20 @@
             { id: "pengaturcaraan", title: "Unit 2: Asas Pengaturcaraan & Robotik", titleEn: "Unit 2: Basic Programming & Robotics" },
             { id: "hidroponik", title: "Unit 3: Teknologi Pertanian (Hidroponik)", titleEn: "Unit 3: Hydroponics" }
           ]
+        },
+        {
+          id: "psv",
+          name: "Pendidikan Seni Visual",
+          nameEn: "Visual Arts Education (PSV)",
+          icon: "🎨",
+          dlp: false,
+          chapters: [
+            { id: "bahasa_sv", title: "Modul 1: Bahasa Seni Visual", titleEn: "Module 1: Visual Art Language" },
+            { id: "kemahiran_sv", title: "Modul 2: Kemahiran Seni Visual", titleEn: "Module 2: Visual Art Skills" },
+            { id: "kreativiti_sv", title: "Modul 3: Kreativiti dan Inovasi", titleEn: "Module 3: Creativity and Innovation" },
+            { id: "apresiasi_sv", title: "Modul 4: Apresiasi Seni Visual", titleEn: "Module 4: Art Appreciation" },
+            { id: "projek_sv", title: "Modul 5: Projek Seni Visual (Pameran)", titleEn: "Module 5: Visual Art Project (Exhibition)" }
+          ]
         }
       ]
     },
