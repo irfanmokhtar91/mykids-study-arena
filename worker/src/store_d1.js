@@ -19,6 +19,82 @@ export class D1Store {
     this.db = db;
   }
 
+  async getParentByGoogleSub(sub) {
+    const r = await this.db.prepare("SELECT id, email, name FROM parents WHERE google_sub = ?").bind(sub).first();
+    return r ? { id: r.id, email: r.email, name: r.name } : null;
+  }
+
+  async upsertStudentAccount({ sub, email, name, at }) {
+    const existing = await this.db
+      .prepare("SELECT id, google_sub, email, name, backup_json, backup_updated_at FROM student_accounts WHERE google_sub = ?")
+      .bind(sub)
+      .first();
+    if (existing) {
+      await this.db.prepare("UPDATE student_accounts SET email = ?, name = ? WHERE id = ?").bind(email, name, existing.id).run();
+      return {
+        id: existing.id,
+        googleSub: existing.google_sub,
+        email,
+        name,
+        backupJson: existing.backup_json || null,
+        backupUpdatedAt: existing.backup_updated_at || null
+      };
+    }
+    const id = `sa_${randomHex(10)}`;
+    await this.db
+      .prepare("INSERT INTO student_accounts (id, google_sub, email, name, created_at) VALUES (?, ?, ?, ?, ?)")
+      .bind(id, sub, email, name, at)
+      .run();
+    return { id, googleSub: sub, email, name, backupJson: null, backupUpdatedAt: null };
+  }
+
+  async getStudentAccount(id) {
+    const r = await this.db
+      .prepare("SELECT id, google_sub, email, name, backup_json, backup_updated_at FROM student_accounts WHERE id = ?")
+      .bind(id)
+      .first();
+    return r
+      ? {
+          id: r.id,
+          googleSub: r.google_sub,
+          email: r.email,
+          name: r.name,
+          backupJson: r.backup_json || null,
+          backupUpdatedAt: r.backup_updated_at || null
+        }
+      : null;
+  }
+
+  async saveStudentBackup(accountId, { backupJson, at }) {
+    await this.db
+      .prepare("UPDATE student_accounts SET backup_json = ?, backup_updated_at = ? WHERE id = ?")
+      .bind(backupJson, at, accountId)
+      .run();
+  }
+
+  async getStudentProfileLink(googleSub, localProfileId) {
+    const r = await this.db
+      .prepare("SELECT google_sub, local_profile_id, child_id FROM student_profile_links WHERE google_sub = ? AND local_profile_id = ?")
+      .bind(googleSub, localProfileId)
+      .first();
+    return r ? { googleSub: r.google_sub, localProfileId: r.local_profile_id, childId: r.child_id } : null;
+  }
+
+  async listStudentProfileLinks(googleSub) {
+    const { results } = await this.db
+      .prepare("SELECT google_sub, local_profile_id, child_id FROM student_profile_links WHERE google_sub = ?")
+      .bind(googleSub)
+      .all();
+    return (results || []).map((r) => ({ googleSub: r.google_sub, localProfileId: r.local_profile_id, childId: r.child_id }));
+  }
+
+  async upsertStudentProfileLink({ googleSub, localProfileId, childId, at }) {
+    await this.db
+      .prepare("INSERT INTO student_profile_links (google_sub, local_profile_id, child_id, created_at) VALUES (?, ?, ?, ?) ON CONFLICT(google_sub, local_profile_id) DO UPDATE SET child_id = excluded.child_id")
+      .bind(googleSub, localProfileId, childId, at)
+      .run();
+  }
+
   async upsertParent({ sub, email, name, at }) {
     const existing = await this.db.prepare("SELECT id, email, name FROM parents WHERE google_sub = ?").bind(sub).first();
     if (existing) {
@@ -93,11 +169,15 @@ export class D1Store {
   }
 
   async deleteChild(childId) {
-    for (const sql of ["DELETE FROM attempt_logs WHERE student_id = ?", "DELETE FROM assessment_sessions WHERE student_id = ?"]) {
+    for (const sql of [
+      "DELETE FROM attempt_logs WHERE student_id = ?",
+      "DELETE FROM assessment_sessions WHERE student_id = ?",
+      "DELETE FROM student_profile_links WHERE child_id = ?"
+    ]) {
       try {
         await this.db.prepare(sql).bind(childId).run();
       } catch (e) {
-        /* ignore on pre-diagnostic schema DBs */
+        /* ignore on pre-diagnostic / pre-student-auth schema DBs */
       }
     }
     for (const sql of ["DELETE FROM marks WHERE child_id = ?", "DELETE FROM photos WHERE child_id = ?", "DELETE FROM links WHERE child_id = ?", "DELETE FROM children WHERE id = ?"]) {

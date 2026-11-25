@@ -132,7 +132,17 @@ export function createApp({ store, env, fetchImpl = fetch, now = () => Date.now(
     const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
     if (!token || !env.SESSION_SECRET) return null;
     const payload = await verifySession(token, env.SESSION_SECRET, now());
-    return payload && payload.sub ? payload.sub : null;
+    if (!payload || !payload.sub || payload.scope === "student") return null;
+    return payload.sub;
+  }
+
+  async function studentFrom(request) {
+    const auth = request.headers.get("authorization") || "";
+    const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+    if (!token || !env.SESSION_SECRET) return null;
+    const payload = await verifySession(token, env.SESSION_SECRET, now());
+    if (!payload || !payload.sub || !payload.googleSub || payload.scope !== "student") return null;
+    return { accountId: payload.sub, googleSub: payload.googleSub };
   }
 
   async function childFromDevice(childId, deviceToken) {
@@ -162,8 +172,123 @@ export function createApp({ store, env, fetchImpl = fetch, now = () => Date.now(
       }
       if (!env.SESSION_SECRET) return fail(500, "Pelayan belum dikonfigurasi");
       const parent = await store.upsertParent({ sub: claims.sub, email: claims.email, name: claims.name, at: now() });
-      const session = await signSession({ sub: parent.id }, env.SESSION_SECRET, SESSION_TTL, now());
+      const existingStudentLinks = await store.listStudentProfileLinks(claims.sub);
+      for (const sl of existingStudentLinks) {
+        const ch = await store.getChild(sl.childId);
+        if (ch) await store.linkParent(parent.id, ch.id, now());
+      }
+      const session = await signSession({ sub: parent.id, scope: "parent" }, env.SESSION_SECRET, SESSION_TTL, now());
       return json({ session, parent: { id: parent.id, email: parent.email, name: parent.name } });
+    }
+
+    // ---------------- student signs in with Google (optional; own or parent Google account) ----------------
+    if (path === "/api/student/auth/google" && method === "POST") {
+      if (await limited(request, "studentauth", 30, 600)) return fail(429, "Terlalu banyak percubaan. Cuba sebentar lagi.");
+      const body = await readJson(request);
+      let claims;
+      try {
+        claims = await verifyGoogleIdToken(body.idToken, { clientId: env.GOOGLE_CLIENT_ID, fetchImpl, nowMs: now(), jwksUrl: env.GOOGLE_JWKS_URL || undefined });
+      } catch (e) {
+        return fail(401, e.message || "Log masuk Google gagal");
+      }
+      if (!env.SESSION_SECRET) return fail(500, "Pelayan belum dikonfigurasi");
+      const acc = await store.upsertStudentAccount({ sub: claims.sub, email: claims.email, name: claims.name, at: now() });
+      const session = await signSession({ sub: acc.id, googleSub: claims.sub, scope: "student" }, env.SESSION_SECRET, SESSION_TTL, now());
+      return json({
+        session,
+        account: { id: acc.id, email: acc.email, name: acc.name },
+        hasBackup: !!acc.backupJson,
+        backupUpdatedAt: acc.backupUpdatedAt || null
+      });
+    }
+
+    if (path === "/api/student/sync") {
+      const stu = await studentFrom(request);
+      if (!stu) return fail(401, "Sila log masuk");
+      const acc = await store.getStudentAccount(stu.accountId);
+      if (!acc) return fail(401, "Akaun tidak dijumpai");
+
+      if (method === "GET") {
+        return json({
+          backup: acc.backupJson ? JSON.parse(acc.backupJson) : null,
+          updatedAt: acc.backupUpdatedAt || null,
+          account: { id: acc.id, email: acc.email, name: acc.name }
+        });
+      }
+
+      if (method === "POST") {
+        const body = await readJson(request, MAX_SNAPSHOT + 32 * 1024);
+        if (!body.backup || typeof body.backup !== "object" || Array.isArray(body.backup) || !Array.isArray(body.backup.profiles)) {
+          return fail(400, "Format sandaran tidak sah");
+        }
+        const backupJson = JSON.stringify(body.backup);
+        if (backupJson.length > MAX_SNAPSHOT) return fail(413, "Data terlalu besar");
+        const at = now();
+        await store.saveStudentBackup(acc.id, { backupJson, at });
+
+        const matchingParent = await store.getParentByGoogleSub(stu.googleSub);
+        const marksByProfile = {};
+        const childIdsByProfile = {};
+        const marksSince = Number(body.marksSince) || 0;
+
+        for (const p of body.backup.profiles.slice(0, 12)) {
+          if (!p || typeof p.id !== "string" || !p.id.trim() || p.id.length > 64) continue;
+          const displayName = cleanName(p.name);
+          if (!displayName) continue;
+          const gradeId = GRADES.has(p.gradeId) ? p.gradeId : "d6";
+
+          let childId = null;
+          const existingLink = await store.getStudentProfileLink(stu.googleSub, p.id);
+          if (existingLink && (await store.getChild(existingLink.childId))) {
+            childId = existingLink.childId;
+          } else {
+            const qr = body.qrLinks && typeof body.qrLinks === "object" ? body.qrLinks[p.id] : null;
+            const linkedChild = qr && qr.childId && qr.deviceToken ? await childFromDevice(qr.childId, qr.deviceToken) : null;
+            if (linkedChild) {
+              childId = linkedChild.id;
+              await store.upsertStudentProfileLink({ googleSub: stu.googleSub, localProfileId: p.id, childId, at });
+            } else {
+              childId = `ch_${randomHex(10)}`;
+              await store.createChild({ id: childId, displayName, gradeId, deviceTokenHash: await sha256Hex(randomHex(32)), at });
+              await store.upsertStudentProfileLink({ googleSub: stu.googleSub, localProfileId: p.id, childId, at });
+            }
+          }
+
+          await store.saveSnapshot(childId, {
+            displayName,
+            gradeId,
+            snapshot: JSON.stringify({ profile: p, schema: 5 }),
+            at
+          });
+          if (matchingParent) {
+            await store.linkParent(matchingParent.id, childId, at);
+          }
+
+          const marks = await store.listMarksSince(childId, marksSince);
+          if (marks.length) marksByProfile[p.id] = marks;
+          childIdsByProfile[p.id] = childId;
+        }
+
+        return json({ ok: true, serverTime: at, marksByProfile, childIdsByProfile });
+      }
+    }
+
+    if (path === "/api/student/photo" && method === "PUT") {
+      const stu = await studentFrom(request);
+      if (!stu) return fail(401, "Sila log masuk");
+      const profileId = url.searchParams.get("profileId");
+      const photoId = url.searchParams.get("photoId");
+      if (!profileId || profileId.length > 64) return fail(400, "ID profil tidak sah");
+      if (!photoId || photoId.length > 120) return fail(400, "ID gambar tidak sah");
+      const link = await store.getStudentProfileLink(stu.googleSub, profileId);
+      const child = link && (await store.getChild(link.childId));
+      if (!child) return fail(404, "Profil anak belum disegerakkan");
+      const buf = new Uint8Array(await request.arrayBuffer());
+      if (buf.length === 0 || buf.length > MAX_PHOTO) return fail(413, "Gambar terlalu besar");
+      if (!(buf[0] === 0xff && buf[1] === 0xd8)) return fail(415, "Hanya gambar JPEG diterima");
+      if ((await store.countPhotos(child.id)) >= MAX_PHOTOS_PER_CHILD && !(await store.hasPhoto(child.id, photoId))) return fail(413, "Had gambar dicapai");
+      await store.putPhoto({ id: photoId, childId: child.id, bytes: buf, mime: "image/jpeg", size: buf.length, at: now() });
+      return json({ ok: true, size: buf.length });
     }
 
     // ---------------- child device starts pairing (no login) ----------------

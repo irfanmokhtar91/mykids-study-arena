@@ -107,7 +107,7 @@
     const resumeHtml = hasSaved
       ? `<div class="mock-resume diag-resume">
           <div>
-            <strong>Semakan belum selesai</strong>
+            <strong>Latihan belum selesai</strong>
             <div class="mock-meta">${esc(subjectLabel(ctx.grade, saved.subjectId))} • Soalan ${Math.min((saved.currentIndex || 0) + 1, saved.items.length)} / ${saved.items.length}</div>
           </div>
           <button type="button" class="btn-tactile btn-true" id="diag-resume-btn">Sambung →</button>
@@ -120,7 +120,7 @@
             .map(
               (b) => `
             <button type="button" class="mock-subject diag-bank-card" data-subj="${esc(b.subjectId)}">
-              <span class="ms-icon">🩺</span>
+              <span class="ms-icon">🎯</span>
               <span class="ms-body">
                 <strong>${esc(subjectLabel(ctx.grade, b.subjectId))}</strong>
                 <small>${Math.min(15, b.questionCount)} soalan pantas • ${b.nodeCount} subtopik teras • Tanpa tekanan masa</small>
@@ -131,16 +131,16 @@
         </div>`
       : `<div class="mock-paper-card">
           <h3>Belum tersedia untuk ${esc(ctx.grade ? ctx.grade.name : ctx.profile.gradeId)}</h3>
-          <p class="mock-note">Set semakan diagnostik berstruktur untuk tahap ini sedang disiapkan dan disemak ketepatannya. Buat masa ini, gunakan latihan bab atau Ujian Percubaan di halaman utama.</p>
+          <p class="mock-note">Set latihan topik lemah untuk tahap ini sedang disiapkan dan disemak ketepatannya. Buat masa ini, gunakan latihan bab atau Ujian Percubaan di halaman utama.</p>
         </div>`;
 
     el.innerHTML = `
       <div class="mock-wrap diag-wrap">
         <div class="mock-head">
           <button type="button" class="btn-secondary btn-sm" id="diag-back">← Kembali</button>
-          <h2>🩺 Semakan Diagnostik Pantas</h2>
+          <h2>🎯 Latihan Topik Lemah</h2>
         </div>
-        <p class="diag-intro">Buktikan topik yang kamu sudah kuasai supaya kamu boleh belajar dengan lebih tepat — tak perlu buat beratus soalan yang kamu sudah pandai!</p>
+        <p class="diag-intro">Jawab 15 soalan pantas untuk kenalpasti dan kuasai topik yang masih lemah — tanpa tekanan masa!</p>
         ${resumeHtml}
         ${banksHtml}
       </div>`;
@@ -289,7 +289,7 @@
     el.innerHTML = `
       <div class="mock-wrap diag-wrap">
         <div class="mock-head">
-          <h2>🎉 Semakan Diagnostik Selesai!</h2>
+          <h2>🎉 Latihan Topik Lemah Selesai!</h2>
         </div>
         <div class="mock-grade">
           <strong>${sum.pct}%</strong>
@@ -306,7 +306,7 @@
         </div>
         <div class="mock-actions">
           <button type="button" class="btn-tactile btn-true" id="diag-done-home">🏠 Kembali ke Laman Utama</button>
-          <button type="button" class="btn-secondary" id="diag-again">🩺 Semakan Lain</button>
+          <button type="button" class="btn-secondary" id="diag-again">🎯 Latihan Lain</button>
         </div>
       </div>`;
 

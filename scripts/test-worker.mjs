@@ -212,6 +212,90 @@ ok("the old device token no longer works", r.status === 403);
 r = await call("DELETE", "/api/parent/account", { token: papa.session });
 ok("a parent can delete the whole account", r.status === 200 && ![...store.parents.values()].some((p) => p.email === "papa@example.com"));
 
+// ---------------------------------------------------------------- student Google sign-in & sync (optional; strict parent/student separation)
+const parentLoginFirst = await login({ sub: "g-family", email: "ayah@example.com", name: "Ayah" });
+r = await call("POST", "/api/student/auth/google", { body: { idToken: await idToken({ sub: "g-family", email: "ayah@example.com", name: "Ayah" }) } });
+ok("student can sign in with parent's Google account", r.status === 200 && r.data.session && r.data.account.email === "ayah@example.com");
+const stuWithParentGoogle = r.data.session;
+
+// Student token MUST NEVER access parent endpoints even with parent's Google account
+for (const [m, p, b] of [
+  ["GET", "/api/parent/children", undefined],
+  ["POST", "/api/parent/marks", { childId: "ch_any", recordTs: "t", parentMarks: {} }],
+  ["POST", "/api/pair/claim", { code: "AAAAAAAA" }]
+]) {
+  r = await call(m, p, { token: stuWithParentGoogle, body: b });
+  ok(`student token rejected on ${m} ${p} (401)`, r.status === 401);
+}
+
+// Parent token MUST NOT access student sync endpoint
+r = await call("GET", "/api/student/sync", { token: parentLoginFirst.session });
+ok("parent token rejected on /api/student/sync (401)", r.status === 401);
+
+// Student syncs profile using parent's Google account -> auto-links to parent
+const stuProfile = {
+  id: "kid_local_1",
+  name: "Umar",
+  gradeId: "d6",
+  avatar: "🦊",
+  xp: 120,
+  coins: 45,
+  history: [{ pct: 90, ts: "2026-11-25T10:00:00.000Z" }],
+  mockResults: [{ ts: "2026-11-25T09:00:00.000Z", gradeId: "d6", subjectId: "math", complete: false, sections: [] }]
+};
+r = await call("POST", "/api/student/sync", {
+  token: stuWithParentGoogle,
+  body: { backup: { version: 5, profiles: [stuProfile] }, marksSince: 0 }
+});
+ok("student sync uploads backup and returns childId mapping", r.status === 200 && r.data.ok === true && /^ch_/.test(r.data.childIdsByProfile.kid_local_1));
+const autoChildId = r.data.childIdsByProfile.kid_local_1;
+
+r = await call("GET", "/api/student/sync", { token: stuWithParentGoogle });
+ok("GET /api/student/sync returns saved backup for cross-device pull", r.status === 200 && r.data.backup && r.data.backup.profiles[0].name === "Umar");
+
+r = await call("GET", "/api/parent/children", { token: parentLoginFirst.session });
+ok("parent logged in with same Google account automatically sees the child", r.status === 200 && r.data.children.some((c) => c.id === autoChildId && c.displayName === "Umar"));
+
+// Student photo upload via student session -> parent reads photo -> parent marks -> student receives marks
+const stuJpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, ...Array.from({ length: 200 }, (_, i) => i % 256)]);
+r = await call("PUT", `/api/student/photo?profileId=kid_local_1&photoId=sp1`, { raw: stuJpeg, token: stuWithParentGoogle });
+ok("student uploads answer photo via /api/student/photo", r.status === 200 && r.data.size === stuJpeg.length);
+r = await call("GET", `/api/parent/photo/${autoChildId}/sp1`, { token: parentLoginFirst.session });
+ok("parent reads photo uploaded via student sync", r.status === 200);
+r = await call("POST", "/api/parent/marks", {
+  token: parentLoginFirst.session,
+  body: { childId: autoChildId, recordTs: "2026-11-25T09:00:00.000Z", parentMarks: { "d6m-B01": { 0: [0, 1] } } }
+});
+ok("parent marks auto-linked child paper", r.status === 200);
+r = await call("POST", "/api/student/sync", {
+  token: stuWithParentGoogle,
+  body: { backup: { version: 5, profiles: [stuProfile] }, marksSince: 0 }
+});
+ok("student sync receives parent marks in marksByProfile", r.status === 200 && Array.isArray(r.data.marksByProfile.kid_local_1) && r.data.marksByProfile.kid_local_1.length === 1);
+
+// Reverse order: kid logs in BEFORE parent ever signs in, then parent signs in later -> auto-links
+r = await call("POST", "/api/student/auth/google", { body: { idToken: await idToken({ sub: "g-late-parent", email: "ibu.baru@example.com", name: "Ibu Baru" }) } });
+const lateStuTok = r.data.session;
+r = await call("POST", "/api/student/sync", {
+  token: lateStuTok,
+  body: { backup: { version: 5, profiles: [{ id: "kid_late", name: "Sofea", gradeId: "t4" }] }, marksSince: 0 }
+});
+const lateChildId = r.data.childIdsByProfile.kid_late;
+const lateParent = await login({ sub: "g-late-parent", email: "ibu.baru@example.com", name: "Ibu Baru" });
+r = await call("GET", "/api/parent/children", { token: lateParent.session });
+ok("when parent signs in later with same Google account, child auto-links too", r.status === 200 && r.data.children.some((c) => c.id === lateChildId && c.displayName === "Sofea"));
+
+// Isolation: kid with own Google account does NOT auto-link to unrelated parent
+r = await call("POST", "/api/student/auth/google", { body: { idToken: await idToken({ sub: "g-kid-own", email: "kid@example.com", name: "Adik" }) } });
+const ownStuTok = r.data.session;
+r = await call("POST", "/api/student/sync", {
+  token: ownStuTok,
+  body: { backup: { version: 5, profiles: [{ id: "kid_own", name: "Adik", gradeId: "d6" }] }, marksSince: 0 }
+});
+const ownChildId = r.data.childIdsByProfile.kid_own;
+r = await call("GET", "/api/parent/children", { token: parentLoginFirst.session });
+ok("kid using own Google account is NOT auto-linked to unrelated parent", !r.data.children.some((c) => c.id === ownChildId));
+
 // ---------------------------------------------------------------- abuse and CORS
 const fresh = await login({ sub: "g-3", email: "c@example.com" });
 let blocked = false;

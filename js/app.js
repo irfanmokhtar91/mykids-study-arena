@@ -24,6 +24,7 @@
   let activeAiPromptTitle = "";
   let activeAiPromptText = "";
   let shopMsg = "";
+  let studentAuthMsg = "";
 
   // Account selector form state
   let editingAccountId = null; // null | "NEW" | <profileId>
@@ -141,7 +142,10 @@
         <button class="btn-parent" id="btn-parent-dash" aria-label="Panel Ibu Bapa"><span aria-hidden="true">👨‍👩‍👧‍👦</span><span class="lbl"> Ibu Bapa</span></button>
       `;
     } else {
-      centerHtml = syncSt.linked
+      const stuSess = App.StudentAuth && App.StudentAuth.getSession ? App.StudentAuth.getSession() : null;
+      centerHtml = stuSess
+        ? `<div class="top-sync-pill is-online">🟢 ${esc(stuSess.email)}</div>`
+        : syncSt.linked
         ? `<div class="top-sync-pill is-online">🟢 Segerak Online (${esc(syncSt.code)})</div>`
         : pendingInviteCode
         ? `<div class="top-sync-pill is-invite">🔗 Pautan: ${esc(pendingInviteCode)}</div>`
@@ -334,6 +338,58 @@
       ${inviteBannerHtml}
     `;
 
+    const frontDashboardTopHtml = `
+      <div class="front-parent-card front-dashboard-top">
+        <div class="fd-info">
+          <strong>👨‍👩‍👧‍👦 Dashboard Ibu Bapa</strong>
+          <small>Pantau keputusan semua anak, topik perlu fokus &amp; tanda kertas.</small>
+        </div>
+        <div class="fd-actions">
+          <button type="button" class="btn-secondary btn-sm" id="btn-front-parent">Buka Dashboard</button>
+          <a class="btn-ghost btn-sm fd-parent-link" href="parent/" target="_blank" rel="noopener">Aplikasi Ibu Bapa ↗</a>
+        </div>
+      </div>
+    `;
+
+    let studentGoogleCardHtml = "";
+    if (App.StudentAuth && App.StudentAuth.isConfigured()) {
+      const stuSess = App.StudentAuth.getSession();
+      if (stuSess) {
+        const lastSync = stuSess.lastSyncAt ? `Segerak: ${App.Storage.fmtDate(stuSess.lastSyncAt)}` : "Sedia untuk disegerak";
+        const errNote = stuSess.lastError ? `<small class="sg-err">⚠️ ${esc(stuSess.lastError)}</small>` : "";
+        const msgNote = studentAuthMsg ? `<small class="sg-msg">${esc(studentAuthMsg)}</small>` : "";
+        studentGoogleCardHtml = `
+          <section class="student-google-card is-signed-in">
+            <div class="sg-head">
+              <div>
+                <strong>🟢 Akaun Google: ${esc(stuSess.email)}</strong>
+                <small>${esc(lastSync)} • Aplikasi Ibu Bapa kekal berasingan.</small>
+                ${errNote}
+                ${msgNote}
+              </div>
+              <div class="sg-actions">
+                <button type="button" class="btn-tactile btn-true btn-sm" id="btn-student-sync">🔄 Segerak</button>
+                <button type="button" class="btn-ghost btn-sm" id="btn-student-logout">Log Keluar</button>
+              </div>
+            </div>
+          </section>
+        `;
+      } else {
+        studentGoogleCardHtml = `
+          <section class="student-google-card">
+            <div class="sg-head">
+              <div>
+                <strong>☁️ Log Masuk Google (Pilihan)</strong>
+                <small>Tidak wajib. Anak boleh guna akaun Google sendiri atau akaun Google ibu bapa untuk simpan &amp; segerak rekod merentas peranti. Aplikasi Ibu Bapa kekal berasingan.</small>
+                ${studentAuthMsg ? `<small class="sg-err">${esc(studentAuthMsg)}</small>` : ""}
+              </div>
+              <div class="sg-btn-wrap" id="student-google-btn"></div>
+            </div>
+          </section>
+        `;
+      }
+    }
+
     if (editingAccountId !== null) {
       const isNew = editingAccountId === "NEW";
       const editProfile = !isNew ? profiles.find((x) => x.id === editingAccountId) : null;
@@ -361,6 +417,7 @@
         .join("");
 
       main.innerHTML = `
+        ${frontDashboardTopHtml}
         ${heroHtml}
         <section class="account-form-card">
           <div class="account-form-head">
@@ -412,13 +469,7 @@
           }
         </section>
 
-        <div class="front-parent-card">
-          <div>
-            <strong>👨‍👩‍👧‍👦 Panel Ibu Bapa</strong>
-            <small>Lihat keputusan, topik lemah, pelan latihan AI & segerak online semua anak.</small>
-          </div>
-          <button type="button" class="btn-secondary" id="btn-front-parent">Buka Dashboard</button>
-        </div>
+        ${studentGoogleCardHtml}
       `;
 
       const nameInput = document.getElementById("acc-name-input");
@@ -544,6 +595,7 @@
         .join("");
 
       main.innerHTML = `
+        ${frontDashboardTopHtml}
         ${heroHtml}
         <div class="account-grid">
           ${accountCardsHtml}
@@ -553,13 +605,7 @@
           </button>
         </div>
 
-        <div class="front-parent-card">
-          <div>
-            <strong>👨‍👩‍👧‍👦 Panel Ibu Bapa</strong>
-            <small>Pantau keputusan semua anak, topik perlu fokus, pelan AI & segerak telefon dalam talian.</small>
-          </div>
-          <button type="button" class="btn-secondary" id="btn-front-parent">Buka Dashboard</button>
-        </div>
+        ${studentGoogleCardHtml}
       `;
 
       main.querySelectorAll(".account-card").forEach((card) => {
@@ -573,6 +619,7 @@
           homeMode = "normal";
           pendingMockLaunch = null;
           shopMsg = "";
+          studentAuthMsg = "";
           currentView = "home";
           renderAll();
         });
@@ -608,6 +655,44 @@
         App.Sound.click();
         editingAccountId = null;
         currentView = "parent";
+        renderAll();
+      });
+    }
+
+    const stuBtnHost = document.getElementById("student-google-btn");
+    if (stuBtnHost && App.StudentAuth) {
+      App.StudentAuth.renderButton(stuBtnHost, {
+        onSignedIn: () => {
+          studentAuthMsg = "✅ Berjaya log masuk dan segerak rekod!";
+          renderAll();
+        },
+        onError: (e) => {
+          studentAuthMsg = `⚠️ ${(e && e.message) || "Log masuk Google gagal."}`;
+          renderMain();
+        }
+      });
+    }
+
+    const stuSyncBtn = document.getElementById("btn-student-sync");
+    if (stuSyncBtn && App.StudentAuth) {
+      stuSyncBtn.addEventListener("click", async () => {
+        App.Sound.click();
+        stuSyncBtn.disabled = true;
+        stuSyncBtn.textContent = "Menyegerak...";
+        const res = await App.StudentAuth.syncNow({ pullFirst: true });
+        studentAuthMsg = res.ok
+          ? "✅ Rekod & markah terkini sudah disegerakkan."
+          : `⚠️ ${res.error || "Gagal menyegerak."}`;
+        renderAll();
+      });
+    }
+
+    const stuLogoutBtn = document.getElementById("btn-student-logout");
+    if (stuLogoutBtn && App.StudentAuth) {
+      stuLogoutBtn.addEventListener("click", () => {
+        App.Sound.click();
+        App.StudentAuth.signOut();
+        studentAuthMsg = "";
         renderAll();
       });
     }
@@ -758,7 +843,7 @@
     if (currentView === "home") {
       const totalSetsPlayed = Object.keys(profile.setBest || {}).length;
       const mascotInfo = App.Mascot ? App.Mascot.getInfo(grade.id) : { name: "Koko", tagline: "" };
-      const mascotHtml = App.Mascot ? App.Mascot.render(grade.id, "happy", 76) : "";
+      const mascotHtml = App.Mascot ? App.Mascot.render(grade.id, "happy", 68) : "";
       const weekDays = App.Storage.getLast7DaysStatus(profile);
       const leaderboard = App.Storage.getSiblingLeaderboard();
       const resumeTarget = resolveResumeTarget(profile, grade, dlp);
@@ -840,7 +925,16 @@
       const modePanelHtml =
         homeMode === "mock"
           ? `<h2 class="section-title">📝 Ujian Percubaan (${esc(grade.name)})</h2><div id="home-mock-picker"></div>`
-          : `<h2 class="section-title">📚 Pilih Subjek (${esc(grade.name)})</h2><div class="subject-grid">${cards}</div>`;
+          : `<button type="button" class="weak-focus-card" id="btn-open-diagnostic">
+               <span class="wf-icon" aria-hidden="true">🎯</span>
+               <span class="wf-body">
+                 <strong>Latihan Topik Lemah</strong>
+                 <small>Jawab 15 soalan pantas untuk kuasai topik yang perlu diperkukuh</small>
+               </span>
+               <span class="wf-go" aria-hidden="true">Mula →</span>
+             </button>
+             <h2 class="section-title">📚 Pilih Subjek (${esc(grade.name)})</h2>
+             <div class="subject-grid">${cards}</div>`;
 
       main.innerHTML = `
         <section class="hero-banner grade-${grade.id}">
@@ -848,31 +942,26 @@
             <div class="hero-mascot-col">${mascotHtml}</div>
             <div class="hero-left">
               <span class="grade-pill">${esc(grade.name)} • ${esc(grade.subtitle)}</span>
-              <div class="hero-greet-row">
-                <div>
-                  <h1>Hai, ${esc(displayName)}! <span class="hero-av frame-${profile.equippedFrame || "default"}">${profile.avatar}</span></h1>
-                  <p class="mascot-line"><strong>${esc(mascotInfo.name)}:</strong> "${esc(mascotInfo.tagline)}"</p>
-                </div>
-                <div class="hero-cta-group">
-                  <button type="button" class="btn-tactile btn-true" id="btn-quick-resume">▶ Sambung Latihan</button>
-                  <button type="button" class="btn-secondary btn-sm" id="btn-hero-switch-acc">🔄 Tukar Akaun</button>
-                </div>
-              </div>
+              <h1>Hai, ${esc(displayName)}! <span class="hero-av frame-${profile.equippedFrame || "default"}">${profile.avatar}</span></h1>
+              <p class="mascot-line"><strong>${esc(mascotInfo.name)}:</strong> "${esc(mascotInfo.tagline)}"</p>
             </div>
           </div>
 
           <div class="hero-bottom-bar">
-            <div class="hero-progress-pills">
-              <span class="hero-mini-pill">🔥 ${profile.dailyStreak || 0} hari</span>
-              <span class="hero-mini-pill">✅ ${totalSetsPlayed} set</span>
+            <div class="hero-stats-group">
+              <div class="hero-progress-pills">
+                <span class="hero-mini-pill">🔥 ${profile.dailyStreak || 0} hari</span>
+                <span class="hero-mini-pill">✅ ${totalSetsPlayed} set</span>
+              </div>
+              <div class="streak-calendar">
+                <span class="sc-title">Kalendar 7 Hari:</span>
+                <div class="sc-days">${streakCalHtml}</div>
+              </div>
             </div>
-            <div class="streak-calendar">
-              <span class="sc-title">Kalendar 7 Hari:</span>
-              <div class="sc-days">${streakCalHtml}</div>
-            </div>
-            <div class="hero-utility-actions">
+            <div class="hero-cta-group">
+              <button type="button" class="btn-tactile btn-true" id="btn-quick-resume">▶ Sambung Latihan</button>
               <button type="button" class="btn-tactile btn-shop-cta btn-sm" id="btn-open-shop">🛍️ Kedai Ganjaran</button>
-              <button type="button" class="btn-tactile btn-diag-cta btn-sm" id="btn-open-diagnostic">🩺 Semakan Diagnostik</button>
+              <button type="button" class="btn-secondary btn-sm" id="btn-hero-switch-acc">🔄 Tukar Akaun</button>
             </div>
           </div>
         </section>
@@ -934,11 +1023,14 @@
         }
       });
 
-      document.getElementById("btn-open-diagnostic").addEventListener("click", () => {
-        App.Sound.click();
-        currentView = "diagnostic";
-        renderAll();
-      });
+      const diagBtn = document.getElementById("btn-open-diagnostic");
+      if (diagBtn) {
+        diagBtn.addEventListener("click", () => {
+          App.Sound.click();
+          currentView = "diagnostic";
+          renderAll();
+        });
+      }
 
       document.getElementById("btn-open-shop").addEventListener("click", () => {
         App.Sound.click();

@@ -120,3 +120,26 @@ CREATE TABLE IF NOT EXISTS attempt_logs (
 CREATE INDEX IF NOT EXISTS idx_attempts_student_time ON attempt_logs (student_id, answered_at_myt);
 CREATE INDEX IF NOT EXISTS idx_attempts_student_node ON attempt_logs (student_id, syllabus_node_id);
 CREATE INDEX IF NOT EXISTS idx_attempts_session ON attempt_logs (session_id);
+
+-- =====================================================================
+-- Optional Student Google Sign-In & Cloud Sync (v5)
+-- =====================================================================
+
+CREATE TABLE IF NOT EXISTS student_accounts (
+  id TEXT PRIMARY KEY,
+  google_sub TEXT NOT NULL UNIQUE,
+  email TEXT NOT NULL,
+  name TEXT,
+  backup_json TEXT,
+  backup_updated_at INTEGER,
+  created_at INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS student_profile_links (
+  google_sub TEXT NOT NULL,
+  local_profile_id TEXT NOT NULL,
+  child_id TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  PRIMARY KEY (google_sub, local_profile_id)
+);
+CREATE INDEX IF NOT EXISTS idx_spl_google_sub ON student_profile_links (google_sub);

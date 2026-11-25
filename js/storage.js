@@ -46,6 +46,7 @@
 
   let fileHandle = null;
   let onSaveListener = null;
+  const extraSaveListeners = [];
 
   function fmtDate(iso) {
     const d = iso ? new Date(iso) : new Date();
@@ -378,8 +379,9 @@
       }
     }
     syncToLinkedFile();
-    if (!opts.skipCloudPush && typeof onSaveListener === "function") {
-      onSaveListener(opts);
+    if (!opts.skipCloudPush) {
+      if (typeof onSaveListener === "function") onSaveListener(opts);
+      extraSaveListeners.forEach((fn) => fn(opts));
     }
   }
 
@@ -859,6 +861,71 @@
         .sort((a, b) => String(a.answered_at_myt || "").localeCompare(String(b.answered_at_myt || "")))
         .slice(-600);
 
+      // Deduplicate & merge mockResults (never overwrite parent-marked results with unmarked ones)
+      const mockMap = new Map();
+      (local.mockResults || []).forEach((r) => {
+        if (r && r.ts) mockMap.set(r.ts, r);
+      });
+      (inc.mockResults || []).forEach((r) => {
+        if (!r || !r.ts) return;
+        const prev = mockMap.get(r.ts);
+        if (!prev) {
+          mockMap.set(r.ts, r);
+        } else {
+          const prevMarks = prev.parentMarks ? Object.keys(prev.parentMarks).length : 0;
+          const incMarks = r.parentMarks ? Object.keys(r.parentMarks).length : 0;
+          const pickInc = (!prev.complete && r.complete) || incMarks > prevMarks;
+          if (pickInc) mockMap.set(r.ts, r);
+        }
+      });
+      local.mockResults = Array.from(mockMap.values())
+        .sort((a, b) => String(b.ts || "").localeCompare(String(a.ts || "")))
+        .slice(0, 40);
+
+      // Deduplicate & merge tasks
+      const taskMap = new Map();
+      (local.tasks || []).forEach((t) => {
+        if (t && t.id) taskMap.set(t.id, t);
+      });
+      const isDoneTask = (t) => t && (t.status === "selesai" || t.status === "tamat");
+      (inc.tasks || []).forEach((t) => {
+        if (!t || !t.id) return;
+        const prev = taskMap.get(t.id);
+        if (!prev) {
+          taskMap.set(t.id, t);
+        } else {
+          const prevUpd = Number(prev.updatedTs) || 0;
+          const incUpd = Number(t.updatedTs) || 0;
+          const prevCyc = Number(prev.cycle) || 0;
+          const incCyc = Number(t.cycle) || 0;
+          if (
+            incUpd > prevUpd ||
+            (incUpd === prevUpd && (incCyc > prevCyc || (!isDoneTask(prev) && isDoneTask(t))))
+          ) {
+            taskMap.set(t.id, t);
+          }
+        }
+      });
+      local.tasks = Array.from(taskMap.values());
+
+      // Deduplicate & merge reports
+      const repMap = new Map();
+      (local.reports || []).forEach((r) => {
+        if (r && r.ts) repMap.set(r.ts, r);
+      });
+      (inc.reports || []).forEach((r) => {
+        if (!r || !r.ts) return;
+        const prev = repMap.get(r.ts);
+        if (!prev) {
+          repMap.set(r.ts, r);
+        } else if (r.done && !prev.done) {
+          repMap.set(r.ts, { ...prev, done: true });
+        }
+      });
+      local.reports = Array.from(repMap.values())
+        .sort((a, b) => String(b.ts || "").localeCompare(String(a.ts || "")))
+        .slice(0, 100);
+
       if (inc.lastPlayed && (!local.lastPlayed || incIsNewer)) {
         local.lastPlayed = inc.lastPlayed;
       }
@@ -973,6 +1040,11 @@
     },
     setOnSaveListener: (fn) => {
       onSaveListener = typeof fn === "function" ? fn : null;
+    },
+    addOnSaveListener: (fn) => {
+      if (typeof fn === "function" && !extraSaveListeners.includes(fn)) {
+        extraSaveListeners.push(fn);
+      }
     },
     recordAttempt: (
       profileId,

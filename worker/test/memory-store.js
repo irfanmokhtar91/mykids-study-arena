@@ -12,7 +12,47 @@ export class MemoryStore {
     this.questions = new Map();
     this.diagnosticSessions = new Map();
     this.attemptLogs = new Map();
+    this.studentAccounts = new Map();
+    this.studentProfileLinks = new Map();
     this.seq = 0;
+  }
+  async getParentByGoogleSub(sub) {
+    for (const p of this.parents.values()) if (p.sub === sub) return { id: p.id, email: p.email, name: p.name };
+    return null;
+  }
+  async upsertStudentAccount({ sub, email, name, at }) {
+    for (const a of this.studentAccounts.values()) {
+      if (a.googleSub === sub) {
+        a.email = email;
+        a.name = name;
+        return { ...a };
+      }
+    }
+    const id = `sa_${++this.seq}`;
+    const rec = { id, googleSub: sub, email, name, backupJson: null, backupUpdatedAt: null, at };
+    this.studentAccounts.set(id, rec);
+    return { ...rec };
+  }
+  async getStudentAccount(id) {
+    const a = this.studentAccounts.get(id);
+    return a ? { ...a } : null;
+  }
+  async saveStudentBackup(accountId, { backupJson, at }) {
+    const a = this.studentAccounts.get(accountId);
+    if (a) {
+      a.backupJson = backupJson;
+      a.backupUpdatedAt = at;
+    }
+  }
+  async getStudentProfileLink(googleSub, localProfileId) {
+    const sl = this.studentProfileLinks.get(`${googleSub}|${localProfileId}`);
+    return sl ? { ...sl } : null;
+  }
+  async listStudentProfileLinks(googleSub) {
+    return [...this.studentProfileLinks.values()].filter((sl) => sl.googleSub === googleSub).map((sl) => ({ ...sl }));
+  }
+  async upsertStudentProfileLink({ googleSub, localProfileId, childId, at }) {
+    this.studentProfileLinks.set(`${googleSub}|${localProfileId}`, { googleSub, localProfileId, childId, createdAt: at });
   }
   async upsertParent({ sub, email, name, at }) {
     for (const p of this.parents.values()) if (p.sub === sub) { p.email = email; p.name = name; return { id: p.id, email, name }; }
@@ -40,6 +80,7 @@ export class MemoryStore {
     for (const [k, p] of [...this.pairs]) if (p.childId === c || p.claimedChildId === c) this.pairs.delete(k);
     for (const [k, s] of [...this.diagnosticSessions]) if (s.student_id === c) this.diagnosticSessions.delete(k);
     for (const [k, a] of [...this.attemptLogs]) if (a.student_id === c) this.attemptLogs.delete(k);
+    for (const [k, sl] of [...this.studentProfileLinks]) if (sl.childId === c) this.studentProfileLinks.delete(k);
   }
   async saveDiagnosticSession({ childId, session, attempts, syllabusNodes = [], questions = [] }) {
     for (const n of syllabusNodes) if (n && n.id && !this.syllabusNodes.has(n.id)) this.syllabusNodes.set(n.id, { ...n });
