@@ -474,10 +474,17 @@
           icon: "🔬",
           dlp: false,
           chapters: [
+            { id: "langkah_keselamatan", title: "Bab 1: Langkah Keselamatan di dalam Makmal", titleEn: "Ch 1: Safety Measures in Laboratory" },
+            { id: "bantuan_kecemasan", title: "Bab 2: Bantuan Kecemasan", titleEn: "Ch 2: Emergency Help" },
+            { id: "parameter_kesihatan", title: "Bab 3: Teknik Mengukur Parameter Kesihatan Badan", titleEn: "Ch 3: Techniques of Measuring the Parameters of Body Health" },
             { id: "teknologi_hijau", title: "Bab 4: Teknologi Hijau dalam Melestarikan Alam", titleEn: "Ch 4: Green Technology" },
             { id: "genetik", title: "Bab 5: Genetik", titleEn: "Ch 5: Genetics" },
             { id: "sokongan_pertumbuhan", title: "Bab 6: Sokongan, Pergerakan dan Pertumbuhan", titleEn: "Ch 6: Support, Movement and Growth" },
             { id: "koordinasi_badan", title: "Bab 7: Koordinasi Badan", titleEn: "Ch 7: Body Coordination" },
+            { id: "unsur_bahan", title: "Bab 8: Unsur dan Bahan", titleEn: "Ch 8: Elements and Substances" },
+            { id: "aloi_kaca_seramik", title: "Bab 9: Aloi, Kaca dan Seramik", titleEn: "Ch 9: Alloys, Glass and Ceramics" },
+            { id: "polimer_getah", title: "Bab 9: Polimer dan Getah", titleEn: "Ch 9: Polymers and Rubber" },
+            { id: "kimia_perubatan", title: "Bab 10: Kimia dalam Perubatan dan Kesihatan", titleEn: "Ch 10: Chemicals in Medicine and Health" },
             { id: "gerakan_linear", title: "Bab 11: Gerakan Linear dan Graf Gerakan", titleEn: "Ch 11: Linear Motion and Motion Graphs" },
             { id: "jatuh_bebas_inersia", title: "Bab 11: Jatuh Bebas, Jisim dan Inersia", titleEn: "Ch 11: Free Fall, Mass and Inertia" },
             { id: "tenaga_nuklear", title: "Bab 12: Tenaga Nuklear", titleEn: "Ch 12: Nuclear Energy" }
