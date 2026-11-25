@@ -43,6 +43,7 @@ const files = [
   "js/data/ask_t2.js",
   "js/data/psv_d6.js",
   "js/data/pjpk_d6.js",
+  "js/data/psv_t2.js",
   "js/data/fact_tables.js",
   "js/questionEngine.js"
 ];

@@ -304,6 +304,26 @@
             { id: "kod_data", title: "3.1 Persekitaran Kod Arahan", titleEn: "3.1 Coding Environment" },
             { id: "kod_struktur", title: "3.2 Struktur Kod Arahan", titleEn: "3.2 Coding Structures" }
           ]
+        },
+        {
+          id: "psv",
+          name: "Pendidikan Seni Visual",
+          nameEn: "Visual Arts Education (PSV)",
+          icon: "🎨",
+          dlp: false,
+          chapters: [
+            { id: "ragam_hias", title: "Tajuk 1: Seni Ragam Hias (Pengangkutan, Alat Permainan Rakyat & Alat Domestik)", titleEn: "Topic 1: Decorative Art" },
+            { id: "lukisan", title: "Tajuk 2: Seni Lukisan", titleEn: "Topic 2: Drawing" },
+            { id: "catan", title: "Tajuk 3: Seni Catan", titleEn: "Topic 3: Painting" },
+            { id: "cetakan", title: "Tajuk 4: Seni Cetakan", titleEn: "Topic 4: Printmaking" },
+            { id: "landskap", title: "Tajuk 5: Reka Bentuk Landskap", titleEn: "Topic 5: Landscape Design" },
+            { id: "hiasan_dalaman", title: "Tajuk 6: Reka Bentuk Hiasan Dalaman", titleEn: "Topic 6: Interior Design" },
+            { id: "reka_industri", title: "Tajuk 7: Reka Bentuk Industri", titleEn: "Topic 7: Industrial Design" },
+            { id: "sulaman", title: "Tajuk 8: Seni Sulaman", titleEn: "Topic 8: Embroidery" },
+            { id: "seramik", title: "Tajuk 9: Seni Seramik", titleEn: "Topic 9: Ceramics" },
+            { id: "reka_grafik", title: "Tajuk 10: Seni Reka Grafik (Simbol & Logo)", titleEn: "Topic 10: Graphic Design" },
+            { id: "foto", title: "Tajuk 11: Seni Foto", titleEn: "Topic 11: Photography" }
+          ]
         }
       ]
     },
