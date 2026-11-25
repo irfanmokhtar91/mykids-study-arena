@@ -477,7 +477,10 @@
             { id: "teknologi_hijau", title: "Bab 4: Teknologi Hijau dalam Melestarikan Alam", titleEn: "Ch 4: Green Technology" },
             { id: "genetik", title: "Bab 5: Genetik", titleEn: "Ch 5: Genetics" },
             { id: "sokongan_pertumbuhan", title: "Bab 6: Sokongan, Pergerakan dan Pertumbuhan", titleEn: "Ch 6: Support, Movement and Growth" },
-            { id: "koordinasi_badan", title: "Bab 7: Koordinasi Badan", titleEn: "Ch 7: Body Coordination" }
+            { id: "koordinasi_badan", title: "Bab 7: Koordinasi Badan", titleEn: "Ch 7: Body Coordination" },
+            { id: "gerakan_linear", title: "Bab 11: Gerakan Linear dan Graf Gerakan", titleEn: "Ch 11: Linear Motion and Motion Graphs" },
+            { id: "jatuh_bebas_inersia", title: "Bab 11: Jatuh Bebas, Jisim dan Inersia", titleEn: "Ch 11: Free Fall, Mass and Inertia" },
+            { id: "tenaga_nuklear", title: "Bab 12: Tenaga Nuklear", titleEn: "Ch 12: Nuclear Energy" }
           ]
         },
         {
