@@ -70,23 +70,23 @@
         ),
         kosa_kata: buildFromTuples(
           [
-            ["gigih", "tekun", "'Gigih' bermaksud tekun dan bersungguh-sungguh."],
-            ["cekal", "tabah", "'Cekal' seerti dengan tabah menghadapi dugaan."],
-            ["mesra", "ramah", "'Mesra' seerti dengan ramah dan mudah bergaul."],
-            ["lazat", "enak", "'Lazat' seerti dengan enak dan sedap."],
-            ["cekap", "mahir", "'Cekap' bermaksud pantas dan mahir menjalankan tugas."],
-            ["amanah", "jujur", "'Amanah' bererti jujur dan boleh dipercayai."],
-            ["agung", "mulia", "'Agung' bermaksud tinggi darjat atau mulia."],
-            ["pantas", "laju", "'Pantas' seerti dengan laju dan cepat."],
-            ["damai", "aman", "'Damai' bermaksud tenang dan aman sentosa."],
-            ["murung", "sedih", "'Murung' bermaksud sedih dan muram."],
-            ["setia", "patuh", "'Setia' bermaksud taat dan teguh berpegang janji."],
-            ["cemerlang", "gemilang", "'Cemerlang' seerti dengan kejayaan yang gemilang."],
-            ["berani", "perkasa", "'Berani' bermaksud tidak takut dan perkasa."],
-            ["sunyi", "sepi", "'Sunyi' bermaksud senyap dan sepi."],
-            ["tulen", "asli", "'Tulen' seerti dengan asli dan tidak bercampur palsu."]
+            ["gigih", "Tekun dan bersungguh-sungguh berusaha", "'Gigih' bermaksud tekun dan tidak mudah berputus asa."],
+            ["cekal", "Tabah dan kuat semangat menghadapi dugaan", "'Cekal' bermaksud tabah menghadapi cabaran."],
+            ["mesra", "Ramah dan mudah bergaul dengan orang lain", "'Mesra' menggambarkan sikap ramah serta muhibah."],
+            ["lazat", "Enak dan sedap rasanya (makanan)", "'Lazat' menggambarkan rasa makanan yang sangat sedap."],
+            ["cekap", "Pantas dan mahir menjalankan tugas", "'Cekap' bermaksud mahir dan kemas menyelesaikan kerja."],
+            ["amanah", "Jujur serta boleh dipercayai menjaga tanggungjawab", "'Amanah' bererti jujur dan bertanggungjawab."],
+            ["agung", "Tinggi kedudukan atau sangat mulia", "'Agung' bermaksud luhur, besar dan mulia."],
+            ["pantas", "Laju dan cepat dalam pergerakan", "'Pantas' menggambarkan kelajuan atau kecepatan bertindak."],
+            ["damai", "Tenang, aman dan bebas daripada pergaduhan", "'Damai' bermaksud keadaan yang tenteram dan aman."],
+            ["murung", "Sedih dan berasa duka dalam hati", "'Murung' menggambarkan perasaan sedih dan muram."],
+            ["setia", "Taat dan teguh berpegang pada janji", "'Setia' bermaksud taat serta tidak berpaling tadah."],
+            ["cemerlang", "Mencapai kejayaan yang gemilang dan terbaik", "'Cemerlang' bermaksud keputusan atau mutu kerja yang sangat baik."],
+            ["berani", "Tidak takut dan tabah menghadapi bahaya", "'Berani' bermaksud gagah serta sanggup menghadapi cabaran."],
+            ["sunyi", "Senyap dan sepi tanpa bunyi bising", "'Sunyi' menggambarkan suasana yang tenang dan sepi."],
+            ["tulen", "Asli dan tidak bercampur bahan tiruan", "'Tulen' bermaksud sejati dan asli."]
           ],
-          (r) => `Pilih kata seerti (sinonim) bagi '${r[0]}':`,
+          (r) => `Apakah maksud perkataan '${r[0]}' mengikut konteks kamus?`,
           (r) => r[1],
           (r) => r[2]
         ),
@@ -116,24 +116,24 @@
       bi: {
         vocab_idioms: buildFromTuples(
           [
-            ["spill the beans", "Reveal a secret accidentally", "'Spill the beans' means to give away a secret."],
-            ["under the weather", "Feeling slightly sick or unwell", "'Under the weather' means feeling ill or tired."],
-            ["cost an arm and a leg", "Very expensive", "'Cost an arm and a leg' means something costs a lot of money."],
-            ["bite the bullet", "Face a difficult situation bravely", "'Bite the bullet' means enduring something tough with courage."],
-            ["burn the midnight oil", "Stay up late studying or working", "'Burn the midnight oil' means working late into the night."],
-            ["on cloud nine", "Extremely happy", "'On cloud nine' means feeling joyful and thrilled."],
-            ["see eye to eye", "Agree completely with someone", "'See eye to eye' means sharing the same opinion."],
-            ["raining cats and dogs", "Raining very heavily", "'Raining cats and dogs' describes a heavy downpour."],
-            ["cry over spilt milk", "Worry about a past mistake that cannot be changed", "It reminds us not to regret something already done."],
-            ["a blessing in disguise", "Something good that seemed bad at first", "An apparent problem turns out to bring a good outcome."],
-            ["beat around the bush", "Avoid talking directly about the main topic", "'Beat around the bush' means delaying getting to the point."],
-            ["early bird catches the worm", "People who wake up or act early succeed first", "Being prompt gives an advantage."],
-            ["actions speak louder than words", "What you do matters more than what you say", "Deeds prove sincerity better than promises."],
-            ["judge a book by its cover", "Form an opinion based only on outward appearance", "Usually used negatively: 'Don't judge a book by its cover'."],
-            ["kill two birds with one stone", "Solve two tasks with a single action", "Achieving two goals in one effort saves time."]
+            ["photographer", "A person who takes pictures using a camera", "A photographer captures photos for books, news, or events."],
+            ["zookeeper", "A worker who feeds and cares for animals in a zoo", "A zookeeper keeps zoo animals healthy and safe."],
+            ["pilot", "A person trained to fly an aeroplane", "A pilot flies aircraft safely between airports."],
+            ["baker", "A person who makes and bakes bread, cakes, and pastries", "A baker prepares fresh bread and cakes in a bakery."],
+            ["scientist", "A person who studies the natural world and conducts experiments", "A scientist tests ideas using careful observation and experiments."],
+            ["designer", "A person who plans how clothes, objects, or buildings will look", "A designer creates sketches and plans for new products."],
+            ["fire station", "The building where fire engines and firefighters wait for emergencies", "Fire engines leave the fire station quickly when an alarm rings."],
+            ["elevator", "A machine in a tall building that carries people up and down floors", "An elevator (lift) moves people easily between storeys."],
+            ["motorway", "A wide fast road built for long-distance traffic between cities", "Vehicles travel smoothly along a motorway without traffic lights."],
+            ["platform", "The raised area beside railway tracks where passengers wait for trains", "Passengers stand safely behind the line on the train platform."],
+            ["backpack", "A bag with shoulder straps carried on the back for school or travel", "Pupils carry books and water bottles in a backpack."],
+            ["bandage", "A strip of cloth wrapped around a wound or sprained ankle", "A bandage protects an injury and keeps it clean."],
+            ["instrument", "An object such as a guitar, piano, or flute played to make music", "Musicians practise playing a musical instrument before a concert."],
+            ["stadium", "A large sports ground surrounded by rows of seats for spectators", "Thousands of fans watch football matches inside a stadium."],
+            ["climate", "The typical weather conditions of a place over a long time", "Malaysia has a warm, wet tropical climate all year round."]
           ],
-          (r) => `What does the English idiom "${r[0]}" mean?`,
-          (r) => r[1],
+          (r) => `Which Year 6 English word matches this meaning: "${r[1]}"?`,
+          (r) => r[0],
           (r) => r[2]
         ),
         tenses: buildFromTuples(
@@ -218,44 +218,27 @@
           (r) => r.ans,
           (r) => r.exp
         ),
-        mesin: buildFromTuples(
-          [
-            { q: "Apakah contoh kegunaan skru dalam kehidupan harian?", ans: "Mengikat kepingan kayu pada tempatnya (skru & pengapit G)", exp: "Skru ialah satah condong yang berlingkar mengelilingi silinder.", qEn: "What is an everyday example of a screw?", ansEn: "Joining wood pieces (wood screw & G-clamp)", expEn: "A screw is a spiral inclined plane." },
-            { q: "Bagaimanakah susunan bahagian tuas kelas pertama seperti papan jongkang-jongket?", ans: "Fulkrum berada di tengah antara daya dan beban", exp: "Contoh tuas kelas pertama lain ialah gunting dan playar.", qEn: "How is a first-class lever like a seesaw arranged?", ansEn: "Fulcrum in the middle between effort and load", expEn: "Scissors and pliers are also first-class levers." },
-            { q: "Apakah kelebihan utama sistem takal bergabung (takal tetap dan takal bergerak)?", ans: "Mengurangkan daya yang diperlukan untuk mengangkat beban berat", exp: "Lebih banyak tali penyokong takal membantu mengurangkan daya tarikan.", qEn: "What is the main advantage of a combined pulley system?", ansEn: "Reduces the effort needed to lift a heavy load", expEn: "Movable pulleys share the load weight across rope segments." },
-            { q: "Dalam basikal, rantai menghubungkan gear hadapan dan gear belakang untuk...", ans: "Memindahkan daya kayuhan pedal ke roda belakang", exp: "Basikal ialah mesin kompleks yang menggabungkan gear, tuas, skru serta roda dan gandar.", qEn: "On a bicycle, the chain links front and rear gears to...", ansEn: "Transfer pedalling force to the rear wheel", expEn: "A bicycle combines gears, levers, screws, and wheels and axles." },
-            { q: "Jam tangan mekanikal ialah mesin kompleks yang menggabungkan...", ans: "Gear, skru serta roda dan gandar", exp: "Gear kecil dan besar menggerakkan jarum saat, minit dan jam tepat.", qEn: "A mechanical watch is a complex machine combining...", ansEn: "Gears, screws, and wheel and axle", expEn: "Gears regulate the motion of the watch hands." },
-            { q: "Kren pembinaan menggunakan mesin ringkas utama iaitu...", ans: "Takal dan tuas", exp: "Sistem takal memudahkan pengangkatan bahan binaan berat ke bangunan tinggi.", qEn: "A construction crane primarily relies on...", ansEn: "Pulleys and levers", expEn: "Pulleys lift heavy steel and concrete upward." },
-            { q: "Dalam pemotong kuku, pemegangnya berfungsi sebagai...", ans: "Tuas untuk menggandakan daya tangan", exp: "Pemegang panjang ialah tuas manakala hujung pemotong ialah baji.", qEn: "In a nail clipper, the handle works as a...", ansEn: "Lever to multiply finger force", expEn: "The lever presses the sharp wedge blades together." },
-            { q: "Dalam kereta sorong, di manakah kedudukan beban berbanding fulkrum (roda)?", ans: "Beban di tengah-tengah antara roda dan pemegang (tuas kelas ke-2)", exp: "Kedudukan ini mengurangkan daya mengangkat beban berat.", qEn: "In a wheelbarrow, where is the load relative to the wheel (fulcrum)?", ansEn: "Load in the middle between wheel and handles (2nd-class lever)", expEn: "Class 2 levers make lifting heavy loads easier." },
-            { q: "Pengasah pensel mekanikal menggunakan gabungan dua jenis mesin ringkas iaitu...", ans: "Roda dan gandar serta baji", exp: "Pemegang berpusing (roda dan gandar) memusingkan bilah tajam (baji).", qEn: "A crank pencil sharpener combines...", ansEn: "Wheel and axle with a wedge", expEn: "Turning the handle rotates the sharp cutting wedge." },
-            { q: "Pembuka tin berputar menggabungkan empat jenis mesin ringkas iaitu...", ans: "Tuas, roda dan gandar, gear serta baji", exp: "Ia gabungan beberapa mesin ringkas untuk memotong penutup tin dengan mudah.", qEn: "A rotary can opener is a complex machine combining...", ansEn: "Lever, wheel and axle, gear, and wedge", expEn: "Multiple simple machines work together cleanly." }
-          ].map((x) => ({ q: x.q, qEn: x.qEn, ans: x.ans, ansEn: x.ansEn, exp: x.exp, expEn: x.expEn })),
-          (r) => r.q,
-          (r) => r.ans,
-          (r) => r.exp
-        )
       },
       pi: {
         akidah: buildFromTuples(
           [
-            ["Al-Khaliq", "Allah Maha Pencipta", "Al-Khaliq bermaksud Allah mencipta seluruh alam daripada tiada."],
-            ["Ar-Rahman", "Allah Maha Pemurah", "Ar-Rahman melimpahkan rahmat dan rezeki kepada semua makhluk di dunia."],
-            ["Al-Adlu", "Allah Maha Adil", "Setiap keputusan Allah adalah tepat dan tidak menzalimi sesiapapun."],
-            ["Al-Hakim", "Allah Maha Bijaksana", "Setiap ciptaan dan syariat Allah mempunyai hikmah."],
-            ["As-Sami'", "Allah Maha Mendengar", "Allah mendengar segala bisikan hati dan doa hamba-Nya."],
-            ["Al-Basir", "Allah Maha Melihat", "Tiada satu perbuatan pun tersembunyi daripada penglihatan Allah."],
-            ["Al-Alim", "Allah Maha Mengetahui", "Ilmu Allah meliputi segala yang zahir dan ghaib."],
+            ["Al-Hadi (الهادي)", "Allah Maha Pemberi Petunjuk ke jalan yang benar dan lurus", "Allah membimbing manusia melalui al-Quran, para rasul dan akal."],
+            ["Al-'Adl (العدل)", "Allah Maha Adil dalam setiap hukum dan ketetapan-Nya", "Allah tidak pernah menzalimi mana-mana makhluk."],
+            ["Qada'", "Ketetapan Allah SWT ke atas segala sesuatu sejak azali lagi", "Beriman kepada Qada' dan Qadar ialah Rukun Iman keenam."],
+            ["Qadar", "Pelaksanaan ketetapan Allah terhadap makhluk mengikut ketentuan masa dan kehendak-Nya", "Manusia wajib berusaha dan berdoa sebelum bertawakal."],
+            ["Takdir Mubram", "Ketentuan Allah yang tetap dan tidak berubah seperti kelahiran dan ajal", "Tiada sesiapa dapat mengubah takdir mubram."],
+            ["Takdir Muallaq", "Ketentuan Allah yang bergantung kepada usaha, doa dan ikhtiar manusia", "Contohnya kejayaan peperiksaan melalui belajar bersungguh-sungguh dan berdoa."],
+            ["Khurafat", "Kepercayaan atau amalan karut yang bercanggah dengan syariat Islam", "Contohnya mempercayai tangkal azimat atau hari sial."],
+            ["Riddah (Murtad)", "Keluar atau berpaling daripada agama Islam melalui niat, perkataan atau perbuatan", "Riddah ialah dosa besar yang merosakkan iman dan menggugurkan amal soleh."],
+            ["Perkara Sam'iyyat", "Perkara ghaib yang hanya diketahui melalui al-Quran dan hadis sahih", "Contohnya alam barzakh, Padang Mahsyar, Mizan, Sirat, syurga dan neraka."],
             ["Malaikat Munkar & Nakir", "Menyoal manusia di dalam alam kubur (barzakh)", "Kedua-dua malaikat ini menyoal roh di alam barzakh."],
-            ["Malaikat Malik", "Menjaga pintu neraka", "Malaikat Malik bertugas mengawal neraka dengan tegas."],
-            ["Malaikat Ridwan", "Menjaga pintu syurga", "Malaikat Ridwan mengalu-alukan ahli syurga."],
             ["Yaumul Ba'ath", "Hari kebangkitan semula manusia dari kubur", "Selepas sangkakala kedua ditiup, semua makhluk dibangkitkan."],
             ["Yaumul Hisab", "Hari perhitungan segala amalan manusia", "Setiap amalan baik dan buruk dihitung dengan adil."],
+            ["Al-Mizan", "Neraca timbangan amalan baik dan buruk manusia di akhirat", "Mizan menzahirkan keadilan mutlak Allah SWT."],
             ["Sirat", "Titian merentangi neraka menuju ke syurga", "Kelajuan melintasi Sirat bergantung pada amalan soleh di dunia."],
-            ["Al-Qadir", "Allah Maha Berkuasa", "Allah berkuasa melakukan segala sesuatu mengikut kehendak-Nya."],
-            ["Al-Ghafur", "Allah Maha Pengampun", "Allah mengampunkan dosa hamba-Nya yang bertaubat nasuha."]
+            ["Tawakal", "Berserah diri kepada Allah setelah berusaha dengan bersungguh-sungguh dan berdoa", "Tawakal yang benar sentiasa didahului dengan usaha yang gigih."]
           ],
-          (r) => `Apakah penjelasan yang betul tentang “${r[0]}” dalam Akidah Islam?`,
+          (r) => `Apakah maksud atau penjelasan yang tepat tentang "${r[0]}" dalam Akidah Tahun 6?`,
           (r) => r[1],
           (r) => r[2]
         )

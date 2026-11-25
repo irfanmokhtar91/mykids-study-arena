@@ -96,6 +96,7 @@
   function leaveActiveSubViews() {
     if (App.MockUI) App.MockUI.stop();
     if (App.DiagnosticUI) App.DiagnosticUI.stop();
+    if (App.VariantsUI) App.VariantsUI.stop();
     pendingMockLaunch = null;
   }
 
@@ -840,6 +841,21 @@
       return;
     }
 
+    if (currentView === "variants" && App.VariantsUI) {
+      App.VariantsUI.open(main, {
+        profile,
+        grade,
+        onProfileUpdate: () => renderTopBar(),
+        onExit: () => {
+          App.VariantsUI.stop();
+          homeMode = "normal";
+          currentView = "home";
+          renderAll();
+        }
+      });
+      return;
+    }
+
     if (currentView === "home") {
       const totalSetsPlayed = Object.keys(profile.setBest || {}).length;
       const mascotInfo = App.Mascot ? App.Mascot.getInfo(grade.id) : { name: "Koko", tagline: "" };
@@ -922,6 +938,18 @@
         })
         .join("");
 
+      const variantCardHtml =
+        App.Variants && App.Variants.getAvailablePools(App.Pools, App.Curriculum, grade.id).length > 0
+          ? `<button type="button" class="weak-focus-card variant-focus-card" id="btn-open-variants">
+               <span class="wf-icon" aria-hidden="true">🔀</span>
+               <span class="wf-body">
+                 <strong>Latihan Rawak</strong>
+                 <small>Pilih bab yang sudah dipelajari • 10 soalan baharu setiap sesi (Sejarah)</small>
+               </span>
+               <span class="wf-go" aria-hidden="true">Mula →</span>
+             </button>`
+          : "";
+
       const modePanelHtml =
         homeMode === "mock"
           ? `<h2 class="section-title">📝 Ujian Percubaan (${esc(grade.name)})</h2><div id="home-mock-picker"></div>`
@@ -933,6 +961,7 @@
                </span>
                <span class="wf-go" aria-hidden="true">Mula →</span>
              </button>
+             ${variantCardHtml}
              <h2 class="section-title">📚 Pilih Subjek (${esc(grade.name)})</h2>
              <div class="subject-grid">${cards}</div>`;
 
@@ -1028,6 +1057,15 @@
         diagBtn.addEventListener("click", () => {
           App.Sound.click();
           currentView = "diagnostic";
+          renderAll();
+        });
+      }
+
+      const variantsBtn = document.getElementById("btn-open-variants");
+      if (variantsBtn) {
+        variantsBtn.addEventListener("click", () => {
+          App.Sound.click();
+          currentView = "variants";
           renderAll();
         });
       }
@@ -2016,6 +2054,15 @@
         const action = btn.getAttribute("data-task-action");
         const name = App.Storage.getDisplayName(prof);
         if (action === "practice") {
+          if (task.chapterId === "latihan_rawak" && App.VariantsUI) {
+            App.Storage.setActiveProfile(prof.id);
+            parentUnlocked = false;
+            shopMsg = "";
+            homeMode = "normal";
+            currentView = "variants";
+            renderAll();
+            return;
+          }
           const grade = App.GRADES[prof.gradeId];
           const subject = grade && grade.subjects.find((s) => s.id === task.subjectId);
           const chapter = subject && subject.chapters.find((c) => c.id === task.chapterId);

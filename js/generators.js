@@ -346,47 +346,233 @@
       }
     ],
     ruang: [
+      // 6.2 Bulatan: Hubungan jejari dan diameter (d = 2r, r = d / 2)
       (rng, dlp) => {
-        const w = randInt(rng, 3, 18);
-        const l = w + randInt(rng, 2, 16);
-        const perim = 2 * (l + w);
-        const area = l * w;
-        const askArea = rng() > 0.5;
-        if (askArea) {
+        const objs = [
+          ["meja bulat", "round table"],
+          ["jam dinding bulat", "round wall clock"],
+          ["kolam ikan berbentuk bulatan", "circular fish pond"],
+          ["kek bulat", "round cake"],
+          ["roda basikal", "bicycle wheel"],
+          ["piza bulat", "round pizza"],
+          ["pinggan bulat", "round plate"],
+          ["cermin bulat", "round mirror"],
+          ["gelung plastik", "plastic hoop"],
+          ["tudung saji bulat", "round food cover"]
+        ];
+        const [objBm, objEn] = pick(rng, objs);
+        const askDiameter = rng() > 0.5;
+        if (askDiameter) {
+          const half = rng() > 0.65;
+          const r = half ? randInt(rng, 2, 16) + 0.5 : randInt(rng, 3, 28);
+          const d = r * 2;
           const q = dlp
-            ? `A rectangle has length ${l} cm and width ${w} cm. Calculate its area.`
-            : `Sebuah segi empat tepat mempunyai panjang ${l} cm dan lebar ${w} cm. Hitung luasnya.`;
-          const exp = `Luas / Area = ${l} × ${w} = ${area} cm².`;
-          return makeMcq(rng, q, `${area} cm²`, [`${perim} cm²`, `${area + l} cm²`, `${l + w} cm²`], exp);
+            ? `A ${objEn} has a radius of ${r} cm. What is its diameter?`
+            : `Sebuah ${objBm} mempunyai jejari ${r} cm. Berapakah diameternya?`;
+          const exp = dlp
+            ? `Diameter = 2 × radius = 2 × ${r} cm = ${d} cm.`
+            : `Diameter = 2 × jejari = 2 × ${r} cm = ${d} cm.`;
+          return makeMcq(rng, q, `${d} cm`, [`${r} cm`, `${d * 2} cm`, `${r + 2} cm`, `${d + 2} cm`], exp);
         } else {
+          const allowOdd = rng() > 0.7;
+          const d = allowOdd ? randInt(rng, 3, 18) * 2 + 1 : randInt(rng, 3, 28) * 2;
+          const r = d / 2;
           const q = dlp
-            ? `A rectangle has length ${l} cm and width ${w} cm. Calculate its perimeter.`
-            : `Sebuah segi empat tepat mempunyai panjang ${l} cm dan lebar ${w} cm. Hitung perimeternya.`;
-          const exp = `Perimeter = 2 × (${l} + ${w}) = ${perim} cm.`;
-          return makeMcq(rng, q, `${perim} cm`, [`${area} cm`, `${l + w} cm`, `${perim + 6} cm`], exp);
+            ? `A ${objEn} has a diameter of ${d} cm. What is its radius?`
+            : `Sebuah ${objBm} mempunyai diameter ${d} cm. Berapakah jejarinya?`;
+          const exp = dlp
+            ? `Radius = diameter ÷ 2 = ${d} cm ÷ 2 = ${r} cm.`
+            : `Jejari = diameter ÷ 2 = ${d} cm ÷ 2 = ${r} cm.`;
+          return makeMcq(rng, q, `${r} cm`, [`${d * 2} cm`, `${d} cm`, `${r + 2} cm`, `${Math.max(1, r - 2)} cm`], exp);
         }
       },
+      // 6.3 Penyelesaian masalah bulatan & sudut pada pusat (putaran lengkap = 360°)
       (rng, dlp) => {
-        const b = randInt(rng, 3, 18) * 2;
-        const h = randInt(rng, 3, 19);
-        const area = (b * h) / 2;
-        const q = dlp
-          ? `Find the area of a triangle with base ${b} cm and height ${h} cm.`
-          : `Cari luas sebuah segi tiga dengan tapak ${b} cm dan tinggi ${h} cm.`;
-        const exp = `Luas = 1/2 × ${b} × ${h} = ${area} cm².`;
-        return makeMcq(rng, q, `${area} cm²`, [`${b * h} cm²`, `${b + h} cm²`, `${area + b} cm²`], exp);
-      },
-      (rng, dlp) => {
-        const s = randInt(rng, 3, 16);
-        const askPerim = rng() > 0.5;
-        if (askPerim) {
-          const p = 4 * s;
-          const q = dlp ? `A square has side length ${s} cm. Find its perimeter.` : `Sebuah segi empat sama mempunyai sisi ${s} cm. Cari perimeternya.`;
-          return makeMcq(rng, q, `${p} cm`, [`${s * s} cm`, `${2 * s} cm`, `${p + 4} cm`], `Perimeter = 4 × ${s} = ${p} cm.`);
+        const mode = randInt(rng, 1, 3);
+        if (mode === 1) {
+          const items = [
+            ["syiling sama saiz", "identical coins"],
+            ["pinggan bulat sama saiz", "identical round plates"],
+            ["gelung bulat sama saiz", "identical circular hoops"],
+            ["butang bulat sama saiz", "identical round buttons"],
+            ["biskut bulat sama saiz", "identical round biscuits"],
+            ["penutup tin sama saiz", "identical round lids"]
+          ];
+          const [itBm, itEn] = pick(rng, items);
+          const k = randInt(rng, 2, 6);
+          const r = randInt(rng, 3, 15);
+          const d = r * 2;
+          const totalLen = k * d;
+          const askRadius = rng() > 0.5;
+          if (askRadius) {
+            const q = dlp
+              ? `${k} ${itEn} are placed side by side in a straight row with a total length of ${totalLen} cm. Find the radius of one piece.`
+              : `${k} keping ${itBm} disusun rapat sebaris dengan jumlah panjang ${totalLen} cm. Cari jejari bagi satu keping.`;
+            const exp = dlp
+              ? `Diameter of 1 = ${totalLen} ÷ ${k} = ${d} cm. Radius = ${d} ÷ 2 = ${r} cm.`
+              : `Diameter 1 keping = ${totalLen} ÷ ${k} = ${d} cm. Jejari = ${d} ÷ 2 = ${r} cm.`;
+            return makeMcq(rng, q, `${r} cm`, [`${d} cm`, `${Math.round(totalLen / k) + 1} cm`, `${r + 2} cm`, `${Math.max(1, r - 1)} cm`], exp);
+          } else {
+            const q = dlp
+              ? `${k} ${itEn}, each with a radius of ${r} cm, are placed side by side in a straight row. What is the total length of the row?`
+              : `${k} keping ${itBm} berjejari ${r} cm setiap satu disusun rapat sebaris. Berapakah jumlah panjang susunan itu?`;
+            const exp = dlp
+              ? `Diameter of 1 = 2 × ${r} = ${d} cm. Total length = ${k} × ${d} = ${totalLen} cm.`
+              : `Diameter 1 keping = 2 × ${r} = ${d} cm. Jumlah panjang = ${k} × ${d} = ${totalLen} cm.`;
+            return makeMcq(rng, q, `${totalLen} cm`, [`${k * r} cm`, `${totalLen + d} cm`, `${d} cm`, `${totalLen - r} cm`], exp);
+          }
+        } else if (mode === 2) {
+          const items = [
+            ["kek bulat", "round cake"],
+            ["piza bulat", "round pizza"],
+            ["carta pai", "pie chart"],
+            ["roda putar", "spinning wheel"],
+            ["biskut bulatan", "circular biscuit"]
+          ];
+          const [itBm, itEn] = pick(rng, items);
+          const n = pick(rng, [3, 4, 5, 6, 8, 9, 10, 12]);
+          const ans = 360 / n;
+          const q = dlp
+            ? `A ${itEn} is divided equally into ${n} equal sectors from the centre. What is the angle at the centre of each sector?`
+            : `Sebuah ${itBm} dipotong sama rata kepada ${n} sektor yang sama saiz dari pusatnya. Berapakah sudut pada pusat bagi setiap sektor?`;
+          const exp = dlp
+            ? `One full turn = 360°. Angle of 1 sector = 360° ÷ ${n} = ${ans}°.`
+            : `Satu putaran lengkap = 360°. Sudut 1 sektor = 360° ÷ ${n} = ${ans}°.`;
+          return makeMcq(rng, q, `${ans}°`, [`${Math.round(180 / n)}°`, `${ans + 15}°`, `${Math.max(10, ans - 15)}°`, `${ans * 2}°`], exp);
         } else {
-          const a = s * s;
-          const q = dlp ? `A square has side length ${s} cm. Find its area.` : `Sebuah segi empat sama mempunyai sisi ${s} cm. Cari luasnya.`;
-          return makeMcq(rng, q, `${a} cm²`, [`${4 * s} cm²`, `${a + s} cm²`, `${2 * s} cm²`], `Luas = ${s} × ${s} = ${a} cm².`);
+          const fracs = [
+            { n: 1, d: 3, deg: 120 },
+            { n: 2, d: 3, deg: 240 },
+            { n: 1, d: 4, deg: 90 },
+            { n: 3, d: 4, deg: 270 },
+            { n: 1, d: 5, deg: 72 },
+            { n: 2, d: 5, deg: 144 },
+            { n: 3, d: 5, deg: 216 },
+            { n: 4, d: 5, deg: 288 },
+            { n: 1, d: 6, deg: 60 },
+            { n: 5, d: 6, deg: 300 },
+            { n: 1, d: 8, deg: 45 },
+            { n: 3, d: 8, deg: 135 },
+            { n: 5, d: 8, deg: 225 },
+            { n: 7, d: 8, deg: 315 },
+            { n: 1, d: 9, deg: 40 },
+            { n: 2, d: 9, deg: 80 },
+            { n: 3, d: 10, deg: 108 },
+            { n: 7, d: 10, deg: 252 },
+            { n: 5, d: 12, deg: 150 }
+          ];
+          const fr = pick(rng, fracs);
+          const q = dlp
+            ? `One complete turn of a circle is 360°. Find the angle for ${fr.n}/${fr.d} of a complete turn.`
+            : `Satu putaran lengkap bulatan ialah 360°. Cari sudut bagi ${fr.n}/${fr.d} daripada satu putaran lengkap.`;
+          const exp = `${fr.n}/${fr.d} × 360° = ${fr.deg}°.`;
+          return makeMcq(rng, q, `${fr.deg}°`, [`${360 - fr.deg === fr.deg ? fr.deg + 30 : 360 - fr.deg}°`, `${fr.deg + 20}°`, `${Math.max(15, fr.deg - 20)}°`], exp);
+        }
+      },
+      // 6.1.2 Membentuk & mengukur sudut hingga 180° menggunakan protraktor
+      (rng, dlp) => {
+        if (rng() > 0.45) {
+          const rayNames = [
+            ["OA", "OB"],
+            ["OP", "OQ"],
+            ["XY", "XZ"],
+            ["KL", "KM"],
+            ["AB", "AC"],
+            ["PQ", "PR"]
+          ];
+          const [r1, r2] = pick(rng, rayNames);
+          const a = pick(rng, [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60]);
+          const maxStep = Math.floor((180 - a) / 5);
+          const diff = randInt(rng, 5, maxStep) * 5;
+          const b = a + diff;
+          const q = dlp
+            ? `On a protractor, ray ${r1} is at ${a}° and ray ${r2} is at ${b}°. What is the angle between the two rays?`
+            : `Pada sebuah protraktor, garisan ${r1} berada pada ${a}° dan garisan ${r2} berada pada ${b}°. Berapakah saiz sudut antara kedua-dua garisan itu?`;
+          const exp = dlp
+            ? `Angle = ${b}° - ${a}° = ${diff}°.`
+            : `Saiz sudut = ${b}° - ${a}° = ${diff}°.`;
+          return makeMcq(rng, q, `${diff}°`, [`${b}°`, `${a + b}°`, `${diff + 10}°`, `${Math.max(5, diff - 10)}°`], exp);
+        } else {
+          const contexts = [
+            ["sudut bukaan pintu", "the opening angle of a door"],
+            ["sudut bukaan gunting", "the opening angle of scissors"],
+            ["sudut pada sebuah segi tiga", "an angle in a triangle"],
+            ["sudut bukaan kipas tangan", "the opening angle of a hand fan"],
+            ["sudut pada bucu bingkai", "an angle at the corner of a frame"],
+            ["sudut antara dua garisan lurus", "the angle between two straight lines"]
+          ];
+          const [cBm, cEn] = pick(rng, contexts);
+          const angles = [24, 35, 48, 56, 65, 72, 84, 90, 96, 108, 115, 126, 138, 145, 154, 168, 180];
+          const theta = pick(rng, angles);
+          const allBm = ["Sudut tirus", "Sudut tegak", "Sudut cakah", "Sudut garis lurus"];
+          const allEn = ["Acute angle", "Right angle", "Obtuse angle", "Straight angle"];
+          let idx;
+          if (theta < 90) idx = 0;
+          else if (theta === 90) idx = 1;
+          else if (theta < 180) idx = 2;
+          else idx = 3;
+          const ans = dlp ? allEn[idx] : allBm[idx];
+          const pool = dlp ? allEn : allBm;
+          const q = dlp
+            ? `A pupil measures ${cEn} as ${theta}°. Classify this angle.`
+            : `Seorang murid mengukur ${cBm} dan mendapati nilainya ialah ${theta}°. Nyatakan jenis sudut itu.`;
+          const exp = dlp
+            ? `${theta}° is ${idx === 0 ? "less than 90° (acute angle)" : idx === 1 ? "exactly 90° (right angle)" : idx === 2 ? "between 90° and 180° (obtuse angle)" : "exactly 180° (straight angle)"}.`
+            : `${theta}° ialah ${idx === 0 ? "kurang daripada 90° (sudut tirus)" : idx === 1 ? "tepat 90° (sudut tegak)" : idx === 2 ? "antara 90° hingga 180° (sudut cakah)" : "tepat 180° (sudut garis lurus)"}.`;
+          return makeMcq(rng, q, ans, pool.filter((_, k) => k !== idx), exp);
+        }
+      },
+      // 6.1.1 Poligon sekata hingga 8 sisi dan sudut pedalamannya
+      (rng, dlp) => {
+        const polys = [
+          { sides: 3, angle: 60, sum: 180, nameBm: "segi tiga sama sisi", nameEn: "equilateral triangle" },
+          { sides: 4, angle: 90, sum: 360, nameBm: "segi empat sama", nameEn: "square" },
+          { sides: 5, angle: 108, sum: 540, nameBm: "pentagon sekata", nameEn: "regular pentagon" },
+          { sides: 6, angle: 120, sum: 720, nameBm: "heksagon sekata", nameEn: "regular hexagon" },
+          { sides: 8, angle: 135, sum: 1080, nameBm: "oktagon sekata", nameEn: "regular octagon" }
+        ];
+        const variant = randInt(rng, 1, 3);
+        if (variant === 1) {
+          const obj = pick(rng, [
+            ["jubin", "tile"],
+            ["papan tanda", "signboard"],
+            ["kadbod", "cardboard cut-out"],
+            ["alas cawan", "coaster"],
+            ["bingkai", "frame"]
+          ]);
+          const p = pick(rng, polys);
+          const q = dlp
+            ? `A ${obj[1]} is shaped like a ${p.nameEn}. What is the measure of each interior angle?`
+            : `Sekeping ${obj[0]} berbentuk ${p.nameBm}. Berapakah nilai setiap sudut pedalamannya?`;
+          const exp = dlp
+            ? `A ${p.nameEn} (${p.sides} equal sides) has interior angles summing to ${p.sum}°, so each interior angle is ${p.sum}° ÷ ${p.sides} = ${p.angle}°.`
+            : `${p.nameBm} (${p.sides} sisi sama panjang) mempunyai jumlah sudut pedalaman ${p.sum}°, maka setiap sudut pedalaman = ${p.sum}° ÷ ${p.sides} = ${p.angle}°.`;
+          const wrongs = polys.filter((x) => x.sides !== p.sides).map((x) => `${x.angle}°`);
+          return makeMcq(rng, q, `${p.angle}°`, wrongs, exp);
+        } else if (variant === 2) {
+          const p = pick(rng, polys);
+          const k = randInt(rng, 2, p.sides);
+          const total = k * p.angle;
+          const q = dlp
+            ? `What is the sum of ${k} interior angles of a ${p.nameEn}?`
+            : `Berapakah hasil tambah ${k} sudut pedalaman bagi sebuah ${p.nameBm}?`;
+          const exp = dlp
+            ? `One interior angle of a ${p.nameEn} = ${p.angle}°. Sum of ${k} interior angles = ${k} × ${p.angle}° = ${total}°.`
+            : `Satu sudut pedalaman ${p.nameBm} = ${p.angle}°. Hasil tambah ${k} sudut = ${k} × ${p.angle}° = ${total}°.`;
+          return makeMcq(rng, q, `${total}°`, [`${p.angle}°`, `${total + p.angle}°`, `${Math.max(30, total - 30)}°`], exp);
+        } else {
+          const i1 = randInt(rng, 0, polys.length - 2);
+          const i2 = randInt(rng, i1 + 1, polys.length - 1);
+          const small = polys[i1];
+          const big = polys[i2];
+          const diff = big.angle - small.angle;
+          const q = dlp
+            ? `Find the difference between one interior angle of a ${big.nameEn} and one interior angle of a ${small.nameEn}.`
+            : `Cari beza antara satu sudut pedalaman ${big.nameBm} dengan satu sudut pedalaman ${small.nameBm}.`;
+          const exp = dlp
+            ? `${big.nameEn} = ${big.angle}°, ${small.nameEn} = ${small.angle}°. Difference = ${big.angle}° - ${small.angle}° = ${diff}°.`
+            : `${big.nameBm} = ${big.angle}°, ${small.nameBm} = ${small.angle}°. Beza = ${big.angle}° - ${small.angle}° = ${diff}°.`;
+          return makeMcq(rng, q, `${diff}°`, [`${big.angle + small.angle}°`, `${diff + 12}°`, `${Math.max(5, diff - 8)}°`], exp);
         }
       }
     ],

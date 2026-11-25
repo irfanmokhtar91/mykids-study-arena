@@ -57,6 +57,43 @@
     return `${dd}/${mon}/${yyyy}`;
   }
 
+  function formatMytIso(dateOrMs) {
+    const parsed = typeof dateOrMs === "string" ? Date.parse(dateOrMs) : dateOrMs;
+    const ms = typeof parsed === "number" && Number.isFinite(parsed) ? parsed : Date.now();
+    const d = new Date(ms + 8 * 60 * 60 * 1000);
+    const pad = (n) => String(n).padStart(2, "0");
+    return (
+      `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}` +
+      `T${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}+08:00`
+    );
+  }
+
+  function buildAttemptMeta(a, isVariant, fallbackMytIso) {
+    const qObj = (a && a.qObj) || {};
+    const questionId = (a && a.questionId) || qObj.id;
+    const unit = (a && a.unit) || qObj.unit;
+    const skill = (a && a.skill) || qObj.skill;
+    const diff = (a && a.diff) || qObj.diff;
+    const hasTime = a && typeof a.time_spent_ms === "number" && Number.isFinite(a.time_spent_ms);
+    const hasElapsed = a && typeof a.elapsedSec === "number" && Number.isFinite(a.elapsedSec);
+    const time_spent_ms = hasTime
+      ? a.time_spent_ms
+      : hasElapsed && (isVariant || (a && a.time_spent_ms !== undefined) || unit || skill)
+        ? Math.round(a.elapsedSec * 1000)
+        : undefined;
+    const answered_at_myt = (a && a.answered_at_myt) || (isVariant ? fallbackMytIso : undefined);
+    const meta = {};
+    if (questionId !== undefined && questionId !== null && questionId !== "") meta.questionId = questionId;
+    if (unit !== undefined && unit !== null && unit !== "") meta.unit = unit;
+    if (skill !== undefined && skill !== null && skill !== "") meta.skill = skill;
+    if (diff !== undefined && diff !== null && diff !== "") meta.diff = diff;
+    if (time_spent_ms !== undefined) meta.time_spent_ms = time_spent_ms;
+    if (answered_at_myt !== undefined && answered_at_myt !== null && answered_at_myt !== "") {
+      meta.answered_at_myt = answered_at_myt;
+    }
+    return meta;
+  }
+
   function toLocalDateKey(dateInput) {
     const d = dateInput ? new Date(dateInput) : new Date();
     if (isNaN(d.getTime())) return null;
@@ -135,6 +172,8 @@
       diagnosticSessions: [],
       diagnosticAttempts: [],
       setBest: {},
+      variantUnits: {},
+      variantState: {},
       updatedAt: new Date().toISOString()
     };
   }
@@ -163,6 +202,7 @@
     if (Array.isArray(p.history) && p.history.length > 0) return true;
     if (Array.isArray(p.diagnosticSessions) && p.diagnosticSessions.length > 0) return true;
     if (p.setBest && Object.keys(p.setBest).length > 0) return true;
+    if (p.variantState && typeof p.variantState === "object" && Object.keys(p.variantState).length > 0) return true;
     if ((Number(p.xp) || 0) > 0 || (Number(p.coins) || 0) > 0) return true;
     return false;
   }
@@ -254,6 +294,14 @@
     }
     if (!p.setBest || typeof p.setBest !== "object") {
       p.setBest = {};
+      changed = true;
+    }
+    if (!p.variantUnits || typeof p.variantUnits !== "object" || Array.isArray(p.variantUnits)) {
+      p.variantUnits = {};
+      changed = true;
+    }
+    if (!p.variantState || typeof p.variantState !== "object" || Array.isArray(p.variantState)) {
+      p.variantState = {};
       changed = true;
     }
     if (typeof p.updatedAt !== "string") {
@@ -353,7 +401,14 @@
 
   function shrinkState() {
     state.profiles.forEach((p) => {
-      if (Array.isArray(p.history)) p.history.forEach((h, i) => { if (i >= 20) delete h.questionLogs; });
+      if (Array.isArray(p.history)) {
+        p.history.forEach((h, i) => {
+          if (i >= 20) {
+            delete h.questionLogs;
+            delete h.variantAttempts;
+          }
+        });
+      }
       if (Array.isArray(p.mockResults)) {
         p.mockResults.forEach((r, i) => { if (i >= 5) delete r.typed; }); // keep marks, drop old typed working
         if (p.mockResults.length > 15) p.mockResults.length = 15;
@@ -818,6 +873,7 @@
         .slice(0, 150);
       for (let i = 80; i < local.history.length; i++) {
         delete local.history[i].questionLogs;
+        delete local.history[i].variantAttempts;
       }
 
       // Deduplicate & merge mistakeLog
@@ -925,6 +981,32 @@
       local.reports = Array.from(repMap.values())
         .sort((a, b) => String(b.ts || "").localeCompare(String(a.ts || "")))
         .slice(0, 100);
+
+      // Merge variantUnits
+      if (inc.variantUnits && typeof inc.variantUnits === "object" && !Array.isArray(inc.variantUnits)) {
+        Object.keys(inc.variantUnits).forEach((k) => {
+          const incArr = Array.isArray(inc.variantUnits[k]) ? inc.variantUnits[k] : null;
+          if (!incArr) return;
+          const locArr = Array.isArray(local.variantUnits[k]) ? local.variantUnits[k] : null;
+          if (!locArr || (incIsNewer && incArr.length > 0) || locArr.length === 0) {
+            local.variantUnits[k] = incArr.slice();
+          }
+        });
+      }
+
+      // Merge variantState
+      if (inc.variantState && typeof inc.variantState === "object" && !Array.isArray(inc.variantState)) {
+        Object.keys(inc.variantState).forEach((k) => {
+          const incVs = inc.variantState[k];
+          if (!incVs || typeof incVs !== "object" || Array.isArray(incVs)) return;
+          const locVs = local.variantState[k];
+          if (!locVs || typeof locVs !== "object" || Array.isArray(locVs)) {
+            local.variantState[k] = JSON.parse(JSON.stringify(incVs));
+          } else if ((Number(incVs.drawCount) || 0) > (Number(locVs.drawCount) || 0)) {
+            local.variantState[k] = JSON.parse(JSON.stringify(incVs));
+          }
+        });
+      }
 
       if (inc.lastPlayed && (!local.lastPlayed || incIsNewer)) {
         local.lastPlayed = inc.lastPlayed;
@@ -1048,7 +1130,7 @@
     },
     recordAttempt: (
       profileId,
-      { gradeId, subjectId, subjectName, chapterId, chapterTitle, setNum, score, total, speedBonus, maxStreak, mode, answers, isRevision }
+      { gradeId, subjectId, subjectName, chapterId, chapterTitle, setNum, score, total, speedBonus, maxStreak, mode, answers, isRevision, isVariant, unitIds }
     ) => {
       const p = state.profiles.find((x) => x.id === profileId);
       if (!p) return;
@@ -1086,9 +1168,11 @@
       const sName = subjectName || info.subjectName;
       const cTitle = chapterTitle || info.chapterTitle;
       const nowIso = new Date().toISOString();
+      const mytIso = formatMytIso(nowIso);
+      const displaySetNum = isVariant ? "Rawak" : isRevision ? "Kilat" : setNum;
       p.updatedAt = nowIso;
 
-      if (!isRevision) {
+      if (!isRevision && !isVariant) {
         const key = `${gradeId}:${subjectId}:${chapterId}:${setNum}`;
         const prev = getSetBest(p, gradeId, subjectId, chapterId, setNum);
         p.setBest[key] = {
@@ -1108,18 +1192,19 @@
             correct: a.correctText !== undefined ? a.correctText : a.qObj.options[a.qObj.correctIndex] || "",
             isCorrect: !!a.isCorrect,
             gotBonus: !!a.gotBonus,
-            elapsedSec: Math.round((Number(a.elapsedSec) || 0) * 10) / 10
+            elapsedSec: Math.round((Number(a.elapsedSec) || 0) * 10) / 10,
+            ...buildAttemptMeta(a, isVariant, mytIso)
           }))
         : [];
 
-      p.history.unshift({
+      const historyEntry = {
         ts: nowIso,
         gradeId,
         subjectId,
         subjectName: sName,
         chapterId,
         chapterTitle: cTitle,
-        setNum: isRevision ? "Kilat" : setNum,
+        setNum: displaySetNum,
         score: cleanScore,
         total,
         speedBonus: bonus,
@@ -1128,11 +1213,34 @@
         earnedXp,
         earnedCoins,
         questionLogs
-      });
+      };
+      if (isVariant) {
+        historyEntry.isVariant = true;
+        historyEntry.unitIds = Array.isArray(unitIds) ? unitIds.slice() : [];
+        historyEntry.variantAttempts = Array.isArray(answers)
+          ? answers.map((a) => {
+              const meta = buildAttemptMeta(a, true, mytIso);
+              return {
+                questionId: meta.questionId !== undefined ? meta.questionId : null,
+                unit: meta.unit !== undefined ? meta.unit : null,
+                skill: meta.skill !== undefined ? meta.skill : null,
+                diff: meta.diff !== undefined ? meta.diff : null,
+                correct: !!a.isCorrect,
+                time_spent_ms:
+                  meta.time_spent_ms !== undefined
+                    ? meta.time_spent_ms
+                    : Math.round((Number(a && a.elapsedSec) || 0) * 1000),
+                answered_at_myt: meta.answered_at_myt || mytIso
+              };
+            })
+          : [];
+      }
+      p.history.unshift(historyEntry);
 
       if (p.history.length > 80) {
         for (let i = 80; i < p.history.length; i++) {
           delete p.history[i].questionLogs;
+          delete p.history[i].variantAttempts;
         }
       }
       if (p.history.length > 150) p.history.length = 150;
@@ -1148,12 +1256,13 @@
               subjectName: sName,
               chapterId,
               chapterTitle: cTitle,
-              setNum: isRevision ? "Kilat" : setNum,
+              setNum: displaySetNum,
               q: a.qObj.q,
               chosen: a.chosenText !== undefined ? a.chosenText : a.qObj.options[a.selectedIndex] || "",
               correct: a.correctText !== undefined ? a.correctText : a.qObj.options[a.qObj.correctIndex] || "",
               explanation: a.qObj.explanation || "",
-              elapsedSec: Math.round((Number(a.elapsedSec) || 0) * 10) / 10
+              elapsedSec: Math.round((Number(a.elapsedSec) || 0) * 10) / 10,
+              ...buildAttemptMeta(a, isVariant, mytIso)
             });
           }
         }
@@ -1360,6 +1469,53 @@
       const summary = mergeBackup(text);
       fileHandle = handle;
       return { fileName: handle.name, ...summary };
+    },
+    getVariantUnits: (profileId, gradeId, subjectId) => {
+      const p = state.profiles.find((x) => x.id === profileId);
+      if (!p || !p.variantUnits || typeof p.variantUnits !== "object") return [];
+      const list = p.variantUnits[`${gradeId}:${subjectId}`];
+      return Array.isArray(list) ? list.slice() : [];
+    },
+    setVariantUnits: (profileId, gradeId, subjectId, unitIds) => {
+      const p = state.profiles.find((x) => x.id === profileId);
+      if (!p) return [];
+      normalizeProfileFields(p);
+      const clean = [];
+      const seen = new Set();
+      (Array.isArray(unitIds) ? unitIds : []).forEach((u) => {
+        const s = typeof u === "string" ? u.trim() : String(u == null ? "" : u).trim();
+        if (s && !seen.has(s)) {
+          seen.add(s);
+          clean.push(s);
+        }
+      });
+      p.variantUnits[`${gradeId}:${subjectId}`] = clean;
+      p.updatedAt = new Date().toISOString();
+      save();
+      return clean.slice();
+    },
+    getVariantState: (profileId, gradeId, subjectId) => {
+      const p = state.profiles.find((x) => x.id === profileId);
+      if (!p || !p.variantState || typeof p.variantState !== "object") return null;
+      const vState = p.variantState[`${gradeId}:${subjectId}`];
+      if (!vState || typeof vState !== "object" || Array.isArray(vState)) return null;
+      return JSON.parse(JSON.stringify(vState));
+    },
+    saveVariantState: (profileId, gradeId, subjectId, vState) => {
+      const p = state.profiles.find((x) => x.id === profileId);
+      if (!p) return null;
+      normalizeProfileFields(p);
+      if (!vState || typeof vState !== "object" || Array.isArray(vState)) {
+        delete p.variantState[`${gradeId}:${subjectId}`];
+        p.updatedAt = new Date().toISOString();
+        save();
+        return null;
+      }
+      const cloned = JSON.parse(JSON.stringify(vState));
+      p.variantState[`${gradeId}:${subjectId}`] = cloned;
+      p.updatedAt = new Date().toISOString();
+      save();
+      return JSON.parse(JSON.stringify(cloned));
     },
     getLinkedFileName: () => (fileHandle ? fileHandle.name : null)
   };

@@ -29,7 +29,9 @@
             { id: "imbuhan", title: "Imbuhan & Pengimbuhan", titleEn: "Affixes & Morphology" },
             { id: "sintaksis", title: "Jenis & Struktur Ayat", titleEn: "Sentence Types & Structure" },
             { id: "peribahasa", title: "Peribahasa, Simpulan Bahasa & Bidalan", titleEn: "Proverbs & Idioms" },
-            { id: "kosa_kata", title: "Kosa Kata, Sinonim & Antonim", titleEn: "Vocabulary, Synonyms & Antonyms" },
+            { id: "kosa_kata", title: "Kosa Kata & Makna Kata", titleEn: "Vocabulary & Word Meanings" },
+            { id: "ejaan_tanda_baca", title: "Sistem Ejaan & Tanda Baca", titleEn: "Spelling & Punctuation" },
+            { id: "seni_bahasa", title: "Aspek Seni Bahasa (Puisi & Karya)", titleEn: "Language Arts (Poetry & Creative Works)" },
             { id: "pemahaman", title: "Pemahaman & Penulisan", titleEn: "Comprehension & Writing" }
           ]
         },
@@ -40,10 +42,11 @@
           icon: "🔤",
           dlp: false,
           chapters: [
-            { id: "tenses", title: "Tenses & Verb Forms", titleEn: "Tenses & Verb Forms" },
-            { id: "parts_of_speech", title: "Parts of Speech & Prepositions", titleEn: "Parts of Speech & Prepositions" },
-            { id: "conditionals_passive", title: "Passive Voice & Modals", titleEn: "Passive Voice & Modals" },
-            { id: "vocab_idioms", title: "Vocabulary & Idioms", titleEn: "Vocabulary & Idioms" },
+            { id: "tenses", title: "Tenses, Used To & Future Forms", titleEn: "Tenses, Used To & Future Forms" },
+            { id: "parts_of_speech", title: "Indefinite Pronouns, Adverbs & Conjunctions", titleEn: "Indefinite Pronouns, Adverbs & Conjunctions" },
+            { id: "conditionals_passive", title: "First Conditional, Passive Voice & Modals", titleEn: "First Conditional, Passive Voice & Modals" },
+            { id: "reported_tags_comp", title: "Reported Speech, Question Tags & Comparisons", titleEn: "Reported Speech, Question Tags & Comparisons" },
+            { id: "vocab_idioms", title: "Year 6 Themes & Vocabulary", titleEn: "Year 6 Themes & Vocabulary" },
             { id: "punctuation_error", title: "Punctuation & Error Correction", titleEn: "Punctuation & Error Correction" },
             { id: "reading_comp", title: "Reading & Functional Language", titleEn: "Reading & Functional Language" }
           ]
@@ -60,7 +63,7 @@
             { id: "wang", title: "Bab 3: Wang (Untung, Rugi, Diskaun, Faedah)", titleEn: "Ch 3: Money (Profit, Loss, Discount, Interest)" },
             { id: "masa_waktu", title: "Bab 4: Masa & Waktu (Zon Masa)", titleEn: "Ch 4: Time & Time Zones" },
             { id: "ukuran_sukatan", title: "Bab 5: Ukuran & Sukatan", titleEn: "Ch 5: Measurement" },
-            { id: "ruang", title: "Bab 6: Ruang (Sudut, Bulatan, Perimeter & Luas)", titleEn: "Ch 6: Space (Angles, Circles, Perimeter & Area)" },
+            { id: "ruang", title: "Bab 6: Ruang (Sudut & Bulatan)", titleEn: "Ch 6: Space (Angles & Circles)" },
             { id: "koordinat_nisbah", title: "Bab 7: Koordinat, Nisbah & Kadaran", titleEn: "Ch 7: Coordinates, Ratio & Proportion" },
             { id: "data_kebolehjadian", title: "Bab 8: Pengurusan Data & Kebolehjadian", titleEn: "Ch 8: Data Handling & Likelihood" }
           ]
@@ -79,9 +82,12 @@
             { id: "pemeliharaan", title: "Unit 5: Pemeliharaan & Pemuliharaan", titleEn: "Unit 5: Preservation & Conservation" },
             { id: "daya", title: "Unit 6: Daya & Kesan Daya", titleEn: "Unit 6: Force & Its Effects" },
             { id: "kelajuan", title: "Unit 7: Kelajuan", titleEn: "Unit 7: Speed" },
-            { id: "pengawetan", title: "Unit 8: Pengawetan Makanan & Bahan Buangan", titleEn: "Unit 8: Food Preservation & Waste" },
-            { id: "gerhana_buruj", title: "Unit 9: Gerhana, Galaksi & Teknologi Angkasa", titleEn: "Unit 9: Eclipses, Galaxies & Space Tech" },
-            { id: "mesin", title: "Unit 10: Mesin Ringkas & Mesin Kompleks", titleEn: "Unit 10: Simple & Complex Machines" }
+            { id: "pengawetan", title: "Unit 8: Teknologi Pengawetan Makanan", titleEn: "Unit 8: Food Preservation Technology" },
+            { id: "bahan_buangan", title: "Unit 9: Bahan Buangan", titleEn: "Unit 9: Waste Material" },
+            { id: "gerhana_buruj", title: "Unit 10: Gerhana", titleEn: "Unit 10: Eclipse" },
+            { id: "galaksi", title: "Unit 11: Galaksi", titleEn: "Unit 11: Galaxy" },
+            { id: "kestabilan_kekuatan", title: "Unit 12: Kestabilan dan Kekuatan", titleEn: "Unit 12: Stability and Strength" },
+            { id: "teknologi", title: "Unit 13: Teknologi", titleEn: "Unit 13: Technology" }
           ]
         },
         {
@@ -91,11 +97,13 @@
           icon: "🏛️",
           dlp: false,
           chapters: [
-            { id: "pembentukan_malaysia", title: "Tajuk 1: Pembentukan Malaysia", titleEn: "Topic 1: Formation of Malaysia" },
-            { id: "negeri_malaysia", title: "Tajuk 2: Negeri-negeri di Malaysia", titleEn: "Topic 2: States in Malaysia" },
-            { id: "rukun_negara", title: "Tajuk 3: Rukun Negara & Perpaduan", titleEn: "Topic 3: Rukun Negara & Unity" },
-            { id: "kaum_budaya", title: "Tajuk 4: Kaum, Agama & Perayaan di Malaysia", titleEn: "Topic 4: Ethnicities & Cultures" },
-            { id: "ekonomi_sukan", title: "Tajuk 5: Ekonomi, Sukan & Pencapaian Negara", titleEn: "Topic 5: Economy, Sports & Achievements" }
+            { id: "pembentukan_malaysia", title: "Unit 1: Pembentukan Malaysia", titleEn: "Unit 1: Formation of Malaysia" },
+            { id: "negeri_malaysia", title: "Unit 2: Negeri-negeri di Malaysia", titleEn: "Unit 2: States in Malaysia" },
+            { id: "rukun_negara", title: "Unit 3: Rukun Negara", titleEn: "Unit 3: Rukun Negara" },
+            { id: "kaum_budaya", title: "Unit 4–6: Kaum, Agama & Perayaan di Malaysia", titleEn: "Unit 4–6: Ethnicities, Religions & Festivals" },
+            { id: "pemimpin_negara", title: "Unit 7: Pemimpin Negara di Malaysia", titleEn: "Unit 7: National Leaders of Malaysia" },
+            { id: "ekonomi_sukan", title: "Unit 8–9: Kemajuan Ekonomi & Sukan Kebanggaan", titleEn: "Unit 8–9: Economic Progress & Sports Pride" },
+            { id: "malaysia_dunia", title: "Unit 10: Malaysia dan Dunia", titleEn: "Unit 10: Malaysia and the World" }
           ]
         },
         {
@@ -105,12 +113,13 @@
           icon: "🕌",
           dlp: false,
           chapters: [
-            { id: "alquran_tajwid", title: "Bidang Al-Quran & Tajwid", titleEn: "Al-Quran & Tajwid" },
-            { id: "hadis", title: "Bidang Hadis", titleEn: "Hadith" },
-            { id: "akidah", title: "Bidang Akidah (Nama Allah & Hari Akhirat)", titleEn: "Aqidah" },
-            { id: "ibadah", title: "Bidang Ibadah (Solat Jumaat, Jenazah & Puasa)", titleEn: "Ibadah" },
-            { id: "sirah", title: "Bidang Sirah (Pembukaan Mekah & Hijrah)", titleEn: "Sirah" },
-            { id: "adab", title: "Bidang Adab & Akhlak Islamiyah", titleEn: "Adab & Akhlak" }
+            { id: "alquran_tajwid", title: "Bidang 1: Al-Quran & Tajwid", titleEn: "Al-Quran & Tajwid" },
+            { id: "hadis", title: "Bidang 2: Hadis", titleEn: "Hadith" },
+            { id: "akidah", title: "Bidang 3: Akidah", titleEn: "Aqidah" },
+            { id: "ibadah", title: "Bidang 4: Ibadah", titleEn: "Ibadah" },
+            { id: "sirah", title: "Bidang 5: Sirah", titleEn: "Sirah" },
+            { id: "adab", title: "Bidang 6: Adab & Akhlak Islamiyah", titleEn: "Adab & Akhlak" },
+            { id: "jawi", title: "Bidang 7: Jawi & Khat", titleEn: "Jawi & Khat Calligraphy" }
           ]
         },
         {
@@ -121,8 +130,8 @@
           dlp: false,
           chapters: [
             { id: "elektromekanikal", title: "Unit 1: Reka Bentuk Produk Elektromekanikal", titleEn: "Unit 1: Design of Electromechanical Products" },
-            { id: "pengaturcaraan", title: "Unit 2: Asas Pengaturcaraan & Robotik", titleEn: "Unit 2: Basic Programming & Robotics" },
-            { id: "hidroponik", title: "Unit 3: Teknologi Pertanian (Hidroponik)", titleEn: "Unit 3: Hydroponics" }
+            { id: "pengaturcaraan", title: "Unit 2: Pengenalan Asas Sistem Robotik", titleEn: "Unit 2: Introduction to Basic Robotics" },
+            { id: "penghasilan_produk", title: "Unit 3: Pembangunan Produk (Penghasilan Produk)", titleEn: "Unit 3: Product Development & Production" }
           ]
         },
         {
