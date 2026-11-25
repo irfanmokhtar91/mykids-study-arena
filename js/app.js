@@ -938,13 +938,22 @@
         })
         .join("");
 
+      const variantPools = App.Variants
+        ? App.Variants.getAvailablePools(App.Pools, App.Curriculum, grade.id, App.Generators)
+        : [];
+      const variantSubjNames = variantPools
+        .map((vp) => {
+          const s = grade.subjects.find((x) => x.id === vp.subjectId);
+          return s ? (dlp && s.dlp ? s.nameEn : s.name) : vp.subjectId;
+        })
+        .join(", ");
       const variantCardHtml =
-        App.Variants && App.Variants.getAvailablePools(App.Pools, App.Curriculum, grade.id).length > 0
+        variantPools.length > 0
           ? `<button type="button" class="weak-focus-card variant-focus-card" id="btn-open-variants">
                <span class="wf-icon" aria-hidden="true">🔀</span>
                <span class="wf-body">
                  <strong>Latihan Rawak</strong>
-                 <small>Pilih bab yang sudah dipelajari • 10 soalan baharu setiap sesi (Sejarah)</small>
+                 <small>Pilih bab yang sudah dipelajari • 10 soalan baharu setiap sesi (${esc(variantSubjNames)})</small>
                </span>
                <span class="wf-go" aria-hidden="true">Mula →</span>
              </button>`

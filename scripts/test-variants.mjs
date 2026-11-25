@@ -712,13 +712,310 @@ test("11c. getAvailablePools only lists subjects with both a non-empty pool and 
   const pools = V.getAvailablePools({ d6: { sejarah: POOL } }, { d6: { sejarah: CURR } }, "d6");
   assert.equal(pools.length, 1);
   assert.equal(pools[0].subjectId, "sejarah");
+  assert.equal(pools[0].isGenerator, false);
   assert.equal(V.getAvailablePools({ d6: { sejarah: POOL } }, { d6: {} }, "d6").length, 0);
   assert.equal(V.getAvailablePools({ d6: { sejarah: [] } }, { d6: { sejarah: CURR } }, "d6").length, 0);
+});
+
+// 12. Generator-backed variant pools -----------------------------------------
+function makeMockGeneratorFixture() {
+  const curr = {
+    units: [
+      {
+        id: "b1",
+        name: "Nombor",
+        skills: [
+          { id: "b1_s1", name: "Tambah" },
+          { id: "b1_s2", name: "Tolak" }
+        ]
+      },
+      {
+        id: "b2",
+        name: "Darab",
+        skills: [{ id: "b2_s1", name: "Darab asas" }]
+      }
+    ]
+  };
+  const makeEntry = (id, unit, skill, diff, op) => ({
+    id,
+    unit,
+    skill,
+    diff,
+    generate(seed) {
+      const rng = V.mulberry32(seed);
+      const a = 10 + Math.floor(rng() * 40);
+      const b = 2 + Math.floor(rng() * 19);
+      const ans = op === "+" ? a + b : op === "-" ? a - b : a * b;
+      return {
+        sig: `${skill}:${op}:${a},${b}`,
+        q: `Hitung ${a} ${op} ${b} = ?`,
+        options: [String(ans), String(ans + 1), String(ans + 2), String(ans - 1)],
+        correctIndex: 0,
+        explanation: `${a} ${op} ${b} = ${ans}`
+      };
+    }
+  });
+  const genPool = [
+    makeEntry("g_add_l", "b1", "b1_s1", "L", "+"),
+    makeEntry("g_add_m", "b1", "b1_s1", "M", "+"),
+    makeEntry("g_sub_l", "b1", "b1_s2", "L", "-"),
+    makeEntry("g_sub_m", "b1", "b1_s2", "M", "-"),
+    makeEntry("g_mul_l", "b2", "b2_s1", "L", "*"),
+    makeEntry("g_mul_m", "b2", "b2_s1", "M", "*")
+  ];
+  return { curr, genPool, ticked: ["b1", "b2"] };
+}
+
+test("12a. getAvailablePools detects static and generator pools, deduplicates, and ignores legacy function arrays", () => {
+  const { curr, genPool } = makeMockGeneratorFixture();
+  const legacyFn = () => ({ q: "Legacy", options: ["1", "2", "3", "4"], correctIndex: 0 });
+  const poolsRoot = { d6: { sejarah: POOL, math: genPool } };
+  const currRoot = {
+    d6: {
+      sejarah: CURR,
+      math: curr,
+      nombor_operasi: curr
+    }
+  };
+  const gensRoot = {
+    d6: {
+      nombor_operasi: [legacyFn]
+    },
+    pools: {
+      d6: {
+        math: { type: "generator", entries: genPool }
+      }
+    }
+  };
+
+  const found = V.getAvailablePools(poolsRoot, currRoot, "d6", gensRoot);
+  assert.equal(found.length, 2);
+  const sej = found.find((p) => p.subjectId === "sejarah");
+  const math = found.find((p) => p.subjectId === "math");
+  assert.ok(sej && math);
+  assert.equal(sej.isGenerator, false);
+  assert.equal(math.isGenerator, true);
+  assert.equal(math.pool.length, genPool.length, "duplicate entries across roots must be deduplicated");
+  assert.equal(found.some((p) => p.subjectId === "nombor_operasi"), false, "legacy function array must be ignored");
+
+  // Direct generator-entry array under generatorsRoot[gradeId] is accepted when entries satisfy isGeneratorEntry.
+  const directFound = V.getAvailablePools(null, currRoot, "d6", { d6: { math: genPool, nombor_operasi: [legacyFn] } });
+  assert.equal(directFound.length, 1);
+  assert.equal(directFound[0].subjectId, "math");
+  assert.equal(directFound[0].isGenerator, true);
+});
+
+test("12b. generator draws are deterministic by seed, have no duplicate sig/q in session, and honor 8-draw cooldown", () => {
+  const { genPool, ticked } = makeMockGeneratorFixture();
+  const runA = playSession({ pool: genPool, ticked, state: V.createInitialState(), seed: "gen-det-1", id: "gd1" });
+  const runB = playSession({ pool: genPool, ticked, state: V.createInitialState(), seed: "gen-det-1", id: "gd1" });
+  assert.equal(runA.draws.length, 10);
+  assert.deepEqual(
+    runA.draws.map((d) => ({ id: d.q.id, sig: d.q.sig, q: d.q.q, options: d.q.options, ci: d.q.correctIndex })),
+    runB.draws.map((d) => ({ id: d.q.id, sig: d.q.sig, q: d.q.q, options: d.q.options, ci: d.q.correctIndex }))
+  );
+
+  assert.equal(new Set(runA.draws.map((d) => d.q.sig)).size, 10, "duplicate sig in 10-question session");
+  assert.equal(
+    new Set(runA.draws.map((d) => V.normalizePromptText(d.q.q))).size,
+    10,
+    "duplicate prompt text in 10-question session"
+  );
+
+  // Bounded 10-variant generator across 2 chained sessions verifies 8-draw cooldown.
+  const boundedPool = [
+    {
+      id: "bounded",
+      unit: "b1",
+      skill: "b1_s1",
+      diff: "L",
+      generate(seed) {
+        const k = seed % 10;
+        return {
+          sig: `b_sig_${k}`,
+          q: `Soalan terhad #${k}?`,
+          options: [String(k), String(k + 1), String(k + 2), String(k + 3)],
+          correctIndex: 0
+        };
+      }
+    }
+  ];
+  let st = V.createInitialState();
+  const timeline = [];
+  for (let s = 0; s < 3; s++) {
+    const run = playSession({ pool: boundedPool, ticked: ["b1"], state: st, seed: `bcd-${s}`, id: `bcd-${s}` });
+    st = run.state;
+    for (const d of run.draws) timeline.push({ sig: d.q.sig, drawCount: d.drawCount });
+  }
+  const lastSeen = new Map();
+  for (const t of timeline) {
+    if (lastSeen.has(t.sig)) {
+      const gap = t.drawCount - lastSeen.get(t.sig);
+      assert.ok(gap > V.COOLDOWN_DRAWS, `${t.sig} redrawn after only ${gap} draws`);
+    }
+    lastSeen.set(t.sig, t.drawCount);
+  }
+});
+
+test("12c. wrong answer on generated question triggers same-skill retry with different sig and q text at <= diff", () => {
+  const { genPool, ticked } = makeMockGeneratorFixture();
+  const run = playSession({
+    pool: genPool,
+    ticked,
+    state: V.createInitialState(),
+    seed: "gen-retry-1",
+    id: "gr1",
+    answer: (q, i) => i !== 0
+  });
+  const missed = run.draws[0].q;
+  const retry = run.draws.find((d) => d.fromRetry && d.idx > 0);
+  assert.ok(retry, "no retry was drawn for generated question");
+  assert.equal(retry.q.skill, missed.skill);
+  assert.notEqual(retry.q.sig, missed.sig);
+  assert.notEqual(V.normalizePromptText(retry.q.q), V.normalizePromptText(missed.q));
+  assert.ok(rank(retry.q.diff) <= rank(missed.diff), `retry ${retry.q.diff} harder than ${missed.diff}`);
+});
+
+test("12d. generator mastery requires 3 different sigs AND 2 consecutive correct answers", () => {
+  const mkGenQ = (id, sig, diff = "M") => ({
+    id,
+    sig,
+    unit: "b1",
+    skill: "b1_s1",
+    diff,
+    q: `Soalan ${id}`,
+    options: ["A", "B", "C", "D"],
+    correctIndex: 0
+  });
+
+  // Same sig 3 times (even with distinct ids) must NOT master.
+  let st = V.createInitialState();
+  for (let i = 0; i < 3; i++) {
+    st = answerSkill(st, mkGenQ(`g_dup_${i}`, "sig_same"), true).state;
+  }
+  assert.equal(V.isSkillMastered(st.skills.b1_s1), false);
+  assert.equal(st.skills.b1_s1.correctQuestionIds.length, 1);
+
+  // 3 different sigs with 2 consecutive correct at the end masters the skill.
+  st = V.createInitialState();
+  st = answerSkill(st, mkGenQ("g1", "sig_1"), true).state;
+  st = answerSkill(st, mkGenQ("g2", "sig_2"), true).state;
+  st = answerSkill(st, mkGenQ("g3w", "sig_3w"), false).state;
+  st = answerSkill(st, mkGenQ("g4", "sig_3"), true).state;
+  assert.equal(V.isSkillMastered(st.skills.b1_s1), false, "only 1 trailing correct must not master");
+  st = answerSkill(st, mkGenQ("g5", "sig_4"), true).state;
+  assert.equal(V.isSkillMastered(st.skills.b1_s1), true);
+  assert.equal(V.classifySkill(st.skills.b1_s1), "kuat");
 });
 
 // Pool data must be untouched by every call above.
 test("shared pool data was never mutated by the engine", () => {
   assert.equal(JSON.stringify(POOL), POOL_PRISTINE);
+});
+
+// 13. Real d6_math + d6_math_gen integration tests ----------------------------
+function loadD6WithMath() {
+  const win = { localStorage: makeLocalStorage() };
+  const ctx = vm.createContext({ window: win, Date: FixedDate });
+  for (const rel of [
+    "js/data/pools/d6_sejarah.js",
+    "js/data/curriculum/d6_sejarah.js",
+    "js/data/curriculum/d6_math.js",
+    "js/data/pools/d6_math_gen.js",
+    "js/storage.js"
+  ]) {
+    vm.runInContext(readRel(rel), ctx, { filename: rel });
+  }
+  return win.App;
+}
+
+const D6_WITH_MATH = loadD6WithMath();
+const MATH_CURR = D6_WITH_MATH.Curriculum.d6.math;
+const MATH_POOL = D6_WITH_MATH.Pools.d6.math;
+
+test("13a. real d6_math and d6_math_gen auto-detect alongside sejarah without duplication", () => {
+  assert.equal(MATH_CURR.units.length, 8);
+  assert.equal(MATH_POOL.length, 96);
+  const found = V.getAvailablePools(
+    D6_WITH_MATH.Pools,
+    D6_WITH_MATH.Curriculum,
+    "d6",
+    D6_WITH_MATH.Generators
+  );
+  assert.equal(found.length, 2);
+  const sej = found.find((p) => p.subjectId === "sejarah");
+  const math = found.find((p) => p.subjectId === "math");
+  assert.ok(sej && math);
+  assert.equal(sej.isGenerator, false);
+  assert.equal(math.isGenerator, true);
+  assert.equal(math.pool.length, 96);
+  assert.equal(D6_WITH_MATH.Generators.d6, undefined, "App.Generators.d6 must remain untouched");
+});
+
+test("13b. real d6_math_gen 10-question session across ticked units [b1,b3,b6,b8] has unique sig/q and valid 4 options", () => {
+  const ticked = ["b1", "b3", "b6", "b8"];
+  const run = playSession({
+    pool: MATH_POOL,
+    ticked,
+    state: V.createInitialState(),
+    seed: "math-real-1",
+    id: "mr1"
+  });
+  assert.equal(run.draws.length, 10);
+  assert.equal(run.session.completed, true);
+  assert.equal(new Set(run.draws.map((d) => d.q.sig)).size, 10, "duplicate sig in d6_math session");
+  assert.equal(
+    new Set(run.draws.map((d) => V.normalizePromptText(d.q.q))).size,
+    10,
+    "duplicate prompt text in d6_math session"
+  );
+  for (const d of run.draws) {
+    assert.ok(ticked.includes(d.q.unit), `unexpected unit ${d.q.unit}`);
+    assert.equal(d.q.options.length, 4);
+    assert.equal(new Set(d.q.options.map((o) => String(o).trim())).size, 4, `duplicate options in ${d.q.id}`);
+    assert.ok(d.q.correctIndex >= 0 && d.q.correctIndex <= 3);
+    assert.ok(typeof d.q.explanation === "string" && d.q.explanation.trim().length > 0);
+    assert.equal(/NaN|undefined/.test(`${d.q.q}|${d.q.options.join("|")}|${d.q.explanation}|${d.q.sig}`), false);
+  }
+});
+
+test("13c. real d6_math_gen sessions are byte-identical for the same seed", () => {
+  const ticked = ["b1", "b3", "b6", "b8"];
+  const runA = playSession({ pool: MATH_POOL, ticked, state: V.createInitialState(), seed: "math-det-42", id: "md1" });
+  const runB = playSession({ pool: MATH_POOL, ticked, state: V.createInitialState(), seed: "math-det-42", id: "md1" });
+  const project = (run) =>
+    run.draws.map((d) => ({
+      id: d.q.id,
+      sig: d.q.sig,
+      unit: d.q.unit,
+      skill: d.q.skill,
+      diff: d.q.diff,
+      template: d.q.template,
+      q: d.q.q,
+      options: d.q.options,
+      correctIndex: d.q.correctIndex,
+      explanation: d.q.explanation
+    }));
+  assert.deepEqual(project(runA), project(runB));
+});
+
+test("13d. wrong answer on real d6_math_gen triggers same-skill retry with different sig and q at <= diff", () => {
+  const ticked = ["b1", "b3", "b6", "b8"];
+  const run = playSession({
+    pool: MATH_POOL,
+    ticked,
+    state: V.createInitialState(),
+    seed: "math-retry-7",
+    id: "mr7",
+    answer: (q, i) => i !== 0
+  });
+  const missed = run.draws[0].q;
+  const retry = run.draws.find((d) => d.fromRetry && d.idx > 0);
+  assert.ok(retry, "no retry was drawn for real d6_math_gen");
+  assert.equal(retry.q.skill, missed.skill);
+  assert.notEqual(retry.q.sig, missed.sig);
+  assert.notEqual(V.normalizePromptText(retry.q.q), V.normalizePromptText(missed.q));
+  assert.ok(rank(retry.q.diff) <= rank(missed.diff), `retry ${retry.q.diff} harder than ${missed.diff}`);
 });
 
 const failed = results.filter((r) => !r.ok);

@@ -56,6 +56,7 @@
    * @property {string} unit
    * @property {Difficulty} maxDiff
    * @property {string} excludeQuestionId
+   * @property {string} [excludeQuestionText]
    * @property {number} queuedAtDraw
    * @property {string|null} queuedInSession
    * @property {number} queuedAtSessionIndex
@@ -73,6 +74,7 @@
   /**
    * @typedef {object} VariantQuestion
    * @property {string} id
+   * @property {string} [sig]
    * @property {string} unit
    * @property {string} skill
    * @property {Difficulty} diff
@@ -109,6 +111,7 @@
    * @property {number} targetCount
    * @property {string[]} tickedUnits
    * @property {string[]} usedQuestionIds
+   * @property {string[]} usedQuestionTexts
    * @property {Record<string, number>} drawnSkillCounts
    * @property {VariantAttempt[]} answers
    * @property {VariantQuestion|null} currentQuestion
@@ -142,6 +145,24 @@
    * @property {string[]} unitIds
    * @property {VariantAttempt[]} answers
    */
+
+  /**
+   * Determine whether a pool item is a dynamic question generator entry.
+   * @param {*} item
+   * @returns {boolean}
+   */
+  function isGeneratorEntry(item) {
+    return Boolean(item && typeof item === "object" && typeof item.generate === "function");
+  }
+
+  /**
+   * Normalize a question prompt for duplicate-text comparison.
+   * @param {*} s
+   * @returns {string}
+   */
+  function normalizePromptText(s) {
+    return String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
+  }
 
   /**
    * Normalize a difficulty tag into `"L"`, `"M"`, or `"H"`.
@@ -339,6 +360,10 @@
             entry.excludeQuestionId !== undefined && entry.excludeQuestionId !== null
               ? String(entry.excludeQuestionId)
               : "",
+          excludeQuestionText:
+            entry.excludeQuestionText !== undefined && entry.excludeQuestionText !== null
+              ? normalizePromptText(entry.excludeQuestionText)
+              : "",
           queuedAtDraw: Number.isFinite(Number(entry.queuedAtDraw)) ? Number(entry.queuedAtDraw) : 0,
           queuedInSession:
             entry.queuedInSession !== undefined && entry.queuedInSession !== null
@@ -367,7 +392,7 @@
    */
   function cloneQuestion(q) {
     if (!q || typeof q !== "object") return null;
-    return {
+    const out = {
       id: q.id,
       unit: q.unit,
       skill: q.skill,
@@ -378,6 +403,10 @@
       explanation: q.explanation || "",
       ref: q.ref || ""
     };
+    if (q.sig !== undefined && q.sig !== null && q.sig !== "") {
+      out.sig = String(q.sig);
+    }
+    return out;
   }
 
   /**
@@ -423,6 +452,9 @@
       targetCount,
       tickedUnits: Array.isArray(session.tickedUnits) ? session.tickedUnits.slice() : [],
       usedQuestionIds: Array.isArray(session.usedQuestionIds) ? session.usedQuestionIds.slice() : [],
+      usedQuestionTexts: Array.isArray(session.usedQuestionTexts)
+        ? session.usedQuestionTexts.map((t) => normalizePromptText(t)).filter(Boolean)
+        : [],
       drawnSkillCounts,
       answers: Array.isArray(session.answers) ? session.answers.map(cloneAttempt) : [],
       currentQuestion: session.currentQuestion ? cloneQuestion(session.currentQuestion) : null,
@@ -487,38 +519,123 @@
   }
 
   /**
+   * Extract an entry array from a raw pool or `{ type: "generator", entries }` descriptor.
+   * @param {*} rawPool
+   * @returns {object[]|null}
+   */
+  function extractPoolEntries(rawPool) {
+    if (Array.isArray(rawPool)) return rawPool;
+    if (
+      rawPool &&
+      typeof rawPool === "object" &&
+      rawPool.type === "generator" &&
+      Array.isArray(rawPool.entries)
+    ) {
+      return rawPool.entries;
+    }
+    return null;
+  }
+
+  /**
    * List subjects for `gradeId` that have both a non-empty variant pool
-   * and a curriculum map with non-empty `units`.
+   * (static or generator-backed) and a curriculum map with non-empty `units`.
    *
-   * @param {Record<string, Record<string, object[]>>|null|undefined} poolsRoot
+   * @param {Record<string, Record<string, object[]|{ type: string, entries: object[] }>>|null|undefined} poolsRoot
    * @param {Record<string, Record<string, { units: object[] }>>|null|undefined} curriculumRoot
    * @param {string} gradeId
-   * @returns {Array<{ gradeId: string, subjectId: string, pool: object[], curriculum: { units: object[] } }>}
+   * @param {Record<string, *>|null|undefined} [generatorsRoot]
+   * @returns {Array<{ gradeId: string, subjectId: string, pool: object[], curriculum: { units: object[] }, isGenerator: boolean }>}
    */
-  function getAvailablePools(poolsRoot, curriculumRoot, gradeId) {
-    if (!poolsRoot || !curriculumRoot || !gradeId) return [];
-    const gradePools = poolsRoot[gradeId];
+  function getAvailablePools(poolsRoot, curriculumRoot, gradeId, generatorsRoot) {
+    if (!curriculumRoot || !gradeId) return [];
     const gradeCurr = curriculumRoot[gradeId];
-    if (!gradePools || typeof gradePools !== "object" || !gradeCurr || typeof gradeCurr !== "object") {
+    if (!gradeCurr || typeof gradeCurr !== "object") {
       return [];
     }
+
+    const mergedBySubject = new Map();
+    const appendEntries = (subjectId, entries) => {
+      if (!Array.isArray(entries) || entries.length === 0) return;
+      let bucket = mergedBySubject.get(subjectId);
+      if (!bucket) {
+        bucket = { entries: [], seenRefs: new Set(), seenIds: new Set() };
+        mergedBySubject.set(subjectId, bucket);
+      }
+      for (let i = 0; i < entries.length; i++) {
+        const item = entries[i];
+        if (!item) continue;
+        if (bucket.seenRefs.has(item)) continue;
+        const itemId = typeof item === "object" && item.id !== undefined && item.id !== null && item.id !== ""
+          ? String(item.id)
+          : "";
+        if (itemId && bucket.seenIds.has(itemId)) continue;
+        bucket.seenRefs.add(item);
+        if (itemId) bucket.seenIds.add(itemId);
+        bucket.entries.push(item);
+      }
+    };
+
+    const gradePools = poolsRoot && typeof poolsRoot === "object" ? poolsRoot[gradeId] : null;
+    if (gradePools && typeof gradePools === "object") {
+      const subjects = Object.keys(gradePools);
+      for (let i = 0; i < subjects.length; i++) {
+        const subjectId = subjects[i];
+        const entries = extractPoolEntries(gradePools[subjectId]);
+        if (entries) appendEntries(subjectId, entries);
+      }
+    }
+
+    const genPoolsRoot =
+      generatorsRoot && typeof generatorsRoot === "object" && generatorsRoot.pools && typeof generatorsRoot.pools === "object"
+        ? generatorsRoot.pools[gradeId]
+        : null;
+    if (genPoolsRoot && typeof genPoolsRoot === "object") {
+      const subjects = Object.keys(genPoolsRoot);
+      for (let i = 0; i < subjects.length; i++) {
+        const subjectId = subjects[i];
+        const entries = extractPoolEntries(genPoolsRoot[subjectId]);
+        if (entries) appendEntries(subjectId, entries);
+      }
+    }
+
+    const genDirectGrade =
+      generatorsRoot && typeof generatorsRoot === "object" && gradeId !== "pools" ? generatorsRoot[gradeId] : null;
+    if (genDirectGrade && typeof genDirectGrade === "object") {
+      const subjects = Object.keys(genDirectGrade);
+      for (let i = 0; i < subjects.length; i++) {
+        const subjectId = subjects[i];
+        const rawPool = genDirectGrade[subjectId];
+        const isTaggedDesc =
+          rawPool && typeof rawPool === "object" && !Array.isArray(rawPool) && rawPool.type === "generator" && Array.isArray(rawPool.entries);
+        const isGenArray = Array.isArray(rawPool) && rawPool.length > 0 && rawPool.some(isGeneratorEntry);
+        if (isTaggedDesc) {
+          appendEntries(subjectId, rawPool.entries);
+        } else if (isGenArray) {
+          appendEntries(subjectId, rawPool);
+        }
+      }
+    }
+
     const out = [];
-    const subjects = Object.keys(gradePools);
-    for (let i = 0; i < subjects.length; i++) {
-      const subjectId = subjects[i];
-      const pool = gradePools[subjectId];
+    mergedBySubject.forEach((bucket, subjectId) => {
+      const pool = bucket.entries;
       const curriculum = gradeCurr[subjectId];
       if (
-        Array.isArray(pool) &&
         pool.length > 0 &&
         curriculum &&
         typeof curriculum === "object" &&
         Array.isArray(curriculum.units) &&
         curriculum.units.length > 0
       ) {
-        out.push({ gradeId, subjectId, pool, curriculum });
+        out.push({
+          gradeId,
+          subjectId,
+          pool,
+          curriculum,
+          isGenerator: pool.some(isGeneratorEntry)
+        });
       }
-    }
+    });
     return out;
   }
 
@@ -563,6 +680,7 @@
       targetCount,
       tickedUnits: uniqueUnits,
       usedQuestionIds: [],
+      usedQuestionTexts: [],
       drawnSkillCounts: {},
       answers: [],
       currentQuestion: null,
@@ -588,7 +706,7 @@
     }));
     const shuffled = shuffleWith(rng, tagged);
     const newCorrectIdx = shuffled.findIndex((o) => o.isCorrect);
-    return {
+    const out = {
       id: raw.id,
       unit: raw.unit,
       skill: raw.skill,
@@ -599,6 +717,10 @@
       explanation: raw.explanation || "",
       ref: raw.ref || ""
     };
+    if (raw.sig !== undefined && raw.sig !== null && raw.sig !== "") {
+      out.sig = String(raw.sig);
+    }
+    return out;
   }
 
   /**
@@ -616,7 +738,10 @@
     const prefOrder = DIFF_FALLBACKS[desiredDiff] || DIFF_FALLBACKS.L;
     const scored = candidates.map((q) => {
       const prefIdx = prefOrder.indexOf(normalizeDiff(q.diff, "L"));
-      const lastDraw = Object.prototype.hasOwnProperty.call(lastDrawnAt, q.id) ? lastDrawnAt[q.id] : -1;
+      const lastDraw =
+        !isGeneratorEntry(q) && Object.prototype.hasOwnProperty.call(lastDrawnAt, q.id)
+          ? lastDrawnAt[q.id]
+          : -1;
       return {
         q,
         prefIdx: prefIdx >= 0 ? prefIdx : prefOrder.length,
@@ -668,6 +793,86 @@
   }
 
   /**
+   * Materialize a dynamic generator entry into a concrete question object,
+   * avoiding cooldown collisions, duplicate session IDs/texts, and retry exclusions.
+   *
+   * @param {object} entry
+   * @param {VariantSession} nextSession
+   * @param {VariantState} nextState
+   * @param {Set<string>} sessionUsedSet
+   * @param {Set<string>} sessionTextSet
+   * @param {string} excludeId
+   * @param {string} excludeText
+   * @returns {object|null}
+   */
+  function materializeGeneratorEntry(entry, nextSession, nextState, sessionUsedSet, sessionTextSet, excludeId, excludeText) {
+    if (!isGeneratorEntry(entry)) return null;
+    const nextDraw = nextState.drawCount + 1;
+    const normExcludeText = excludeText ? normalizePromptText(excludeText) : "";
+    let fallbackCandidate = null;
+
+    for (let attempt = 0; attempt < 32; attempt++) {
+      const genSeed = hashSeed(
+        `${nextSession.seed}:gen:${entry.id || entry.skill}:${entry.diff}`,
+        nextSession.rngStep * 64 + attempt
+      );
+      const raw = entry.generate(genSeed);
+      if (!raw || typeof raw !== "object" || !raw.q || !Array.isArray(raw.options) || raw.options.length === 0) {
+        continue;
+      }
+
+      const diff = normalizeDiff(raw.diff || entry.diff, "L");
+      const skill = raw.skill || entry.skill;
+      const unit = raw.unit || entry.unit;
+      const id = raw.id
+        ? String(raw.id)
+        : raw.sig
+          ? String(raw.sig)
+          : `${entry.skill}:${entry.diff}:${genSeed}`;
+      const sig = raw.sig ? String(raw.sig) : id;
+      const normQ = normalizePromptText(raw.q);
+
+      const candidate = {
+        id,
+        sig,
+        unit,
+        skill,
+        diff,
+        q: raw.q,
+        options: raw.options.slice(),
+        correctIndex: typeof raw.correctIndex === "number" ? raw.correctIndex : 0,
+        explanation: raw.explanation || "",
+        ref: raw.ref || ""
+      };
+
+      const matchesExcludeId = Boolean(excludeId && id === excludeId);
+      const matchesExcludeText = Boolean(normExcludeText && normQ === normExcludeText);
+
+      if (!fallbackCandidate && !sessionUsedSet.has(id) && !matchesExcludeId && !matchesExcludeText) {
+        fallbackCandidate = candidate;
+      }
+
+      const inCooldown =
+        Object.prototype.hasOwnProperty.call(nextState.lastDrawnAt, id) &&
+        nextDraw - nextState.lastDrawnAt[id] <= COOLDOWN_DRAWS;
+
+      if (
+        matchesExcludeId ||
+        sessionUsedSet.has(id) ||
+        inCooldown ||
+        matchesExcludeText ||
+        (normQ && sessionTextSet.has(normQ))
+      ) {
+        continue;
+      }
+
+      return candidate;
+    }
+
+    return fallbackCandidate;
+  }
+
+  /**
    * Draw the next question for `session` from `pool` without mutating inputs.
    * Honors `tickedUnits`, 8-draw cooldown, due `retryQueue` items, skill balance,
    * adaptive difficulty, and deterministic option shuffling.
@@ -694,11 +899,14 @@
     }
 
     const sessionUsedSet = new Set(nextSession.usedQuestionIds);
+    const sessionTextSet = new Set(nextSession.usedQuestionTexts);
     const nextDraw = nextState.drawCount + 1;
-    const isBlocked = (qId) =>
-      sessionUsedSet.has(qId) ||
-      (Object.prototype.hasOwnProperty.call(nextState.lastDrawnAt, qId) &&
-        nextDraw - nextState.lastDrawnAt[qId] <= COOLDOWN_DRAWS);
+    const isStaticBlocked = (q) =>
+      sessionUsedSet.has(q.id) ||
+      (Object.prototype.hasOwnProperty.call(nextState.lastDrawnAt, q.id) &&
+        nextDraw - nextState.lastDrawnAt[q.id] <= COOLDOWN_DRAWS) ||
+      (q.q ? sessionTextSet.has(normalizePromptText(q.q)) : false);
+    const isEntryBlocked = (q) => !isGeneratorEntry(q) && isStaticBlocked(q);
 
     const rng = mulberry32(hashSeed(nextSession.seed, nextSession.rngStep));
 
@@ -713,21 +921,24 @@
       const isFromPriorSession = entry.queuedInSession !== nextSession.id;
       const hasIntervening = nextSession.usedQuestionIds.length >= (Number(entry.queuedAtSessionIndex) || 0) + 2;
       const isLastSlot = nextSession.usedQuestionIds.length === nextSession.targetCount - 1;
-      const noOtherSkillCandidates = !tickedPool.some((q) => !isBlocked(q.id) && q.skill !== entry.skill);
+      const noOtherSkillCandidates = !tickedPool.some(
+        (q) => q.skill !== entry.skill && (isGeneratorEntry(q) || !isStaticBlocked(q))
+      );
 
       if (!(isFromPriorSession || hasIntervening || isLastSlot || noOtherSkillCandidates)) {
         continue;
       }
 
       const maxRank = diffRank(entry.maxDiff);
-      const retryCandidates = tickedPool.filter(
-        (q) =>
-          q.skill === entry.skill &&
-          tickedSet.has(q.unit) &&
-          q.id !== entry.excludeQuestionId &&
-          !isBlocked(q.id) &&
-          diffRank(q.diff) <= maxRank
-      );
+      const excludeText = entry.excludeQuestionText || "";
+      const retryCandidates = tickedPool.filter((q) => {
+        if (q.skill !== entry.skill || !tickedSet.has(q.unit)) return false;
+        if (diffRank(q.diff) > maxRank) return false;
+        if (isGeneratorEntry(q)) return true;
+        if (entry.excludeQuestionId && q.id === entry.excludeQuestionId) return false;
+        if (excludeText && q.q && normalizePromptText(q.q) === excludeText) return false;
+        return !isStaticBlocked(q);
+      });
 
       if (retryCandidates.length === 0) {
         continue;
@@ -736,14 +947,42 @@
       const rankedRetry = retryCandidates.map((q) => ({
         q,
         rank: diffRank(q.diff),
-        lastDraw: Object.prototype.hasOwnProperty.call(nextState.lastDrawnAt, q.id)
-          ? nextState.lastDrawnAt[q.id]
-          : -1,
+        lastDraw:
+          !isGeneratorEntry(q) && Object.prototype.hasOwnProperty.call(nextState.lastDrawnAt, q.id)
+            ? nextState.lastDrawnAt[q.id]
+            : -1,
         rand: rng()
       }));
       rankedRetry.sort((a, b) => b.rank - a.rank || a.lastDraw - b.lastDraw || a.rand - b.rand);
 
-      chosenRaw = rankedRetry[0].q;
+      let pickedRetry = null;
+      for (let rIdx = 0; rIdx < rankedRetry.length; rIdx++) {
+        const cand = rankedRetry[rIdx].q;
+        if (isGeneratorEntry(cand)) {
+          const mat = materializeGeneratorEntry(
+            cand,
+            nextSession,
+            nextState,
+            sessionUsedSet,
+            sessionTextSet,
+            entry.excludeQuestionId,
+            excludeText
+          );
+          if (mat) {
+            pickedRetry = mat;
+            break;
+          }
+        } else {
+          pickedRetry = cand;
+          break;
+        }
+      }
+
+      if (!pickedRetry) {
+        continue;
+      }
+
+      chosenRaw = pickedRetry;
       nextState.retryQueue.splice(i, 1);
       fromRetry = true;
       break;
@@ -754,19 +993,52 @@
       let lastSkill = null;
       if (nextSession.usedQuestionIds.length > 0) {
         const lastQId = nextSession.usedQuestionIds[nextSession.usedQuestionIds.length - 1];
-        const lastQ = pool.find((q) => q && q.id === lastQId);
-        if (lastQ && lastQ.skill) {
-          lastSkill = lastQ.skill;
-        } else if (nextSession.answers.length > 0) {
-          lastSkill = nextSession.answers[nextSession.answers.length - 1].skill || null;
+        if (
+          nextSession.currentQuestion &&
+          nextSession.currentQuestion.id === lastQId &&
+          nextSession.currentQuestion.skill
+        ) {
+          lastSkill = nextSession.currentQuestion.skill;
+        } else {
+          const lastQ = pool.find((q) => q && q.id === lastQId);
+          if (lastQ && lastQ.skill) {
+            lastSkill = lastQ.skill;
+          } else if (nextSession.answers.length > 0) {
+            lastSkill = nextSession.answers[nextSession.answers.length - 1].skill || null;
+          }
         }
       }
 
-      const eligible = tickedPool.filter((q) => !isBlocked(q.id));
+      const eligible = tickedPool.filter((q) => !isEntryBlocked(q));
       if (eligible.length > 0) {
-        chosenRaw = pickFromEligibleNormal(eligible, nextSession, nextState, lastSkill, rng);
+        const picked = pickFromEligibleNormal(eligible, nextSession, nextState, lastSkill, rng);
+        if (picked && isGeneratorEntry(picked)) {
+          chosenRaw = materializeGeneratorEntry(
+            picked,
+            nextSession,
+            nextState,
+            sessionUsedSet,
+            sessionTextSet,
+            "",
+            ""
+          );
+          if (!chosenRaw && eligible.length > 1) {
+            const remaining = eligible.filter((item) => item !== picked);
+            while (remaining.length > 0 && !chosenRaw) {
+              const alt = pickFromEligibleNormal(remaining, nextSession, nextState, lastSkill, rng);
+              if (!alt) break;
+              const idx = remaining.indexOf(alt);
+              if (idx >= 0) remaining.splice(idx, 1);
+              chosenRaw = isGeneratorEntry(alt)
+                ? materializeGeneratorEntry(alt, nextSession, nextState, sessionUsedSet, sessionTextSet, "", "")
+                : alt;
+            }
+          }
+        } else {
+          chosenRaw = picked;
+        }
       } else {
-        const notUsedInSession = tickedPool.filter((q) => !sessionUsedSet.has(q.id));
+        const notUsedInSession = tickedPool.filter((q) => !isGeneratorEntry(q) && !sessionUsedSet.has(q.id));
         if (notUsedInSession.length === 0) {
           return { question: null, session: nextSession, state: nextState, fromRetry: false };
         }
@@ -791,6 +1063,10 @@
     nextState.drawCount = nextDraw;
     nextState.lastDrawnAt[question.id] = nextDraw;
     nextSession.usedQuestionIds.push(question.id);
+    const normQuestionText = normalizePromptText(question.q);
+    if (normQuestionText) {
+      nextSession.usedQuestionTexts.push(normQuestionText);
+    }
     nextSession.drawnSkillCounts[question.skill] = (nextSession.drawnSkillCounts[question.skill] || 0) + 1;
     nextSession.rngStep += 1;
     nextSession.currentQuestion = cloneQuestion(question);
@@ -844,12 +1120,13 @@
       nextState.skills[question.skill] = skillState;
     }
 
+    const masteryKey = question.sig || question.id;
     skillState.attempts += 1;
     if (correctBool) {
       skillState.correct += 1;
       skillState.consecutiveCorrect += 1;
-      if (question.id && !skillState.correctQuestionIds.includes(question.id)) {
-        skillState.correctQuestionIds.push(question.id);
+      if (masteryKey && !skillState.correctQuestionIds.includes(masteryKey)) {
+        skillState.correctQuestionIds.push(masteryKey);
       }
       if (skillState.consecutiveCorrect > 0 && skillState.consecutiveCorrect % 2 === 0) {
         skillState.targetDiff = stepDiffUp(skillState.targetDiff);
@@ -864,6 +1141,7 @@
         unit: question.unit,
         maxDiff: skillState.targetDiff,
         excludeQuestionId: question.id,
+        excludeQuestionText: normalizePromptText(question.q),
         queuedAtDraw: nextState.drawCount,
         queuedInSession: nextSession ? nextSession.id : null,
         queuedAtSessionIndex: nextSession ? (nextSession.answers || []).length : 0
@@ -1089,6 +1367,8 @@
     formatMytIso,
     mulberry32,
     hashSeed,
+    isGeneratorEntry,
+    normalizePromptText,
     createInitialState,
     normalizeState,
     stepDiffUp,

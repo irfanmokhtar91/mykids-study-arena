@@ -2233,9 +2233,64 @@
     ]
   };
 
+  const D6_MATH_META = {
+    nombor_operasi: [
+      { unit: "b1", skill: "b1_s1", diff: "L" },
+      { unit: "b1", skill: "b1_s2", diff: "M" },
+      { unit: "b1", skill: "b1_s3", diff: "L" }
+    ],
+    pecahan_peratus: [
+      { unit: "b2", skill: "b2_s1", diff: "L" },
+      { unit: "b2", skill: "b2_s2", diff: "M" },
+      { unit: "b2", skill: "b2_s3", diff: "L" },
+      { unit: "b2", skill: "b2_s4", diff: "M" }
+    ],
+    wang: [
+      { unit: "b3", skill: "b3_s1", diff: "M" },
+      { unit: "b3", skill: "b3_s2", diff: "L" },
+      { unit: "b3", skill: "b3_s3", diff: "M" }
+    ],
+    masa_waktu: [
+      { unit: "b4", skill: "b4_s1", diff: "M" },
+      { unit: "b4", skill: "b4_s2", diff: "M" },
+      { unit: "b4", skill: "b4_s3", diff: "L" }
+    ],
+    ukuran_sukatan: [
+      { unit: "b5", skill: "b5_s1", diff: "L" },
+      { unit: "b5", skill: "b5_s2", diff: "L" },
+      { unit: "b5", skill: "b5_s3", diff: "L" }
+    ],
+    ruang: [
+      { unit: "b6", skill: "b6_s1", diff: "L" },
+      { unit: "b6", skill: "b6_s2", diff: "M" },
+      { unit: "b6", skill: "b6_s3", diff: "M" },
+      { unit: "b6", skill: "b6_s4", diff: "H" }
+    ],
+    koordinat_nisbah: [
+      { unit: "b7", skill: "b7_s1", diff: "M" },
+      { unit: "b7", skill: "b7_s2", diff: "L" },
+      { unit: "b7", skill: "b7_s3", diff: "M" }
+    ],
+    data_kebolehjadian: [
+      { unit: "b8", skill: "b8_s1", diff: "M" },
+      { unit: "b8", skill: "b8_s2", diff: "L" },
+      { unit: "b8", skill: "b8_s3", diff: "M" }
+    ]
+  };
+  Object.keys(D6_MATH_META).forEach((ch) => {
+    const fns = D6[ch];
+    const metas = D6_MATH_META[ch];
+    if (Array.isArray(fns)) {
+      for (let i = 0; i < fns.length && i < metas.length; i++) {
+        fns[i].meta = metas[i];
+      }
+    }
+  });
+
   App.Generators = {
     d6: D6,
     t2: T2,
-    t4: T4
+    t4: T4,
+    _helpers: { randInt, pick, gcd, shuffle, makeMcq, fmtMoney }
   };
 })(window);

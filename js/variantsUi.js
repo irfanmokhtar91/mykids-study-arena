@@ -35,7 +35,7 @@
 
   function getPools() {
     if (!ctx || !ctx.grade || !App.Variants) return [];
-    return App.Variants.getAvailablePools(App.Pools, App.Curriculum, ctx.grade.id);
+    return App.Variants.getAvailablePools(App.Pools, App.Curriculum, ctx.grade.id, App.Generators);
   }
 
   function resolveActivePool() {
@@ -185,9 +185,15 @@
     const tickedSet = new Set(App.Storage.getVariantUnits(ctx.profile.id, ctx.grade.id, subjectId));
 
     const unitCounts = {};
+    const unitIsGenerator = {};
     for (let i = 0; i < active.pool.length; i++) {
       const q = active.pool[i];
-      if (q && q.unit) unitCounts[q.unit] = (unitCounts[q.unit] || 0) + 1;
+      if (q && q.unit) {
+        unitCounts[q.unit] = (unitCounts[q.unit] || 0) + 1;
+        if (typeof q.generate === "function" || q.type === "generator") {
+          unitIsGenerator[q.unit] = true;
+        }
+      }
     }
 
     const subjPickerHtml =
@@ -196,7 +202,7 @@
             ${pools
               .map(
                 (p) =>
-                  `<button type="button" class="vr-subj-pill ${p.subjectId === subjectId ? "is-active" : ""}" data-vr-subj="${esc(p.subjectId)}">${esc(getSubjectName(ctx.grade, p.subjectId))}</button>`
+                  `<button type="button" class="vr-subj-pill ${p.subjectId === subjectId ? "is-active" : ""}" data-vr-subj="${esc(p.subjectId)}" aria-pressed="${p.subjectId === subjectId ? "true" : "false"}">${esc(getSubjectName(ctx.grade, p.subjectId))}</button>`
               )
               .join("")}
           </div>`
@@ -216,13 +222,16 @@
           }
         }
         const masteryMeta = hasProgress ? ` • ${masteredCount}/${skills.length} kuat` : "";
+        const countLabel = unitIsGenerator[u.id]
+          ? "Soalan dijana baharu"
+          : `${unitQCount} soalan`;
         const checked = tickedSet.has(u.id) ? "checked" : "";
         return `
           <label class="vr-unit-item">
             <input type="checkbox" class="vr-unit-chk" data-unit-id="${esc(u.id)}" ${checked}>
             <span class="vr-unit-body">
               <strong class="vr-unit-title">${esc(u.textbookUnit || u.name)}</strong>
-              <small class="vr-unit-meta">${skills.length} kemahiran • ${unitQCount} soalan${esc(masteryMeta)}</small>
+              <small class="vr-unit-meta">${skills.length} kemahiran • ${countLabel}${esc(masteryMeta)}</small>
             </span>
           </label>`;
       })
