@@ -468,6 +468,19 @@
           ]
         },
         {
+          id: "sains",
+          name: "Sains",
+          nameEn: "Science (core)",
+          icon: "🔬",
+          dlp: false,
+          chapters: [
+            { id: "teknologi_hijau", title: "Bab 4: Teknologi Hijau dalam Melestarikan Alam", titleEn: "Ch 4: Green Technology" },
+            { id: "genetik", title: "Bab 5: Genetik", titleEn: "Ch 5: Genetics" },
+            { id: "sokongan_pertumbuhan", title: "Bab 6: Sokongan, Pergerakan dan Pertumbuhan", titleEn: "Ch 6: Support, Movement and Growth" },
+            { id: "koordinasi_badan", title: "Bab 7: Koordinasi Badan", titleEn: "Ch 7: Body Coordination" }
+          ]
+        },
+        {
           id: "sejarah",
           name: "Sejarah",
           nameEn: "History",
