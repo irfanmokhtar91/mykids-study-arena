@@ -324,6 +324,24 @@
             { id: "reka_grafik", title: "Tajuk 10: Seni Reka Grafik (Simbol & Logo)", titleEn: "Topic 10: Graphic Design" },
             { id: "foto", title: "Tajuk 11: Seni Foto", titleEn: "Topic 11: Photography" }
           ]
+        },
+        {
+          id: "pjpk",
+          name: "Pendidikan Jasmani & Kesihatan",
+          nameEn: "Physical & Health Education (PJPK)",
+          icon: "🏃",
+          dlp: false,
+          chapters: [
+            { id: "kecergasan", title: "Kecergasan Fizikal Berdasarkan Kesihatan (Unit 8)", titleEn: "Health-Based Physical Fitness" },
+            { id: "gimnastik_berirama", title: "Gimnastik Asas & Pergerakan Berirama (Unit 1-2)", titleEn: "Basic Gymnastics & Rhythmic Movement" },
+            { id: "bolabaling_ragbi", title: "Bola Baling & Ragbi Sentuh (Unit 3)", titleEn: "Handball & Touch Rugby" },
+            { id: "takraw_kriket", title: "Sepak Takraw & Kriket (Unit 4-5)", titleEn: "Sepak Takraw & Cricket" },
+            { id: "olahraga_rekreasi", title: "Olahraga Asas, Rekreasi & Kesenggangan (Unit 6-7)", titleEn: "Athletics & Recreation" },
+            { id: "kesihatan_reproduktif", title: "Kesihatan Diri & Penyalahgunaan Bahan", titleEn: "Personal Health & Substance Abuse" },
+            { id: "mental_keluarga", title: "Mental & Emosi, Kekeluargaan, Perhubungan", titleEn: "Mental Health, Family & Relationships" },
+            { id: "penyakit_keselamatan", title: "Penyakit & Keselamatan", titleEn: "Disease & Safety" },
+            { id: "pemakanan_pertolongan", title: "Pemakanan & Pertolongan Cemas", titleEn: "Nutrition & First Aid" }
+          ]
         }
       ]
     },

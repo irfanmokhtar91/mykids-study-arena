@@ -3,7 +3,7 @@
  * Source: KPM KSSM textbook "Pendidikan Seni Visual Tingkatan 2" (2017, 11 Tajuk), cross-read with the DSKP KSSM PSV Tingkatan 2 v2.
  * One chapter per textbook Tajuk. Written knowledge only (definitions, classifications, terms, history, named works as the book states).
  * Tags: diff L/M/H, part "A", src "BT". Correct index is spread deterministically (the engine shuffles options at run time).
- * Verification record: docs/psv-t2-verification-2026-11-26.md.
+ * Verification record: docs/psv-t2-verification-2026-11-25.md.
  */
 (function (global) {
   const App = (global.App = global.App || {});

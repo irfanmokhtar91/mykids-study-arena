@@ -1,4 +1,4 @@
-# Pendidikan Seni Visual Tingkatan 2: question bank verification (26/Nov/2026)
+# Pendidikan Seni Visual Tingkatan 2: question bank verification (25/Nov/2026)
 
 Bank: `js/data/psv_t2.js`, 168 original questions in 11 chapters (one per textbook Tajuk). Difficulty L/M/H = 23/88/57.
 Source: KPM KSSM textbook "Pendidikan Seni Visual Tingkatan 2" (2017), text extracted by Irfan, kept locally in `docs/sources-private/` (git-ignored). The textbook has 11 Tajuk; the earlier chapter table (9 themes, from the DSKP outline) missed Seni Reka Grafik (Simbol dan Logo) and Seni Foto, which belong to the DSKP area Komunikasi Visual. Both were added.
