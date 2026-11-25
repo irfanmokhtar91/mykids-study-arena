@@ -138,6 +138,24 @@
             { id: "apresiasi_sv", title: "Modul 4: Apresiasi Seni Visual", titleEn: "Module 4: Art Appreciation" },
             { id: "projek_sv", title: "Modul 5: Projek Seni Visual (Pameran)", titleEn: "Module 5: Visual Art Project (Exhibition)" }
           ]
+        },
+        {
+          id: "pjpk",
+          name: "Pendidikan Jasmani & Kesihatan",
+          nameEn: "Physical & Health Education (PJPK)",
+          icon: "🏃",
+          dlp: false,
+          chapters: [
+            { id: "kecergasan", title: "Konsep Kecergasan & Kecergasan Fizikal (Unit 9-10)", titleEn: "Fitness Concepts & Health-Based Fitness" },
+            { id: "gimnastik_berirama", title: "Gimnastik Asas & Pergerakan Berirama (Unit 1-2)", titleEn: "Basic Gymnastics & Rhythmic Movement" },
+            { id: "permainan", title: "Permainan: Serangan, Jaring, Pukul & Memadang (Unit 3-5)", titleEn: "Games: Invasion, Net, Striking & Fielding" },
+            { id: "olahraga", title: "Olahraga Asas (Unit 6)", titleEn: "Basic Athletics" },
+            { id: "akuatik_rekreasi", title: "Akuatik Asas, Rekreasi & Kesenggangan (Unit 7-8)", titleEn: "Basic Aquatics & Recreation" },
+            { id: "kesihatan_reproduktif", title: "Kesihatan Diri, Reproduktif & Penyalahgunaan Bahan (Unit 11)", titleEn: "Personal & Reproductive Health, Substance Abuse" },
+            { id: "mental_keluarga", title: "Mental, Emosi, Keluarga & Perhubungan (Unit 11)", titleEn: "Mental & Emotional Health, Family, Relationships" },
+            { id: "penyakit_keselamatan", title: "Penyakit & Keselamatan Komuniti (Unit 11)", titleEn: "Disease & Community Safety" },
+            { id: "pemakanan_pertolongan", title: "Pemakanan & Pertolongan Cemas (Unit 12-13)", titleEn: "Nutrition & First Aid" }
+          ]
         }
       ]
     },

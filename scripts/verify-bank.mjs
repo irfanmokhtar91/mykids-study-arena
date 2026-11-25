@@ -11,7 +11,7 @@ const ctx = { console }; ctx.window = ctx;
 vm.runInNewContext(fs.readFileSync(file, "utf8"), ctx, { filename: file });
 let bank = ctx.App.Data; for (const k of dpath.split(".")) bank = bank[k];
 const errors = [], seen = new Set(), diffs = { L: 0, M: 0, H: 0 }, spread = [0, 0, 0, 0];
-let total = 0;
+let total = 0, checked = 0;
 const norm = (s) => String(s).toLowerCase().replace(/\s+/g, " ").trim();
 for (const [ch, items] of Object.entries(bank)) {
   if (items.length < 10) errors.push(`${ch}: only ${items.length} items (need >= 10)`);
@@ -26,8 +26,16 @@ for (const [ch, items] of Object.entries(bank)) {
     if (seen.has(norm(it.q))) errors.push(`${id}: duplicate prompt`);
     seen.add(norm(it.q));
     if (/NaN|undefined/.test(JSON.stringify(it))) errors.push(`${id}: NaN/undefined`);
+    if (it.check && it.check.type === "js") {
+      checked++;
+      const got = String(new Function(it.check.code)());
+      if (got !== it.check.ans) errors.push(`${id}: recomputed "${got}" but check.ans is "${it.check.ans}"`);
+      const has = (o) => String(o).split(/[^0-9A-Za-z.]+/).includes(it.check.ans);
+      if (!has(it.options[it.correctIndex])) errors.push(`${id}: keyed option "${it.options[it.correctIndex]}" does not contain recomputed ${it.check.ans}`);
+      it.options.forEach((o, k) => { if (k !== it.correctIndex && has(o)) errors.push(`${id}: a distractor also contains ${it.check.ans}`); });
+    }
   });
 }
-console.log(`${dpath}: ${total} items, ${Object.keys(bank).length} chapters, diff L/M/H ${diffs.L}/${diffs.M}/${diffs.H}, key index spread ${spread.join("/")}`);
+console.log(`${dpath}: ${total} items (${checked} code-checked), ${Object.keys(bank).length} chapters, diff L/M/H ${diffs.L}/${diffs.M}/${diffs.H}, key index spread ${spread.join("/")}`);
 if (errors.length) { console.error(errors.join("\n")); process.exit(1); }
 console.log("GATE 1 PASSED (structure).");
