@@ -283,6 +283,17 @@
       }
 
       return pairs.length === 3 ? pairs : null;
+    },
+
+    getDiagnosticBank: function (gradeId, subjectId) {
+      const banks = App.DiagnosticBanks && App.DiagnosticBanks[gradeId];
+      return (banks && banks[subjectId]) || null;
+    },
+
+    getDiagnosticQuestions: function (gradeId, subjectId, opts) {
+      const bank = this.getDiagnosticBank(gradeId, subjectId);
+      if (!bank || !App.DiagnosticRunner) return [];
+      return App.DiagnosticRunner.selectDiagnosticQuestions(bank, opts || {});
     }
   };
 })(window);

@@ -29,6 +29,63 @@ async function readJson(request, limit = MAX_JSON) {
 
 const cleanName = (s) => String(s || "").replace(/[\u0000-\u001f]/g, "").trim().slice(0, 40);
 const GRADES = new Set(["d6", "t2", "t4"]);
+const VALID_SESSION_TYPES = new Set(["INITIAL_DIAGNOSTIC", "WEEKLY_CHECKUP"]);
+const VALID_ERROR_CLASSES = new Set(["MASTERY", "LOW_FLUENCY", "CARELESS_RUSH", "CONCEPTUAL_GAP", "TIMEOUT"]);
+const VALID_BLOOM_LEVELS = new Set(["Remember", "Understand", "Apply", "Analyze"]);
+const VALID_OPTIONS = new Set(["A", "B", "C", "D"]);
+
+export function validateDiagnosticPayload(body) {
+  if (!body || typeof body !== "object") return false;
+  const s = body.session;
+  if (!s || typeof s !== "object" || Array.isArray(s)) return false;
+  if (typeof s.id !== "string" || !s.id.trim() || s.id.length > 80) return false;
+  if (!VALID_SESSION_TYPES.has(s.session_type)) return false;
+  if (typeof s.started_at !== "string" || !s.started_at.trim() || s.started_at.length > 40) return false;
+  if (s.completed_at !== null && s.completed_at !== undefined && (typeof s.completed_at !== "string" || s.completed_at.length > 40)) return false;
+
+  if (!Array.isArray(body.attempts) || body.attempts.length === 0 || body.attempts.length > 50) return false;
+  for (const a of body.attempts) {
+    if (!a || typeof a !== "object" || Array.isArray(a)) return false;
+    if (typeof a.id !== "string" || !a.id.trim() || a.id.length > 100) return false;
+    if (typeof a.question_id !== "string" || !a.question_id.trim() || a.question_id.length > 80) return false;
+    if (typeof a.syllabus_node_id !== "string" || !a.syllabus_node_id.trim() || a.syllabus_node_id.length > 80) return false;
+    if (typeof a.is_correct !== "boolean" && a.is_correct !== 0 && a.is_correct !== 1) return false;
+    if (!Number.isInteger(a.time_spent_ms) || a.time_spent_ms < 0 || a.time_spent_ms > 3600000) return false;
+    if (!VALID_ERROR_CLASSES.has(a.error_classification)) return false;
+    if (typeof a.answered_at_myt !== "string" || !a.answered_at_myt.trim() || a.answered_at_myt.length > 40) return false;
+  }
+
+  if (body.syllabusNodes !== undefined) {
+    if (!Array.isArray(body.syllabusNodes) || body.syllabusNodes.length > 50) return false;
+    for (const n of body.syllabusNodes) {
+      if (!n || typeof n !== "object") return false;
+      if (typeof n.id !== "string" || !n.id.trim() || n.id.length > 80) return false;
+      if (typeof n.subject !== "string" || !n.subject.trim() || n.subject.length > 40) return false;
+      if (typeof n.grade_level !== "string" || !n.grade_level.trim() || n.grade_level.length > 20) return false;
+      if (typeof n.topic_name !== "string" || !n.topic_name.trim() || n.topic_name.length > 160) return false;
+      if (typeof n.subtopic_name !== "string" || !n.subtopic_name.trim() || n.subtopic_name.length > 160) return false;
+      if (n.prerequisite_node_id !== null && n.prerequisite_node_id !== undefined && (typeof n.prerequisite_node_id !== "string" || n.prerequisite_node_id.length > 80)) return false;
+      if (!Number.isInteger(n.expected_time_ms) || n.expected_time_ms <= 0) return false;
+      if (!VALID_BLOOM_LEVELS.has(n.bloom_level)) return false;
+    }
+  }
+
+  if (body.questions !== undefined) {
+    if (!Array.isArray(body.questions) || body.questions.length > 50) return false;
+    for (const q of body.questions) {
+      if (!q || typeof q !== "object") return false;
+      if (typeof q.id !== "string" || !q.id.trim() || q.id.length > 80) return false;
+      if (typeof q.syllabus_node_id !== "string" || !q.syllabus_node_id.trim() || q.syllabus_node_id.length > 80) return false;
+      if (!Number.isInteger(q.difficulty_1_to_5) || q.difficulty_1_to_5 < 1 || q.difficulty_1_to_5 > 5) return false;
+      if (typeof q.prompt_text !== "string" || !q.prompt_text.trim() || q.prompt_text.length > 2000) return false;
+      const optStr = typeof q.options_json === "string" ? q.options_json : JSON.stringify(q.options_json || "");
+      if (!optStr || optStr.length > 4000) return false;
+      if (!VALID_OPTIONS.has(q.correct_option)) return false;
+      if (typeof q.explanation_text !== "string" || !q.explanation_text.trim() || q.explanation_text.length > 4000) return false;
+    }
+  }
+  return true;
+}
 
 /** parentMarks = { itemId: { "0": [stepIdx, ...], ... } } with sane bounds. */
 export function validateParentMarks(m) {
@@ -157,6 +214,21 @@ export function createApp({ store, env, fetchImpl = fetch, now = () => Date.now(
       return json({ ok: true, serverTime: now(), marks });
     }
 
+    if (path === "/api/child/diagnostics" && method === "POST") {
+      const body = await readJson(request, 64 * 1024);
+      const child = await childFromDevice(body.childId, body.deviceToken);
+      if (!child) return fail(403, "Peranti tidak dikenali");
+      if (!validateDiagnosticPayload(body)) return fail(400, "Data diagnostik tidak sah");
+      await store.saveDiagnosticSession({
+        childId: child.id,
+        session: body.session,
+        attempts: body.attempts,
+        syllabusNodes: body.syllabusNodes || [],
+        questions: body.questions || []
+      });
+      return json({ ok: true, savedAttempts: body.attempts.length });
+    }
+
     if (path === "/api/child/photo" && method === "PUT") {
       const childId = url.searchParams.get("childId");
       const photoId = url.searchParams.get("photoId");
@@ -199,7 +271,13 @@ export function createApp({ store, env, fetchImpl = fetch, now = () => Date.now(
         return json({ children: await store.listChildrenForParent(parentId) });
       }
 
-      let m = path.match(/^\/api\/parent\/child\/([\w-]+)$/);
+      let m = path.match(/^\/api\/parent\/child\/([\w-]+)\/diagnostics$/);
+      if (m && method === "GET") {
+        if (!(await store.isLinked(parentId, m[1]))) return fail(404, "Anak tidak dijumpai");
+        return json(await store.listDiagnosticsForChild(m[1]));
+      }
+
+      m = path.match(/^\/api\/parent\/child\/([\w-]+)$/);
       if (m && method === "GET") {
         if (!(await store.isLinked(parentId, m[1]))) return fail(404, "Anak tidak dijumpai");
         const child = await store.getChild(m[1]);

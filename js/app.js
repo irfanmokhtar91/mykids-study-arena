@@ -684,6 +684,19 @@
       return;
     }
 
+    if (currentView === "diagnostic") {
+      App.DiagnosticUI.open(main, {
+        profile,
+        grade,
+        onExit: () => {
+          App.DiagnosticUI.stop();
+          currentView = "home";
+          renderAll();
+        }
+      });
+      return;
+    }
+
     if (currentView === "home") {
       const totalSetsPlayed = Object.keys(profile.setBest || {}).length;
       const mascotInfo = App.Mascot ? App.Mascot.getInfo(grade.id) : { name: "Koko", tagline: "" };
@@ -792,6 +805,7 @@
               <div class="stat-box"><strong>${totalSetsPlayed}</strong><span>Set Selesai</span></div>
               <button type="button" class="btn-tactile btn-shop-cta" id="btn-open-shop">🛍️ Kedai Ganjaran</button>
               <button type="button" class="btn-tactile btn-mock-cta" id="btn-open-mock">📝 Ujian Percubaan</button>
+              <button type="button" class="btn-tactile btn-diag-cta" id="btn-open-diagnostic">🩺 Semakan Diagnostik</button>
             </div>
             <div class="streak-calendar">
               <span class="sc-title">Kalendar 7 Hari:</span>
@@ -805,6 +819,12 @@
         <h2 class="section-title">📚 Semua Subjek (${esc(grade.name)})</h2>
         <div class="subject-grid">${cards}</div>
       `;
+
+      document.getElementById("btn-open-diagnostic").addEventListener("click", () => {
+        App.Sound.click();
+        currentView = "diagnostic";
+        renderAll();
+      });
 
       document.getElementById("btn-open-mock").addEventListener("click", () => {
         App.Sound.click();
@@ -1522,6 +1542,23 @@
                     <select class="grade-select" data-pid="${p.id}">${gradeSelectOpts}</select>
                     <button class="btn-secondary btn-rename" data-pid="${p.id}">Simpan</button>
                   </div>
+                  ${
+                    App.DiagnosticReport
+                      ? App.DiagnosticReport.renderCardHtml(
+                          App.DiagnosticReport.buildReportData({
+                            studentId: p.id,
+                            studentName: displayName,
+                            gradeId: p.gradeId,
+                            ...App.DiagnosticReport.mergeDiagnosticSources({
+                              studentId: p.id,
+                              gradeId: p.gradeId,
+                              profile: p,
+                              diagnosticBanks: App.DiagnosticBanks
+                            })
+                          })
+                        )
+                      : ""
+                  }
                   ${chapterStatusHtml}
                   ${mockWkHtml}
                   ${reportsHtml}
@@ -1668,8 +1705,9 @@
       });
     });
 
-    // Cloud link actions
+    // Cloud link actions & diagnostic WhatsApp actions
     if (App.CloudUi) App.CloudUi.bind(main, () => renderParentDashboard(main));
+    if (App.DiagnosticReport) App.DiagnosticReport.bindActions(main);
 
     const closeAiBtn = document.getElementById("btn-close-ai-panel");
     if (closeAiBtn) {

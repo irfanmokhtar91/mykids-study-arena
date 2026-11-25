@@ -93,10 +93,77 @@ export class D1Store {
   }
 
   async deleteChild(childId) {
+    for (const sql of ["DELETE FROM attempt_logs WHERE student_id = ?", "DELETE FROM assessment_sessions WHERE student_id = ?"]) {
+      try {
+        await this.db.prepare(sql).bind(childId).run();
+      } catch (e) {
+        /* ignore on pre-diagnostic schema DBs */
+      }
+    }
     for (const sql of ["DELETE FROM marks WHERE child_id = ?", "DELETE FROM photos WHERE child_id = ?", "DELETE FROM links WHERE child_id = ?", "DELETE FROM children WHERE id = ?"]) {
       await this.db.prepare(sql).bind(childId).run();
     }
     await this.db.prepare("DELETE FROM pairs WHERE child_id = ? OR claimed_child_id = ?").bind(childId, childId).run();
+  }
+
+  async saveDiagnosticSession({ childId, session, attempts, syllabusNodes = [], questions = [] }) {
+    const byId = new Map(syllabusNodes.map((n) => [n.id, n]));
+    const orderedNodes = [];
+    const visited = new Set();
+    const visit = (n) => {
+      if (!n || visited.has(n.id)) return;
+      visited.add(n.id);
+      if (n.prerequisite_node_id && byId.has(n.prerequisite_node_id)) visit(byId.get(n.prerequisite_node_id));
+      orderedNodes.push(n);
+    };
+    syllabusNodes.forEach(visit);
+
+    for (const n of orderedNodes) {
+      await this.db
+        .prepare("INSERT OR IGNORE INTO syllabus_nodes (id, subject, grade_level, chapter_id, topic_name, subtopic_name, prerequisite_node_id, expected_time_ms, bloom_level) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+        .bind(n.id, n.subject, n.grade_level, n.chapter_id || null, n.topic_name, n.subtopic_name, n.prerequisite_node_id || null, n.expected_time_ms, n.bloom_level)
+        .run();
+    }
+
+    for (const q of questions) {
+      const optJson = typeof q.options_json === "string" ? q.options_json : JSON.stringify(q.options_json);
+      await this.db
+        .prepare("INSERT OR IGNORE INTO questions (id, syllabus_node_id, difficulty_1_to_5, prompt_text, options_json, correct_option, explanation_text) VALUES (?, ?, ?, ?, ?, ?, ?)")
+        .bind(q.id, q.syllabus_node_id, q.difficulty_1_to_5, q.prompt_text, optJson, q.correct_option, q.explanation_text)
+        .run();
+    }
+
+    await this.db
+      .prepare("INSERT INTO assessment_sessions (id, student_id, session_type, started_at, completed_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET session_type = excluded.session_type, completed_at = excluded.completed_at")
+      .bind(session.id, childId, session.session_type, session.started_at, session.completed_at || null)
+      .run();
+
+    for (const a of attempts) {
+      await this.db
+        .prepare("INSERT OR IGNORE INTO attempt_logs (id, session_id, student_id, question_id, syllabus_node_id, is_correct, time_spent_ms, error_classification, answered_at_myt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+        .bind(a.id, session.id, childId, a.question_id, a.syllabus_node_id, a.is_correct ? 1 : 0, a.time_spent_ms, a.error_classification, a.answered_at_myt)
+        .run();
+    }
+  }
+
+  async listDiagnosticsForChild(childId) {
+    const sessRes = await this.db
+      .prepare("SELECT id, student_id, session_type, started_at, completed_at FROM assessment_sessions WHERE student_id = ? ORDER BY started_at DESC")
+      .bind(childId)
+      .all();
+    const attRes = await this.db
+      .prepare("SELECT id, session_id, student_id, question_id, syllabus_node_id, is_correct, time_spent_ms, error_classification, answered_at_myt FROM attempt_logs WHERE student_id = ? ORDER BY answered_at_myt DESC")
+      .bind(childId)
+      .all();
+    const nodeRes = await this.db
+      .prepare("SELECT * FROM syllabus_nodes WHERE id IN (SELECT DISTINCT syllabus_node_id FROM attempt_logs WHERE student_id = ?) OR id IN (SELECT DISTINCT n.prerequisite_node_id FROM syllabus_nodes n JOIN attempt_logs a ON a.syllabus_node_id = n.id WHERE a.student_id = ? AND n.prerequisite_node_id IS NOT NULL)")
+      .bind(childId, childId)
+      .all();
+    return {
+      sessions: sessRes.results || [],
+      attempts: attRes.results || [],
+      syllabusNodes: nodeRes.results || []
+    };
   }
 
   async listChildrenForParent(parentId) {

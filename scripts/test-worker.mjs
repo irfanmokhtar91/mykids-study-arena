@@ -1,4 +1,5 @@
 // Phase 2 backend tests: Google ID-token verification (with a locally generated fake Google key), pairing, sync, photos, marks, privacy rules.
+import fs from "node:fs";
 import { createApp, validateParentMarks } from "../worker/src/core.js";
 import { MemoryStore } from "../worker/test/memory-store.js";
 import { resetGoogleKeyCache } from "../worker/src/google.js";
@@ -160,6 +161,44 @@ ok("the second parent now sees the child", r.status === 200 && r.data.child.snap
 r = await call("POST", "/api/pair/status", { body: { code: code2.code, pairSecret: code2.pairSecret } });
 ok("no new device token is issued for an existing child", r.data.linked === true && r.data.deviceToken === undefined);
 
+// ---------------------------------------------------------------- diagnostic checkup logs
+const diagBank = JSON.parse(fs.readFileSync(new URL("../js/data/diagnostic_t2_math.json", import.meta.url), "utf8"));
+const diagQs = [
+  ...diagBank.syllabus_nodes.flatMap((n) => diagBank.questions.filter((q) => q.syllabus_node_id === n.id).slice(0, 2)),
+  diagBank.questions[2]
+];
+const diagAtts = diagQs.map((q, i) => ({
+  id: `diag_test_a${i + 1}`,
+  question_id: q.id,
+  syllabus_node_id: q.syllabus_node_id,
+  is_correct: i % 3 === 0 ? 0 : 1,
+  time_spent_ms: i % 3 === 0 ? 5000 : 25000,
+  error_classification: i % 3 === 0 ? "CARELESS_RUSH" : "MASTERY",
+  answered_at_myt: "2026-11-25T16:30:00+08:00"
+}));
+r = await call("POST", "/api/child/diagnostics", {
+  body: {
+    childId,
+    deviceToken,
+    session: { id: "diag_test_1", session_type: "INITIAL_DIAGNOSTIC", started_at: "2026-11-25T16:25:00+08:00", completed_at: "2026-11-25T16:35:00+08:00" },
+    attempts: diagAtts,
+    syllabusNodes: diagBank.syllabus_nodes,
+    questions: diagQs
+  }
+});
+ok("child device uploads a 15-question diagnostic session", r.status === 200 && r.data.ok === true && r.data.savedAttempts === 15);
+r = await call("POST", "/api/child/diagnostics", { body: { childId, deviceToken: "bad", session: { id: "x", session_type: "INITIAL_DIAGNOSTIC", started_at: "2026-11-25T16:25:00+08:00" }, attempts: diagAtts } });
+ok("diagnostic upload with a bad device token is refused", r.status === 403);
+r = await call("POST", "/api/child/diagnostics", { body: { childId, deviceToken, session: { id: "bad", session_type: "DRILL", started_at: "2026-11-25T16:25:00+08:00" }, attempts: diagAtts } });
+ok("diagnostic upload with invalid session_type is refused", r.status === 400);
+r = await call("POST", "/api/child/diagnostics", { body: { childId, deviceToken, session: { id: "bad2", session_type: "INITIAL_DIAGNOSTIC", started_at: "2026-11-25T16:25:00+08:00" }, attempts: [{ ...diagAtts[0], time_spent_ms: -10 }] } });
+ok("diagnostic upload with negative time_spent_ms is refused", r.status === 400);
+r = await call("GET", `/api/parent/child/${childId}/diagnostics`, { token: mama2.session });
+ok("linked parent reads child diagnostic logs", r.status === 200 && r.data.sessions.length === 1 && r.data.attempts.length === 15 && r.data.syllabusNodes.length === 7);
+const stranger = await login({ sub: "g-stranger", email: "stranger@example.com" });
+r = await call("GET", `/api/parent/child/${childId}/diagnostics`, { token: stranger.session });
+ok("unlinked parent cannot read diagnostic logs", r.status === 404);
+
 // ---------------------------------------------------------------- unlink and delete
 r = await call("DELETE", `/api/parent/child/${childId}`, { token: papa.session });
 ok("a parent can unlink", r.status === 200);
@@ -167,7 +206,7 @@ r = await call("GET", `/api/parent/child/${childId}`, { token: mama2.session });
 ok("the other parent still has the child and the data", r.status === 200);
 r = await call("DELETE", `/api/parent/child/${childId}`, { token: mama2.session });
 ok("the last parent can delete the child", r.status === 200);
-ok("all child data (snapshot, marks, photos, links) is gone", !store.children.has(childId) && store.photos.size === 0 && store.marks.size === 0);
+ok("all child data (snapshot, marks, photos, links, diagnostics) is gone", !store.children.has(childId) && store.photos.size === 0 && store.marks.size === 0 && store.diagnosticSessions.size === 0 && store.attemptLogs.size === 0);
 r = await call("POST", "/api/child/sync", { body: { childId, deviceToken, marksSince: 0 } });
 ok("the old device token no longer works", r.status === 403);
 r = await call("DELETE", "/api/parent/account", { token: papa.session });

@@ -1,0 +1,10 @@
+# Cursor Rules — MyKids Study Arena v5
+
+1. Read `PROJECT_CONTEXT.md` and `docs/design-v5.md` first for product domain, grading rules, and v5 architecture.
+2. Preserve the existing stack: vanilla HTML5/CSS/UMD ES6 JS static PWA (`index.html`, `js/`, `parent/`) + personal Cloudflare Workers & D1 SQLite (`worker/`). Do not introduce TypeScript build steps, React/Next.js, or Supabase/PostgreSQL unless explicitly requested.
+3. Keep pure domain modules (`js/gradeBands.js`, `js/weakness.js`, `js/tasks.js`, `js/diagnostics.js`) UMD-compatible (`module.exports` + `window.App.<Module>`), strictly JSDoc-typed, and free of DOM/storage side effects.
+4. Enforce KPM grading scales (UASA for `d6`/`t2`, SPM for `t4`, flagging `D`/`E` alert zones) and diagnostic thresholds (`CARELESS_RUSH < 0.4 * expected_time_ms`, `CONCEPTUAL_GAP >= 0.4`, `LOW_FLUENCY > 1.5`, `>= 50%` prerequisite probe, `>= 20%` post-21:00 MYT fatigue drop).
+5. Format all user-facing dates as `dd/Mon/yyyy` (English 3-letter month) and use MYT (`UTC+8`).
+6. Keep edits single-feature per turn so UI changes do not alter diagnostic logic.
+7. Run relevant Node checks in `scripts/` after edits; never ship unverified AI questions or commit files from `docs/sources-private/`.
+8. Treat `docs/prompts/*.md` as on-demand prompt templates only, never as active tasks unless instructed.

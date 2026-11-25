@@ -116,6 +116,8 @@
       return h;
     });
     p.mistakeLog = (p.mistakeLog || []).slice(0, 100);
+    if (Array.isArray(p.diagnosticSessions)) p.diagnosticSessions = p.diagnosticSessions.slice(0, 20);
+    if (Array.isArray(p.diagnosticAttempts)) p.diagnosticAttempts = p.diagnosticAttempts.slice(-300);
     let size = JSON.stringify(p).length;
     if (size > MAX_SNAPSHOT_BYTES) {
       (p.mockResults || []).forEach((r, i) => {
@@ -125,6 +127,7 @@
       size = JSON.stringify(p).length;
     }
     if (size > MAX_SNAPSHOT_BYTES) p.mistakeLog = [];
+    if (size > MAX_SNAPSHOT_BYTES) p.diagnosticAttempts = [];
     return p;
   }
 
@@ -185,8 +188,64 @@
         newest = Math.max(newest, m.updatedAt || 0);
       }
       if (marksApplied && App.Storage.refreshTasks) App.Storage.refreshTasks(profileId);
+
+      // push completed diagnostic sessions + attempt logs to D1
+      let diagnosticsUploaded = 0;
+      const unsynced = App.Storage.getUnsyncedDiagnostics ? App.Storage.getUnsyncedDiagnostics(profileId).slice(0, 5) : [];
+      const syncedDiagIds = [];
+      for (const entry of unsynced) {
+        const bank = App.QuestionEngine && App.QuestionEngine.getDiagnosticBank
+          ? App.QuestionEngine.getDiagnosticBank(entry.session.gradeId || profile.gradeId, entry.session.subjectId)
+          : null;
+        let syllabusNodes = [];
+        let questions = [];
+        if (bank) {
+          const allNodes = new Map((bank.syllabus_nodes || []).map((n) => [n.id, n]));
+          const neededNodeIds = new Set();
+          entry.attempts.forEach((a) => {
+            let cur = a.syllabus_node_id;
+            const seen = new Set();
+            while (cur && allNodes.has(cur) && !seen.has(cur)) {
+              seen.add(cur);
+              neededNodeIds.add(cur);
+              cur = allNodes.get(cur).prerequisite_node_id;
+            }
+          });
+          syllabusNodes = (bank.syllabus_nodes || []).filter((n) => neededNodeIds.has(n.id));
+          const neededQIds = new Set(entry.attempts.map((a) => a.question_id));
+          questions = (bank.questions || []).filter((q) => neededQIds.has(q.id));
+        }
+        await api("/api/child/diagnostics", {
+          method: "POST",
+          body: {
+            childId: link.childId,
+            deviceToken: link.deviceToken,
+            session: {
+              id: entry.session.id,
+              session_type: entry.session.session_type,
+              started_at: entry.session.started_at,
+              completed_at: entry.session.completed_at
+            },
+            attempts: entry.attempts.map((a) => ({
+              id: a.id,
+              question_id: a.question_id,
+              syllabus_node_id: a.syllabus_node_id,
+              is_correct: a.is_correct ? 1 : 0,
+              time_spent_ms: Number(a.time_spent_ms) || 0,
+              error_classification: a.error_classification,
+              answered_at_myt: a.answered_at_myt
+            })),
+            syllabusNodes,
+            questions
+          }
+        });
+        syncedDiagIds.push(entry.session.id);
+        diagnosticsUploaded++;
+      }
+      if (syncedDiagIds.length && App.Storage.markDiagnosticSynced) App.Storage.markDiagnosticSynced(profileId, syncedDiagIds);
+
       setLink(profileId, { marksSince: newest, uploaded: Array.from(uploaded).slice(-500), lastSyncAt: Date.now(), lastError: "" });
-      return { ok: true, marksApplied, photosUploaded };
+      return { ok: true, marksApplied, photosUploaded, diagnosticsUploaded };
     } catch (e) {
       if (e.status === 403) setLink(profileId, { lastError: "Sambungan tidak sah. Hubungkan semula." });
       else setLink(profileId, { lastError: e.message });

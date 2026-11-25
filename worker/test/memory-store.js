@@ -8,6 +8,10 @@ export class MemoryStore {
     this.marks = new Map();
     this.photos = new Map();
     this.rate = new Map();
+    this.syllabusNodes = new Map();
+    this.questions = new Map();
+    this.diagnosticSessions = new Map();
+    this.attemptLogs = new Map();
     this.seq = 0;
   }
   async upsertParent({ sub, email, name, at }) {
@@ -34,6 +38,30 @@ export class MemoryStore {
     for (const k of [...this.photos.keys()]) if (k.startsWith(c + "|")) this.photos.delete(k);
     for (const l of [...this.links]) if (l.endsWith("|" + c)) this.links.delete(l);
     for (const [k, p] of [...this.pairs]) if (p.childId === c || p.claimedChildId === c) this.pairs.delete(k);
+    for (const [k, s] of [...this.diagnosticSessions]) if (s.student_id === c) this.diagnosticSessions.delete(k);
+    for (const [k, a] of [...this.attemptLogs]) if (a.student_id === c) this.attemptLogs.delete(k);
+  }
+  async saveDiagnosticSession({ childId, session, attempts, syllabusNodes = [], questions = [] }) {
+    for (const n of syllabusNodes) if (n && n.id && !this.syllabusNodes.has(n.id)) this.syllabusNodes.set(n.id, { ...n });
+    for (const q of questions) if (q && q.id && !this.questions.has(q.id)) this.questions.set(q.id, { ...q });
+    this.diagnosticSessions.set(session.id, { id: session.id, student_id: childId, session_type: session.session_type, started_at: session.started_at, completed_at: session.completed_at || null });
+    for (const a of attempts) {
+      if (!this.attemptLogs.has(a.id)) {
+        this.attemptLogs.set(a.id, { id: a.id, session_id: session.id, student_id: childId, question_id: a.question_id, syllabus_node_id: a.syllabus_node_id, is_correct: a.is_correct ? 1 : 0, time_spent_ms: a.time_spent_ms, error_classification: a.error_classification, answered_at_myt: a.answered_at_myt });
+      }
+    }
+  }
+  async listDiagnosticsForChild(childId) {
+    const sessions = [...this.diagnosticSessions.values()].filter((s) => s.student_id === childId).sort((a, b) => String(b.started_at).localeCompare(String(a.started_at)));
+    const attempts = [...this.attemptLogs.values()].filter((a) => a.student_id === childId).sort((a, b) => String(b.answered_at_myt).localeCompare(String(a.answered_at_myt)));
+    const nodeIds = new Set();
+    attempts.forEach((a) => {
+      nodeIds.add(a.syllabus_node_id);
+      const n = this.syllabusNodes.get(a.syllabus_node_id);
+      if (n && n.prerequisite_node_id) nodeIds.add(n.prerequisite_node_id);
+    });
+    const syllabusNodes = [...nodeIds].map((id) => this.syllabusNodes.get(id)).filter(Boolean);
+    return { sessions, attempts, syllabusNodes };
   }
   async listChildrenForParent(p) {
     return [...this.links].filter((l) => l.startsWith(p + "|")).map((l) => this.children.get(l.split("|")[1])).filter(Boolean).map((c) => ({ id: c.id, displayName: c.displayName, gradeId: c.gradeId, snapshotUpdatedAt: c.snapshotUpdatedAt }));

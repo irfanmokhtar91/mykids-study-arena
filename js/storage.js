@@ -131,6 +131,8 @@
       tasks: [],
       mockResults: [],
       reports: [],
+      diagnosticSessions: [],
+      diagnosticAttempts: [],
       setBest: {},
       updatedAt: new Date().toISOString()
     };
@@ -158,6 +160,7 @@
     const trimmed = typeof p.name === "string" ? p.name.trim() : "";
     if (trimmed && !LEGACY_GUESSED_NAMES.has(trimmed)) return true;
     if (Array.isArray(p.history) && p.history.length > 0) return true;
+    if (Array.isArray(p.diagnosticSessions) && p.diagnosticSessions.length > 0) return true;
     if (p.setBest && Object.keys(p.setBest).length > 0) return true;
     if ((Number(p.xp) || 0) > 0 || (Number(p.coins) || 0) > 0) return true;
     return false;
@@ -175,6 +178,14 @@
     }
     if (!Array.isArray(p.reports)) {
       p.reports = [];
+      changed = true;
+    }
+    if (!Array.isArray(p.diagnosticSessions)) {
+      p.diagnosticSessions = [];
+      changed = true;
+    }
+    if (!Array.isArray(p.diagnosticAttempts)) {
+      p.diagnosticAttempts = [];
       changed = true;
     }
     if (!p.id) {
@@ -823,6 +834,31 @@
         .sort((a, b) => String(b.ts || "").localeCompare(String(a.ts || "")))
         .slice(0, 300);
 
+      // Deduplicate & merge diagnosticSessions / diagnosticAttempts
+      const diagSessMap = new Map();
+      (local.diagnosticSessions || []).forEach((s) => {
+        if (s && s.id) diagSessMap.set(s.id, s);
+      });
+      (inc.diagnosticSessions || []).forEach((s) => {
+        if (!s || !s.id) return;
+        const prev = diagSessMap.get(s.id);
+        diagSessMap.set(s.id, prev ? { ...prev, ...s, synced: !!(prev.synced || s.synced) } : s);
+      });
+      local.diagnosticSessions = Array.from(diagSessMap.values())
+        .sort((a, b) => String(b.started_at || "").localeCompare(String(a.started_at || "")))
+        .slice(0, 40);
+
+      const diagAttMap = new Map();
+      (local.diagnosticAttempts || []).forEach((a) => {
+        if (a && a.id) diagAttMap.set(a.id, a);
+      });
+      (inc.diagnosticAttempts || []).forEach((a) => {
+        if (a && a.id && !diagAttMap.has(a.id)) diagAttMap.set(a.id, a);
+      });
+      local.diagnosticAttempts = Array.from(diagAttMap.values())
+        .sort((a, b) => String(a.answered_at_myt || "").localeCompare(String(b.answered_at_myt || "")))
+        .slice(-600);
+
       if (inc.lastPlayed && (!local.lastPlayed || incIsNewer)) {
         local.lastPlayed = inc.lastPlayed;
       }
@@ -1135,6 +1171,80 @@
         save();
       }
       return p.tasks;
+    },
+    saveDiagnosticSession: (profileId, sessionRecord, attemptLogs) => {
+      const p = state.profiles.find((x) => x.id === profileId);
+      if (!p || !sessionRecord || !sessionRecord.id) return null;
+      normalizeProfileFields(p);
+
+      const alreadySaved = p.diagnosticSessions.some((s) => s.id === sessionRecord.id);
+      const score = Math.max(0, Math.round(Number(sessionRecord.score) || 0));
+      const total = Math.max(0, Math.round(Number(sessionRecord.total) || 0));
+      const pct = total > 0 ? Math.round((score / total) * 100) : 0;
+      const earnedXp = alreadySaved ? 0 : score * 15 + 30;
+      const earnedCoins = alreadySaved ? 0 : score * 10 + 15;
+
+      if (!alreadySaved) {
+        p.xp = (p.xp || 0) + earnedXp;
+        p.coins = (p.coins || 0) + earnedCoins;
+        const todayKey = toLocalDateKey(new Date());
+        if (todayKey && !p.activeDays.includes(todayKey)) {
+          p.activeDays.push(todayKey);
+          p.activeDays.sort();
+          if (p.activeDays.length > 180) p.activeDays = p.activeDays.slice(-180);
+        }
+        p.dailyStreak = computeDailyStreak(p.activeDays);
+        p.diagnosticSessions.unshift({ ...sessionRecord, synced: false });
+        if (p.diagnosticSessions.length > 40) p.diagnosticSessions.length = 40;
+      }
+
+      const existingIds = new Set(p.diagnosticAttempts.map((a) => a.id));
+      (Array.isArray(attemptLogs) ? attemptLogs : []).forEach((a) => {
+        if (a && a.id && !existingIds.has(a.id)) {
+          existingIds.add(a.id);
+          p.diagnosticAttempts.push(a);
+        }
+      });
+      if (p.diagnosticAttempts.length > 600) {
+        p.diagnosticAttempts = p.diagnosticAttempts.slice(-600);
+      }
+
+      p.updatedAt = new Date().toISOString();
+      save();
+      return { earnedXp, earnedCoins, score, total, pct, dailyStreak: p.dailyStreak };
+    },
+    getDiagnosticData: (profileId) => {
+      const p = state.profiles.find((x) => x.id === profileId);
+      return {
+        sessions: p && Array.isArray(p.diagnosticSessions) ? p.diagnosticSessions : [],
+        attempts: p && Array.isArray(p.diagnosticAttempts) ? p.diagnosticAttempts : []
+      };
+    },
+    getUnsyncedDiagnostics: (profileId) => {
+      const p = state.profiles.find((x) => x.id === profileId);
+      if (!p || !Array.isArray(p.diagnosticSessions)) return [];
+      const attempts = Array.isArray(p.diagnosticAttempts) ? p.diagnosticAttempts : [];
+      return p.diagnosticSessions
+        .filter((s) => s && s.id && !s.synced && s.completed_at)
+        .map((session) => ({
+          session,
+          attempts: attempts.filter((a) => a.session_id === session.id)
+        }))
+        .filter((entry) => entry.attempts.length > 0);
+    },
+    markDiagnosticSynced: (profileId, sessionIds) => {
+      const p = state.profiles.find((x) => x.id === profileId);
+      if (!p || !Array.isArray(p.diagnosticSessions) || !Array.isArray(sessionIds) || !sessionIds.length) return false;
+      const done = new Set(sessionIds);
+      let changed = false;
+      p.diagnosticSessions.forEach((s) => {
+        if (s && done.has(s.id) && !s.synced) {
+          s.synced = true;
+          changed = true;
+        }
+      });
+      if (changed) save({ skipCloudPush: true });
+      return changed;
     },
     buildAiPromptForKid,
     buildAiPromptAllKids,

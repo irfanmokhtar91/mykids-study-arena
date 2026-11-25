@@ -204,20 +204,43 @@
 
   async function childView(id) {
     let r;
+    let diagServer = null;
     try {
-      r = await api(`/api/parent/child/${encodeURIComponent(id)}`);
+      [r, diagServer] = await Promise.all([
+        api(`/api/parent/child/${encodeURIComponent(id)}`),
+        api(`/api/parent/child/${encodeURIComponent(id)}/diagnostics`).catch(() => null)
+      ]);
     } catch (e) {
       setMsg(e.message, true);
       return homeView();
     }
     childData = r.child;
     const p = r.child.snapshot && r.child.snapshot.profile;
+    const diagSources = App.DiagnosticReport.mergeDiagnosticSources({
+      studentId: id,
+      gradeId: r.child.gradeId,
+      profile: p,
+      serverDiagnostics: diagServer,
+      diagnosticBanks: App.DiagnosticBanks
+    });
     const back = `<div class="p-bar"><button class="btn-ghost btn-sm" id="p-back">← Kembali</button><button class="btn-ghost btn-sm" id="p-refresh">🔄</button></div>`;
     if (!p) {
-      root.innerHTML = `${back}<div class="p-card"><h3>${esc(r.child.displayName)}</h3><p>Telefon anak belum menghantar data. Buka aplikasi di telefon anak dan tekan Segerak dalam Panel Ibu Bapa.</p></div>`;
+      const diagOnly = diagSources.attempts.length
+        ? App.DiagnosticReport.renderCardHtml(
+            App.DiagnosticReport.buildReportData({
+              studentId: id,
+              studentName: r.child.displayName,
+              gradeId: r.child.gradeId,
+              sessions: diagSources.sessions,
+              attempts: diagSources.attempts,
+              syllabusNodes: diagSources.syllabusNodes
+            })
+          )
+        : "";
+      root.innerHTML = `${back}<div class="p-card"><h3>${esc(r.child.displayName)}</h3><p>Telefon anak belum menghantar data. Buka aplikasi di telefon anak dan tekan Segerak dalam Panel Ibu Bapa.</p></div>${diagOnly}`;
     } else {
       mergeMarks(p, r.marks);
-      root.innerHTML = `${back}${msgHtml()}${kidHtml(r.child, p)}
+      root.innerHTML = `${back}${msgHtml()}${kidHtml(r.child, p, diagSources)}
         <div class="p-card"><button class="btn-ghost btn-sm" id="p-remove">Putuskan dan padam anak ini daripada akaun saya</button></div>`;
       root.querySelectorAll("[data-mark-ts]").forEach((b) =>
         b.addEventListener("click", () => {
@@ -236,6 +259,7 @@
       );
       root.querySelectorAll("[data-wa]").forEach((b) => b.addEventListener("click", () => window.open(`https://wa.me/?text=${encodeURIComponent(b.getAttribute("data-wa"))}`, "_blank")));
     }
+    App.DiagnosticReport.bindActions(root);
     document.getElementById("p-back").addEventListener("click", () => {
       setMsg("");
       homeView();
@@ -255,9 +279,20 @@
       });
   }
 
-  function kidHtml(child, p) {
+  function kidHtml(child, p, diagSources) {
     const W = App.Weakness;
     const T = App.Tasks;
+    const diagInfo = App.DiagnosticReport.buildReportData({
+      studentId: child.id,
+      studentName: child.displayName,
+      gradeId: child.gradeId,
+      sessions: diagSources ? diagSources.sessions : p.diagnosticSessions || [],
+      attempts: diagSources ? diagSources.attempts : p.diagnosticAttempts || [],
+      syllabusNodes: diagSources
+        ? diagSources.syllabusNodes
+        : App.DiagnosticReport.collectSyllabusNodes(child.gradeId, App.DiagnosticBanks)
+    });
+    const diagHtml = App.DiagnosticReport.renderCardHtml(diagInfo);
     const statusDot = { lemah: "🔴", sederhana: "🟡", kuat: "🟢", baharu: "⚪" };
     const statusCls = { lemah: "tl-red", sederhana: "tl-amber", kuat: "tl-green", baharu: "tl-amber" };
     const wk = W.analyse(p);
@@ -342,11 +377,11 @@
       .join("");
     const grade = App.GRADES && App.GRADES[child.gradeId];
     return `<div class="parent-kid-card"><div class="pk-head"><div><h3>${esc(p.avatar || "🙂")} ${esc(child.displayName)}</h3><small>${esc(grade ? grade.name : child.gradeId)} • 🔥 ${p.dailyStreak || 0} hari • dikemas kini ${fmtDate(child.snapshotUpdatedAt)}</small></div></div>
-      ${subjects}${mockHtml}${tasksHtml}${markHtml}${reportsHtml}<h4>Aktiviti Terkini:</h4><ul class="pk-history">${hist || "<li>Tiada latihan.</li>"}</ul></div>`;
+      ${diagHtml}${subjects}${mockHtml}${tasksHtml}${markHtml}${reportsHtml}<h4>Aktiviti Terkini:</h4><ul class="pk-history">${hist || "<li>Tiada latihan.</li>"}</ul></div>`;
   }
 
   function start() {
-    if (!App || !App.Weakness || !App.MarkingUI || !App.Tasks || !App.getCloudApiUrl) return setTimeout(start, 50);
+    if (!App || !App.Weakness || !App.MarkingUI || !App.Tasks || !App.Diagnostics || !App.DiagnosticReport || !App.getCloudApiUrl) return setTimeout(start, 50);
     loadSession();
     if (session && session.token) afterLogin().catch(() => loginView());
     else loginView();
