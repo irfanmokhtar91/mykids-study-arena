@@ -1018,6 +1018,104 @@ test("13d. wrong answer on real d6_math_gen triggers same-skill retry with diffe
   assert.ok(rank(retry.q.diff) <= rank(missed.diff), `retry ${retry.q.diff} harder than ${missed.diff}`);
 });
 
+// 14. Real d6_sains (static + Kelajuan generator) integration tests ----------
+function loadD6WithSains() {
+  const win = { localStorage: makeLocalStorage() };
+  const ctx = vm.createContext({ window: win, Date: FixedDate });
+  for (const rel of [
+    "js/data/pools/d6_sejarah.js",
+    "js/data/curriculum/d6_sejarah.js",
+    "js/data/curriculum/d6_math.js",
+    "js/data/pools/d6_math_gen.js",
+    "js/data/curriculum/d6_bm.js",
+    "js/data/pools/d6_bm.js",
+    "js/data/curriculum/d6_sains.js",
+    "js/data/pools/d6_sains.js",
+    "js/data/pools/d6_sains_gen.js",
+    "js/storage.js"
+  ]) {
+    vm.runInContext(readRel(rel), ctx, { filename: rel });
+  }
+  return win.App;
+}
+
+const D6_WITH_SAINS = loadD6WithSains();
+const SAINS_CURR = D6_WITH_SAINS.Curriculum.d6.sains;
+const SAINS_POOL = D6_WITH_SAINS.Pools.d6.sains;
+
+test("14a. real d6_sains (13 units, 36 skills, static + Kelajuan generators) auto-detects cleanly without duplication", () => {
+  assert.equal(SAINS_CURR.units.length, 13);
+  const totalSkills = SAINS_CURR.units.reduce((n, u) => n + u.skills.length, 0);
+  assert.equal(totalSkills, 36);
+  assert.equal(SAINS_POOL.length, 339);
+  const found = V.getAvailablePools(
+    D6_WITH_SAINS.Pools,
+    D6_WITH_SAINS.Curriculum,
+    "d6",
+    D6_WITH_SAINS.Generators
+  );
+  assert.equal(found.length, 4);
+  const sains = found.find((p) => p.subjectId === "sains");
+  assert.ok(sains);
+  assert.equal(sains.isGenerator, true);
+  assert.equal(sains.pool.length, 339, "generator entries must not be duplicated when merged across roots");
+  assert.equal(D6_WITH_SAINS.Generators.d6, undefined, "App.Generators.d6 must remain untouched");
+});
+
+test("14b. real d6_sains 10-question session across mixed concept and numeric units has unique valid items", () => {
+  const ticked = ["u2", "u6", "u7", "u10"];
+  const run = playSession({
+    pool: SAINS_POOL,
+    ticked,
+    state: V.createInitialState(),
+    seed: "sains-mix-1",
+    id: "sm1"
+  });
+  assert.equal(run.draws.length, 10);
+  assert.equal(run.session.completed, true);
+  assert.equal(new Set(run.draws.map((d) => V.normalizePromptText(d.q.q))).size, 10);
+  for (const d of run.draws) {
+    assert.ok(ticked.includes(d.q.unit), `unexpected unit ${d.q.unit}`);
+    assert.equal(d.q.options.length, 4);
+    assert.equal(new Set(d.q.options.map((o) => String(o).trim())).size, 4, `duplicate options in ${d.q.id}`);
+    assert.ok(d.q.correctIndex >= 0 && d.q.correctIndex <= 3);
+    assert.ok(typeof d.q.explanation === "string" && d.q.explanation.trim().length > 0);
+    assert.equal(/NaN|undefined/.test(`${d.q.q}|${d.q.options.join("|")}|${d.q.explanation}`), false);
+  }
+});
+
+test("14c. real d6_sains u7-only session draws both static u7_s1 and generated u7_s2..s4 items deterministically", () => {
+  const runA = playSession({ pool: SAINS_POOL, ticked: ["u7"], state: V.createInitialState(), seed: "sains-u7-det", id: "su7" });
+  const runB = playSession({ pool: SAINS_POOL, ticked: ["u7"], state: V.createInitialState(), seed: "sains-u7-det", id: "su7" });
+  assert.equal(runA.draws.length, 10);
+  const skillsDrawn = new Set(runA.draws.map((d) => d.q.skill));
+  assert.ok(skillsDrawn.has("u7_s1"), "u7_s1 static skill should appear in u7-only session");
+  assert.ok(skillsDrawn.has("u7_s2") || skillsDrawn.has("u7_s3") || skillsDrawn.has("u7_s4"), "generator skills should appear");
+  assert.deepEqual(
+    runA.draws.map((d) => ({ id: d.q.id, sig: d.q.sig || "", q: d.q.q, opts: d.q.options, ci: d.q.correctIndex })),
+    runB.draws.map((d) => ({ id: d.q.id, sig: d.q.sig || "", q: d.q.q, opts: d.q.options, ci: d.q.correctIndex }))
+  );
+});
+
+test("14d. wrong answer on u7 generated question triggers same-skill retry with different sig and q at <= diff", () => {
+  const genOnlyU7 = SAINS_POOL.filter((it) => it.unit === "u7" && typeof it.generate === "function");
+  const run = playSession({
+    pool: genOnlyU7,
+    ticked: ["u7"],
+    state: V.createInitialState(),
+    seed: "sains-retry-u7",
+    id: "sru7",
+    answer: (q, i) => i !== 0
+  });
+  const missed = run.draws[0].q;
+  const retry = run.draws.find((d) => d.fromRetry && d.idx > 0);
+  assert.ok(retry, "no retry was drawn for u7 generated question");
+  assert.equal(retry.q.skill, missed.skill);
+  assert.notEqual(retry.q.sig, missed.sig);
+  assert.notEqual(V.normalizePromptText(retry.q.q), V.normalizePromptText(missed.q));
+  assert.ok(rank(retry.q.diff) <= rank(missed.diff), `retry ${retry.q.diff} harder than ${missed.diff}`);
+});
+
 const failed = results.filter((r) => !r.ok);
 console.log(
   failed.length === 0
