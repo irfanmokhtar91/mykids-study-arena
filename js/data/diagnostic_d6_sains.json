@@ -1,0 +1,1213 @@
+{
+  "syllabus_nodes": [
+    {
+      "id": "d6_sains_u01",
+      "subject": "sains",
+      "grade_level": "d6",
+      "chapter_id": "kemahiran_saintifik",
+      "topic_name": "Sains • Unit 1: Kemahiran Saintifik",
+      "subtopic_name": "Pembolehubah, Hipotesis, Definisi Secara Operasi & Inferens",
+      "prerequisite_node_id": null,
+      "expected_time_ms": 35000,
+      "bloom_level": "Understand"
+    },
+    {
+      "id": "d6_sains_u02",
+      "subject": "sains",
+      "grade_level": "d6",
+      "chapter_id": "manusia",
+      "topic_name": "Sains • Unit 2: Manusia",
+      "subtopic_name": "Pembiakan Manusia & Sistem Saraf (Pusat dan Periferi)",
+      "prerequisite_node_id": null,
+      "expected_time_ms": 35000,
+      "bloom_level": "Understand"
+    },
+    {
+      "id": "d6_sains_u03",
+      "subject": "sains",
+      "grade_level": "d6",
+      "chapter_id": "mikroorganisma",
+      "topic_name": "Sains • Unit 3: Mikroorganisma",
+      "subtopic_name": "Jenis, Proses Hidup, Faktor Pertumbuhan & Kesan Mikroorganisma",
+      "prerequisite_node_id": "d6_sains_u01",
+      "expected_time_ms": 35000,
+      "bloom_level": "Understand"
+    },
+    {
+      "id": "d6_sains_u04",
+      "subject": "sains",
+      "grade_level": "d6",
+      "chapter_id": "interaksi",
+      "topic_name": "Sains • Unit 4: Interaksi Antara Hidupan",
+      "subtopic_name": "Simbiosis, Mangsa-Pemangsa & Persaingan Hidupan",
+      "prerequisite_node_id": null,
+      "expected_time_ms": 35000,
+      "bloom_level": "Understand"
+    },
+    {
+      "id": "d6_sains_u05",
+      "subject": "sains",
+      "grade_level": "d6",
+      "chapter_id": "pemeliharaan",
+      "topic_name": "Sains • Unit 5: Pemeliharaan dan Pemuliharaan",
+      "subtopic_name": "Haiwan/Tumbuhan Pupus & Terancam serta Usaha Pemeliharaan dan Pemuliharaan",
+      "prerequisite_node_id": "d6_sains_u04",
+      "expected_time_ms": 35000,
+      "bloom_level": "Apply"
+    },
+    {
+      "id": "d6_sains_u06",
+      "subject": "sains",
+      "grade_level": "d6",
+      "chapter_id": "daya",
+      "topic_name": "Sains • Unit 6: Daya dan Kesan Daya",
+      "subtopic_name": "Jenis Daya, Kesan Daya, Daya Geseran & Tekanan Udara",
+      "prerequisite_node_id": "d6_sains_u01",
+      "expected_time_ms": 40000,
+      "bloom_level": "Apply"
+    },
+    {
+      "id": "d6_sains_u07",
+      "subject": "sains",
+      "grade_level": "d6",
+      "chapter_id": "kelajuan",
+      "topic_name": "Sains • Unit 7: Kelajuan",
+      "subtopic_name": "Maksud Kelajuan, Unit & Pengiraan v = j ÷ t",
+      "prerequisite_node_id": "d6_sains_u06",
+      "expected_time_ms": 45000,
+      "bloom_level": "Apply"
+    },
+    {
+      "id": "d6_sains_u08",
+      "subject": "sains",
+      "grade_level": "d6",
+      "chapter_id": "pengawetan",
+      "topic_name": "Sains • Unit 8: Teknologi Pengawetan Makanan",
+      "subtopic_name": "Punca Kerosakan Makanan & Kaedah Pengawetan serta Kepentingannya",
+      "prerequisite_node_id": "d6_sains_u03",
+      "expected_time_ms": 40000,
+      "bloom_level": "Analyze"
+    },
+    {
+      "id": "d6_sains_u09",
+      "subject": "sains",
+      "grade_level": "d6",
+      "chapter_id": "bahan_buangan",
+      "topic_name": "Sains • Unit 9: Bahan Buangan",
+      "subtopic_name": "Terbiodegradasi vs Tidak Terbiodegradasi & Pengurusan 5R / Terancang",
+      "prerequisite_node_id": "d6_sains_u03",
+      "expected_time_ms": 35000,
+      "bloom_level": "Apply"
+    },
+    {
+      "id": "d6_sains_u10",
+      "subject": "sains",
+      "grade_level": "d6",
+      "chapter_id": "gerhana_buruj",
+      "topic_name": "Sains • Unit 10: Gerhana",
+      "subtopic_name": "Gerhana Bulan dan Gerhana Matahari (Sifat Cahaya & Kedudukan)",
+      "prerequisite_node_id": "d6_sains_u01",
+      "expected_time_ms": 40000,
+      "bloom_level": "Analyze"
+    },
+    {
+      "id": "d6_sains_u11",
+      "subject": "sains",
+      "grade_level": "d6",
+      "chapter_id": "galaksi",
+      "topic_name": "Sains • Unit 11: Galaksi",
+      "subtopic_name": "Galaksi Bima Sakti & Kedudukan Sistem Suria",
+      "prerequisite_node_id": "d6_sains_u10",
+      "expected_time_ms": 30000,
+      "bloom_level": "Remember"
+    },
+    {
+      "id": "d6_sains_u12",
+      "subject": "sains",
+      "grade_level": "d6",
+      "chapter_id": "kestabilan_kekuatan",
+      "topic_name": "Sains • Unit 12: Kestabilan dan Kekuatan",
+      "subtopic_name": "Faktor Kestabilan (Luas Tapak, Ketinggian) & Kekuatan Binaan",
+      "prerequisite_node_id": "d6_sains_u06",
+      "expected_time_ms": 40000,
+      "bloom_level": "Analyze"
+    },
+    {
+      "id": "d6_sains_u13",
+      "subject": "sains",
+      "grade_level": "d6",
+      "chapter_id": "teknologi",
+      "topic_name": "Sains • Unit 13: Teknologi",
+      "subtopic_name": "Perkembangan Teknologi Pertanian, Pengangkutan, Pembinaan & Perubatan",
+      "prerequisite_node_id": "d6_sains_u12",
+      "expected_time_ms": 35000,
+      "bloom_level": "Understand"
+    }
+  ],
+  "questions": [
+    {
+      "id": "d6s_u01_q1",
+      "syllabus_node_id": "d6_sains_u01",
+      "difficulty_1_to_5": 1,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Siti memeriksa pasu pokok keembung di tepi tingkap selepas empat hari pulang dari bercuti. Antara pernyataan berikut, yang manakah merupakan suatu pemerhatian?",
+      "options_json": {
+        "A": "Daun pokok keembung itu kelihatan layu dan bertukar kekuningan.",
+        "B": "Pokok keembung itu layu kerana tidak mendapat bekalan air yang mencukupi.",
+        "C": "Pokok keembung itu akan mati sekiranya tidak disiram selama tiga hari lagi.",
+        "D": "Semakin sedikit air yang disiram, semakin cepat pokok itu menjadi layu."
+      },
+      "correct_option": "A",
+      "explanation_text": "Pemerhatian ialah maklumat yang dikumpul secara langsung menggunakan pancaindera, iaitu melihat daun menjadi layu dan kekuningan. Pilihan B ialah inferens kerana memberi sebab kejadian; pilihan C ialah ramalan tentang masa depan; pilihan D ialah pernyataan hipotesis."
+    },
+    {
+      "id": "d6s_u01_q2",
+      "syllabus_node_id": "d6_sains_u01",
+      "difficulty_1_to_5": 2,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Dalam satu penyiasatan, tiga buah bekas kaca yang berbeza luas permukaan (kecil, sederhana dan besar) masing-masing diisi dengan 100 ml air dan diletakkan di bawah cahaya matahari selama 2 jam. Pada akhir penyiasatan, isi padu air yang tinggal di dalam setiap bekas disukat. Apakah pemboleh ubah dimanipulasikan dan pemboleh ubah bergerak balas?",
+      "options_json": {
+        "A": "Dimanipulasikan: Isi padu awal air; Bergerak balas: Luas permukaan bekas",
+        "B": "Dimanipulasikan: Isi padu air yang tinggal; Bergerak balas: Luas permukaan bekas",
+        "C": "Dimanipulasikan: Luas permukaan bekas; Bergerak balas: Isi padu air yang tinggal",
+        "D": "Dimanipulasikan: Tempoh pendedahan cahaya matahari; Bergerak balas: Isi padu awal air"
+      },
+      "correct_option": "C",
+      "explanation_text": "Pemboleh ubah dimanipulasikan ialah perkara yang sengaja diubah oleh penyiasat (luas permukaan bekas), manakala pemboleh ubah bergerak balas ialah hasil yang diukur (isi padu air yang tinggal). Pilihan B menukarkan kedua-duanya; pilihan A dan D memilih pemboleh ubah dimalarkan (isi padu awal 100 ml dan masa 2 jam)."
+    },
+    {
+      "id": "d6s_u01_q3",
+      "syllabus_node_id": "d6_sains_u01",
+      "difficulty_1_to_5": 2,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Seketul kiub ais diletakkan di atas piring pada suhu bilik. Murid merekodkan panjang sisi kiub ais itu sebagai 4 cm pada minit ke-0, 3 cm pada minit ke-5, 2 cm pada minit ke-10, dan melebur sepenuhnya pada minit ke-15. Kemahiran proses sains bersepadu manakah yang diperihalkan melalui perubahan ini?",
+      "options_json": {
+        "A": "Mengelas mengikut ciri sepunya",
+        "B": "Menggunakan perhubungan ruang dan masa",
+        "C": "Membuat definisi secara operasi",
+        "D": "Membuat inferens awal"
+      },
+      "correct_option": "B",
+      "explanation_text": "Menggunakan perhubungan ruang dan masa memerihalkan perubahan parameter seperti saiz, bentuk atau kedudukan sesuatu objek mengikut perubahan masa. Pilihan A hanya mengelompokkan objek; pilihan C mentakrifkan konsep melalui pemerhatian eksperimen; pilihan D menerangkan sebab sesuatu pemerhatian."
+    },
+    {
+      "id": "d6s_u01_q4",
+      "syllabus_node_id": "d6_sains_u01",
+      "difficulty_1_to_5": 3,
+      "diff": "M",
+      "exam_part": "A",
+      "prompt_text": "Seorang murid menguji kebolehan bahan menyerap air dengan mencelupkan hujung jalur kain kapas, tisu dapur dan kertas plastik ke dalam bikar berisi air berwarna selama 30 saat, lalu mengukur tinggi aras air yang naik pada setiap jalur. Apakah definisi secara operasi bagi kebolehan bahan menyerap air dalam eksperimen ini?",
+      "options_json": {
+        "A": "Keupayaan bahan untuk menyimpan air di dalam liang halusnya.",
+        "B": "Bahan seperti kain kapas dan tisu yang bersifat telap air.",
+        "C": "Tempoh masa 30 saat yang digunakan untuk mencelup setiap jalur bahan.",
+        "D": "Tinggi aras air berwarna yang naik pada jalur bahan selepas dicelup selama 30 saat."
+      },
+      "correct_option": "D",
+      "explanation_text": "Definisi secara operasi menyatakan maksud sesuatu konsep berdasarkan apa yang dilakukan dan apa yang diperhatikan atau diukur dalam eksperimen, iaitu tinggi aras air berwarna yang naik selepas dicelup selama 30 saat. Pilihan A ialah definisi teori buku teks; pilihan B menyenaraikan contoh bahan; pilihan C hanya menyebut pemboleh ubah dimalarkan."
+    },
+    {
+      "id": "d6s_u01_q5",
+      "syllabus_node_id": "d6_sains_u01",
+      "difficulty_1_to_5": 4,
+      "diff": "H",
+      "exam_part": "A",
+      "prompt_text": "Aiman menyiasat kekuatan elektromagnet menggunakan 2 biji sel kering yang sama. Keputusannya: 10 lilitan dawai menarik 3 klip kertas, 20 lilitan menarik 6 klip kertas, dan 30 lilitan menarik 9 klip kertas. Rakannya ingin menguji 40 lilitan tetapi menukar kepada 3 biji sel kering. Pernyataan hipotesis dan analisis yang manakah paling tepat?",
+      "options_json": {
+        "A": "Adakah lilitan dawai mempengaruhi magnet? Menukar kepada 3 biji sel kering dibolehkan supaya keputusan lebih jelas.",
+        "B": "Semakin bertambah bilangan lilitan dawai, semakin bertambah bilangan klip kertas yang ditarik; menukar bilangan sel kering menjadikan eksperimen tidak adil.",
+        "C": "Semakin bertambah bilangan klip kertas yang ditarik, semakin bertambah bilangan lilitan dawai; bilangan sel kering tidak memberi kesan kepada elektromagnet.",
+        "D": "Semakin berkurang bilangan lilitan dawai, semakin bertambah bilangan klip kertas yang ditarik; hanya 40 lilitan perlu diulang."
+      },
+      "correct_option": "B",
+      "explanation_text": "Hipotesis yang tepat mengaitkan pemboleh ubah dimanipulasikan (bilangan lilitan dawai) dahulu diikuti pemboleh ubah bergerak balas (bilangan klip kertas). Menambah sel kering mengubah dua pemboleh ubah serentak sehingga eksperimen tidak adil. Pilihan A menulis hipotesis sebagai soalan; pilihan C membalikkan hubungan pemboleh ubah; pilihan D bercanggah dengan pola data."
+    },
+    {
+      "id": "d6s_u02_q1",
+      "syllabus_node_id": "d6_sains_u02",
+      "difficulty_1_to_5": 1,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Dalam sistem pembiakan manusia, di bahagian manakah percantuman antara satu sperma dengan satu ovum berlaku semasa proses persenyawaan?",
+      "options_json": {
+        "A": "Ovari",
+        "B": "Uterus",
+        "C": "Tiub Fallopio",
+        "D": "Faraj"
+      },
+      "correct_option": "C",
+      "explanation_text": "Persenyawaan, iaitu percantuman satu sperma dengan satu ovum, berlaku di dalam tiub Fallopio. Pilihan A (ovari) ialah tempat penghasilan ovum; pilihan B (uterus) ialah tempat embrio dan fetus berkembang; pilihan D (faraj) ialah saluran menerima sperma dan laluan kelahiran bayi."
+    },
+    {
+      "id": "d6s_u02_q2",
+      "syllabus_node_id": "d6_sains_u02",
+      "difficulty_1_to_5": 2,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Antara urutan berikut, yang manakah menunjukkan peringkat perkembangan manusia dari proses persenyawaan sehingga kelahiran bayi dengan tepat, berserta fungsi tali pusat?",
+      "options_json": {
+        "A": "Zigot -> Embrio -> Fetus -> Bayi; tali pusat membekalkan nutrien dan oksigen serta menyingkirkan bahan kumuh fetus.",
+        "B": "Embrio -> Zigot -> Fetus -> Bayi; tali pusat menghasilkan sperma dan ovum untuk pertumbuhan bayi.",
+        "C": "Zigot -> Fetus -> Embrio -> Bayi; tali pusat hanya berfungsi menampung berat bayi di dalam uterus.",
+        "D": "Ovum -> Fetus -> Zigot -> Bayi; tali pusat menghantar isyarat saraf terus daripada otak ibu ke jantung bayi."
+      },
+      "correct_option": "A",
+      "explanation_text": "Selepas satu sperma bersenyawa dengan satu ovum, terbentuk zigot yang berkembang menjadi embrio, kemudian fetus dan akhirnya dilahirkan sebagai bayi. Tali pusat menyalurkan nutrien dan oksigen kepada fetus serta menyingkirkan bahan kumuhnya. Pilihan B, C dan D tersilap urutan peringkat awal dan fungsi tali pusat."
+    },
+    {
+      "id": "d6s_u02_q3",
+      "syllabus_node_id": "d6_sains_u02",
+      "difficulty_1_to_5": 2,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Sistem saraf manusia terbahagi kepada sistem saraf pusat dan sistem saraf periferi. Organ manakah yang membentuk sistem saraf pusat?",
+      "options_json": {
+        "A": "Otak dan rangkaian saraf di tangan serta kaki",
+        "B": "Otak dan jantung sahaja",
+        "C": "Saraf tunjang dan organ deria sahaja",
+        "D": "Otak dan saraf tunjang"
+      },
+      "correct_option": "D",
+      "explanation_text": "Sistem saraf pusat terdiri daripada otak dan saraf tunjang yang berfungsi sebagai pusat kawalan dan pemprosesan maklumat. Pilihan A dan C mencampuradukkan sistem saraf periferi (rangkaian saraf luar) atau organ deria; ramai murid tersilap menyangka saraf tunjang termasuk dalam sistem saraf periferi; pilihan B mengaitkan jantung sebagai organ saraf."
+    },
+    {
+      "id": "d6s_u02_q4",
+      "syllabus_node_id": "d6_sains_u02",
+      "difficulty_1_to_5": 3,
+      "diff": "M",
+      "exam_part": "A",
+      "prompt_text": "Apabila hujung jari Nadia tersentuh periuk panas secara tidak sengaja, dia menarik tangannya dengan serta-merta sebelum sempat berfikir. Bahagian sistem saraf pusat manakah yang mengawal tindakan refleks ini, dan bagaimanakah arah aliran isyarat yang betul?",
+      "options_json": {
+        "A": "Otak; Otot tangan -> Saraf periferi -> Otak -> Kulit",
+        "B": "Saraf tunjang; Kulit -> Saraf periferi -> Saraf tunjang -> Saraf periferi -> Otot tangan",
+        "C": "Otak; Kulit -> Saraf periferi -> Otak -> Saraf periferi -> Otot tangan",
+        "D": "Saraf tunjang; Otot tangan -> Saraf tunjang -> Saraf periferi -> Kulit"
+      },
+      "correct_option": "B",
+      "explanation_text": "Tindakan refleks pantas bagi mengelakkan kecederaan seperti menarik tangan daripada objek panas dikawal oleh saraf tunjang, dengan isyarat bergerak dari organ deria (kulit) melalui saraf periferi ke saraf tunjang, kemudian dihantar balik melalui saraf periferi ke otot tangan. Pilihan A dan D membalikkan arah isyarat; pilihan C mengelirukan tindakan refleks dengan tindakan terkawal oleh otak."
+    },
+    {
+      "id": "d6s_u02_q5",
+      "syllabus_node_id": "d6_sains_u02",
+      "difficulty_1_to_5": 4,
+      "diff": "H",
+      "exam_part": "A",
+      "prompt_text": "Encik Rahim tiba-tiba mendapati sebelah otot mukanya menjadi lemah, senyumannya senget dan sebelah matanya sukar dikerdipkan. Doktor mendiagnosisnya menghidap Bell's palsy. Apakah punca keadaan ini dan amalan manakah yang paling tepat untuk menjaga kesihatan sistem saraf secara menyeluruh?",
+      "options_json": {
+        "A": "Gangguan fungsi saraf periferi yang mengawal otot muka; mengelakkan minuman beralkohol, mengamalkan postur yang betul dan memakai topi keledar ketika menunggang.",
+        "B": "Kerosakan kekal pada otot kulit muka sahaja; mengurangkan pengambilan makanan berprotein supaya saraf tidak aktif.",
+        "C": "Kegagalan jantung mengepam darah ke otak; tidur lewat setiap malam untuk melatih ketahanan sistem saraf pusat.",
+        "D": "Jangkitan pada tulang tengkorak sahaja; minum minuman beralkohol secara sederhana untuk melancarkan penghantaran isyarat saraf."
+      },
+      "correct_option": "A",
+      "explanation_text": "Bell's palsy berpunca daripada kerosakan atau gangguan pada saraf periferi yang mengawal otot muka, bukannya kerosakan otot semata-mata (pilihan B). Penjagaan sistem saraf merangkumi pemakanan seimbang, mengelakkan alkohol (yang melambatkan isyarat saraf, bukan melancarkannya seperti pilihan D), tidur mencukupi, postur betul serta memakai alat pelindung tubuh seperti topi keledar."
+    },
+    {
+      "id": "d6s_u03_q1",
+      "syllabus_node_id": "d6_sains_u03",
+      "difficulty_1_to_5": 1,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Mikroorganisma ialah hidupan seni yang tidak dapat dilihat dengan mata kasar dan terbahagi kepada lima jenis utama. Padanan jenis mikroorganisma dengan contohnya manakah yang TEPAT?",
+      "options_json": {
+        "A": "Bakteria: Yis dan kulat roti",
+        "B": "Alga: Chlorella dan Volvox",
+        "C": "Protozoa: Salmonella dan Streptococcus",
+        "D": "Fungi: Paramesium dan Amoeba"
+      },
+      "correct_option": "B",
+      "explanation_text": "Chlorella dan Volvox ialah contoh alga yang mampu menjalankan fotosintesis. Pilihan A salah kerana yis dan kulat roti ialah fungi; pilihan C salah kerana Salmonella dan Streptococcus ialah bakteria; pilihan D salah kerana Paramesium dan Amoeba ialah protozoa."
+    },
+    {
+      "id": "d6s_u03_q2",
+      "syllabus_node_id": "d6_sains_u03",
+      "difficulty_1_to_5": 2,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Dalam satu eksperimen, 1 sudu yis kering dan 2 sudu gula dimasukkan ke dalam botol plastik berisi 150 ml air suam, lalu sebiji belon dipasang ketat pada mulut botol. Selepas 20 minit, belon itu mengembang dengan besar. Apakah proses hidup mikroorganisma yang dibuktikan melalui pemerhatian ini?",
+      "options_json": {
+        "A": "Yis bergerak dengan pantas ke dalam belon",
+        "B": "Yis menjalankan fotosintesis untuk membebaskan oksigen",
+        "C": "Yis menyejatkan air suam menjadi wap air",
+        "D": "Yis bernafas dan membebaskan gas karbon dioksida"
+      },
+      "correct_option": "D",
+      "explanation_text": "Pengembangan belon membuktikan yis menjalankan proses hidup bernafas dengan menggunakan gula sebagai nutrien lalu membebaskan gas karbon dioksida. Pilihan A mengaitkan pergerakan protozoa; pilihan B salah kerana yis ialah fungi dan tidak berfotosintesis; pilihan C mengabaikan peranan biologi yis."
+    },
+    {
+      "id": "d6s_u03_q3",
+      "syllabus_node_id": "d6_sains_u03",
+      "difficulty_1_to_5": 2,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Walaupun sesetengah mikroorganisma membawa penyakit, banyak juga yang berfaedah kepada manusia. Pernyataan manakah yang BENAR tentang kegunaan atau keburukan mikroorganisma?",
+      "options_json": {
+        "A": "Fungi Penicillium digunakan untuk menghasilkan antibiotik penisilin bagi merawat jangkitan bakteria.",
+        "B": "Semua bakteria dan fungi berbahaya serta menyebabkan penyakit seperti kurap yang berpunca daripada virus.",
+        "C": "Penyakit beguk disebabkan oleh jangkitan bakteria, manakala roti mengembang kerana tindakan virus.",
+        "D": "Virus boleh dilihat dengan mudah menggunakan mikroskop cahaya biasa dan membiak bebas di atas meja."
+      },
+      "correct_option": "A",
+      "explanation_text": "Fungi Penicillium dimanfaatkan dalam bidang perubatan untuk menghasilkan antibiotik penisilin. Pilihan B salah kerana banyak bakteria/fungi berguna (contoh yogurt, yis) dan kurap disebabkan oleh fungi bukan virus; pilihan C salah kerana beguk disebabkan oleh virus dan roti menggunakan yis; pilihan D salah kerana virus hanya dilihat dengan mikroskop elektron dan membiak di dalam sel perumah."
+    },
+    {
+      "id": "d6s_u03_q4",
+      "syllabus_node_id": "d6_sains_u03",
+      "difficulty_1_to_5": 3,
+      "diff": "M",
+      "exam_part": "A",
+      "prompt_text": "Empat keping roti putih yang sama disimpan dalam beg plastik bertutup selama 5 hari dengan perlakuan berbeza: Roti P direnjis air paip dan diletakkan pada suhu bilik 28°C; Roti Q direnjis air paip dan disimpan di dalam peti sejuk beku -5°C; Roti R direnjis cuka dan diletakkan pada suhu 28°C; Roti S dibakar pada 100°C selama 15 minit tanpa air lalu ditutup rapat. Roti manakah yang paling banyak ditumbuhi kulat dan mengapa?",
+      "options_json": {
+        "A": "Roti S, kerana suhu yang semakin tinggi sentiasa mempercepat pertumbuhan kulat.",
+        "B": "Roti R, kerana cuka membekalkan nutrien tambahan yang disukai oleh kulat.",
+        "C": "Roti P, kerana mendapat air, udara, nutrien, suhu yang sesuai serta keasidan yang sesuai.",
+        "D": "Roti Q, kerana suhu sejuk beku mengekalkan kelembapan roti untuk pertumbuhan kulat."
+      },
+      "correct_option": "C",
+      "explanation_text": "Pertumbuhan mikroorganisma memerlukan lima faktor: air, udara, nutrien, suhu sesuai dan keasidan sesuai, yang kesemuanya dipenuhi pada Roti P. Pilihan A salah kerana suhu didih 100°C membunuh mikroorganisma dan mengeringkan roti; pilihan B salah kerana cuka mewujudkan keadaan terlalu berasid; pilihan D salah kerana suhu -5°C menghentikan pertumbuhan kulat."
+    },
+    {
+      "id": "d6s_u03_q5",
+      "syllabus_node_id": "d6_sains_u03",
+      "difficulty_1_to_5": 5,
+      "diff": "H",
+      "exam_part": "A",
+      "prompt_text": "Hakim gemar makan coklat sebelum tidur tanpa memberus gigi, lalu mengalami kerosakan gigi selepas beberapa bulan. Bagaimanakah tindakan mikroorganisma menyebabkan kerosakan gigi tersebut, dan apakah langkah pencegahan yang paling berkesan?",
+      "options_json": {
+        "A": "Gula dalam coklat secara langsung melarutkan tulang gigi tanpa sebarang tindakan mikroorganisma; berkumur air suam sudah memadai.",
+        "B": "Virus dalam udara masuk ke dalam gusi dan memakan enamel gigi; minum minuman manis bersuhu sejuk dapat menghentikannya.",
+        "C": "Alga mikroskopik membiak di permukaan gigi apabila terdedah kepada gula; mengelakkan minum air kosong sebelum tidur dapat mencegahnya.",
+        "D": "Bakteria di dalam mulut menguraikan sisa makanan bergula dan menghasilkan asid yang menghakis lapisan enamel gigi; memberus gigi sebelum tidur menyingkirkan sisa makanan dan mengurangkan pembentukan asid."
+      },
+      "correct_option": "D",
+      "explanation_text": "Kerosakan gigi bukan disebabkan oleh gula menghakis gigi secara terus (pilihan A), sebaliknya bakteria mulut menukarkan sisa gula kepada asid yang menghakis enamel gigi. Memberus gigi secara berkala menyingkirkan sisa nutrien bakteria dan melindungi enamel. Pilihan B dan C salah mengenal pasti jenis mikroorganisma serta langkah pencegahan."
+    },
+    {
+      "id": "d6s_u04_q1",
+      "syllabus_node_id": "d6_sains_u04",
+      "difficulty_1_to_5": 1,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Haiwan berinteraksi melalui persaingan intraspesies (spesies sama) dan persaingan interspesies (spesies berlainan). Antara faktor berikut, yang manakah HANYA berlaku dalam persaingan intraspesies?",
+      "options_json": {
+        "A": "Makanan yang terhad",
+        "B": "Sumber air di kawasan kering",
+        "C": "Kawasan atau tempat tinggal",
+        "D": "Pasangan untuk mengawan"
+      },
+      "correct_option": "D",
+      "explanation_text": "Haiwan yang berlainan spesies tidak bersaing untuk mendapatkan pasangan mengawan; faktor pasangan hanya berlaku dalam persaingan intraspesies (antara haiwan spesies yang sama). Pilihan A, B dan C boleh berlaku dalam kedua-dua persaingan intraspesies dan interspesies."
+    },
+    {
+      "id": "d6s_u04_q2",
+      "syllabus_node_id": "d6_sains_u04",
+      "difficulty_1_to_5": 2,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Hubungan simbiosis antara ikan badut dengan buran laut dikelaskan sebagai mutualisme dan bukannya komensalisme. Mengapakah hubungan ini dikelaskan sebagai mutualisme?",
+      "options_json": {
+        "A": "Ikan badut mendapat perlindungan manakala buran mengalami kecederaan pada sesungutnya.",
+        "B": "Ikan badut mendapat perlindungan di celah sesungut buran, manakala buran pula dilindungi apabila ikan badut menghalau pemangsa buran.",
+        "C": "Ikan badut mendapat perlindungan manakala buran tidak mendapat sebarang manfaat dan tidak terjejas.",
+        "D": "Buran menjadikan ikan badut sebagai mangsa utamanya pada waktu malam."
+      },
+      "correct_option": "B",
+      "explanation_text": "Dalam mutualisme, kedua-dua pihak beroleh manfaat: ikan badut berlindung di celah sesungut beracun buran, manakala buran menerima manfaat kerana ikan badut menghalau pemangsa buran dan membersihkannya. Pilihan A menggambarkan parasitisme; pilihan C ialah takrif komensalisme (miskonsepsi lazim tentang ikan badut–buran); pilihan D ialah mangsa-pemangsa."
+    },
+    {
+      "id": "d6s_u04_q3",
+      "syllabus_node_id": "d6_sains_u04",
+      "difficulty_1_to_5": 2,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Pokok orkid dan pokok langsuyar sering dilihat tumbuh melekat pada dahan pokok tinggi di hutan. Apakah jenis simbiosis antara tumbuhan ini dengan pokok perumahnya, dan bagaimanakah kesannya?",
+      "options_json": {
+        "A": "Parasitisme; pokok orkid menyerap air dan nutrien daripada batang pokok perumah sehingga pokok perumah mati.",
+        "B": "Mutualisme; pokok orkid membekalkan baja mineral kepada pokok perumah sebagai balasan tempat tinggal.",
+        "C": "Komensalisme; pokok orkid mendapat sokongan dan cahaya matahari manakala pokok perumah tidak mendapat manfaat dan tidak terjejas.",
+        "D": "Persaingan intraspesies; kedua-dua tumbuhan itu tergolong dalam spesies yang sama."
+      },
+      "correct_option": "C",
+      "explanation_text": "Pokok orkid dan pokok langsuyar menumpang pada dahan pokok besar hanya untuk sokongan dan mendapatkan cahaya matahari (membuat makanan sendiri melalui fotosintesis) tanpa merugikan atau menguntungkan pokok perumah, iaitu komensalisme. Pilihan A ialah miskonsepsi yang menyamakan orkid dengan parasit seperti dedalu; pilihan B dan D tidak tepat."
+    },
+    {
+      "id": "d6s_u04_q4",
+      "syllabus_node_id": "d6_sains_u04",
+      "difficulty_1_to_5": 3,
+      "diff": "M",
+      "exam_part": "A",
+      "prompt_text": "Dalam satu penyiasatan, Pasu X ditanam 3 biji benih kacang hijau manakala Pasu Y ditanam 25 biji benih kacang hijau dengan saiz pasu, jenis tanah, isi padu air dan pendedahan cahaya matahari yang sama. Selepas 10 hari, anak benih di Pasu Y didapati lebih tinggi tetapi berbatang kurus dan berdaun kecil berbanding Pasu X. Mengapakah anak benih di Pasu Y tumbuh lebih tinggi?",
+      "options_json": {
+        "A": "Anak benih di Pasu Y bersaing dengan sengit untuk mendapatkan cahaya matahari lalu memanjang ke atas dengan cepat walaupun kekurangan nutrien dan ruang.",
+        "B": "Anak benih di Pasu Y menerima lebih banyak nutrien dan ruang tanah kerana bilangan pokoknya lebih banyak.",
+        "C": "Anak benih di Pasu X gagal menjalankan fotosintesis kerana jumlahnya terlalu sedikit.",
+        "D": "Tumbuhan yang mengalami persaingan akan sentiasa tumbuh lebih subur dan lebih besar batangnya."
+      },
+      "correct_option": "A",
+      "explanation_text": "Dalam keadaan sesak (Pasu Y), anak benih bersaing kuat bagi empat faktor (air, nutrien, ruang dan cahaya matahari), menyebabkan batangnya memanjang lebih tinggi untuk merebut cahaya matahari tetapi menjadi kurus akibat kekurangan nutrien dan ruang. Pilihan B, C dan D bercanggah dengan prinsip persaingan tumbuhan."
+    },
+    {
+      "id": "d6s_u04_q5",
+      "syllabus_node_id": "d6_sains_u04",
+      "difficulty_1_to_5": 4,
+      "diff": "H",
+      "exam_part": "A",
+      "prompt_text": "Di sebuah kebun, pokok mangga menjadi layu selepas banyak pokok dedalu tumbuh pada dahannya. Di ladang kelapa sawit berhampiran pula, kehadiran burung hantu menyebabkan populasi tikus berkurang dengan ketara. Apakah jenis interaksi bagi kedua-dua situasi ini dan kepentingannya kepada ekosistem?",
+      "options_json": {
+        "A": "Dedalu–mangga ialah komensalisme; burung hantu–tikus ialah mutualisme untuk menambah populasi tikus.",
+        "B": "Dedalu–mangga ialah persaingan interspesies; burung hantu–tikus ialah parasitisme yang memusnahkan hasil sawit.",
+        "C": "Dedalu–mangga ialah parasitisme kerana dedalu menyerap air dan nutrien daripada perumah sehingga merugikannya; burung hantu–tikus ialah mangsa-pemangsa yang mengawal populasi haiwan perosak secara semula jadi.",
+        "D": "Dedalu–mangga ialah mutualisme kerana kedua-duanya berwarna hijau; burung hantu–tikus ialah komensalisme tanpa kesan pada keseimbangan ekosistem."
+      },
+      "correct_option": "C",
+      "explanation_text": "Pokok dedalu (seperti bunga pakma) ialah parasit yang mengambil air dan nutrien daripada pokok perumah sehingga merugikannya (parasitisme). Burung hantu memburu tikus ialah interaksi mangsa-pemangsa yang penting bagi mengawal populasi perosak serta mengekalkan keseimbangan ekosistem. Pilihan A, B dan D tersilap mengelaskan jenis interaksi."
+    },
+    {
+      "id": "d6s_u05_q1",
+      "syllabus_node_id": "d6_sains_u05",
+      "difficulty_1_to_5": 1,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Antara kumpulan haiwan berikut, yang manakah kesemuanya terdiri daripada haiwan yang TELAH PUPUS dan tidak lagi wujud di muka bumi?",
+      "options_json": {
+        "A": "Burung Dodo, mamot dan harimau Tasmania",
+        "B": "Burung Dodo, tapir Malaya dan orang utan",
+        "C": "Dinosaur, burung kenyalang dan penyu belimbing",
+        "D": "Mamot, harimau Malaya dan gajah Borneo"
+      },
+      "correct_option": "A",
+      "explanation_text": "Burung Dodo, mamot dan harimau Tasmania ialah contoh haiwan yang telah pupus sepenuhnya dan tidak dapat dipulihara lagi. Pilihan B, C dan D menyertakan haiwan yang masih wujud tetapi diancam kepupusan (tapir Malaya, orang utan, burung kenyalang, penyu belimbing, harimau Malaya dan gajah Borneo)."
+    },
+    {
+      "id": "d6s_u05_q2",
+      "syllabus_node_id": "d6_sains_u05",
+      "difficulty_1_to_5": 2,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Populasi penyu laut dan hidupan marin lain semakin merosot saban tahun. Antara aktiviti manusia berikut, yang manakah menjadi faktor ancaman kepupusan secara langsung kepada hidupan marin tersebut?",
+      "options_json": {
+        "A": "Menanam semula pokok bakau di sepanjang pantai berlumpur",
+        "B": "Mewartakan kawasan taman laut bagi mengawal aktiviti penangkapan ikan",
+        "C": "Mengitar semula botol kaca dan kertas terpakai di kawasan darat",
+        "D": "Pembuangan sisa plastik ke laut, tumpahan minyak dan pemburuan haram telur penyu"
+      },
+      "correct_option": "D",
+      "explanation_text": "Sisa plastik di laut sering termakan oleh penyu kerana menyerupai obor-obor, tumpahan minyak mencemarkan habitat marin, dan pemburuan haram telur penyu menghalang pembiakan spesies tersebut. Pilihan A, B dan C merupakan langkah positif pemeliharaan, pemuliharaan dan pengurusan sisa terancang."
+    },
+    {
+      "id": "d6s_u05_q3",
+      "syllabus_node_id": "d6_sains_u05",
+      "difficulty_1_to_5": 3,
+      "diff": "M",
+      "exam_part": "A",
+      "prompt_text": "Pemeliharaan bermaksud mengekalkan keadaan asal haiwan dan tumbuhan daripada musnah, manakala pemuliharaan bermaksud mengembalikan haiwan dan tumbuhan kepada keadaan asal supaya dapat dinikmati generasi akan datang. Antara langkah berikut, yang manakah merupakan usaha PEMULIHARAAN?",
+      "options_json": {
+        "A": "Mewartakan hutan simpan dan taman negara sebelum kawasan hutan diteroka.",
+        "B": "Menubuhkan pusat rehabilitasi orang utan dan menjalankan penanaman semula pokok di kawasan hutan yang telah ditebang.",
+        "C": "Menguatkuasakan undang-undang melarang pemburuan haram spesies terlindung.",
+        "D": "Memboikot pembelian produk yang diperbuat daripada kulit atau gading haiwan terancam."
+      },
+      "correct_option": "B",
+      "explanation_text": "Pusat rehabilitasi (memulihkan haiwan cedera/yatim sebelum dilepaskan semula) dan penanaman semula hutan (mengembalikan kawasan yang sudah rosak) ialah usaha pemuliharaan. Pilihan A, C dan D ialah usaha pemeliharaan kerana mengekalkan dan melindungi hidupan serta habitat asal sebelum musnah."
+    },
+    {
+      "id": "d6s_u05_q4",
+      "syllabus_node_id": "d6_sains_u05",
+      "difficulty_1_to_5": 3,
+      "diff": "M",
+      "exam_part": "A",
+      "prompt_text": "Bagi mengurangkan kemusnahan habitat hutan hujan tropika, pihak berkuasa melaksanakan kaedah pembalakan terpilih. Apakah yang dilakukan dalam kaedah pembalakan terpilih?",
+      "options_json": {
+        "A": "Menebang semua jenis pokok di sesuatu kawasan hutan secara serentak untuk mempercepat kerja.",
+        "B": "Menebang anak pokok yang masih kecil sahaja dan membiarkan semua pokok besar kekal.",
+        "C": "Hanya menebang pokok yang matang dan memenuhi had saiz tertentu supaya anak pokok muda terus membesar menggantikannya.",
+        "D": "Membakar seluruh kawasan hutan terlebih dahulu sebelum memilih batang kayu yang elok."
+      },
+      "correct_option": "C",
+      "explanation_text": "Pembalakan terpilih ialah langkah pemeliharaan yang hanya menebang pokok matang bersaiz tertentu agar pokok muda terus tumbuh dan keseimbangan ekosistem hutan terpelihara. Pilihan A ialah pembalakan haram atau secara meluas (miskonsepsi lazim); pilihan B dan D memusnahkan kelestarian hutan."
+    },
+    {
+      "id": "d6s_u05_q5",
+      "syllabus_node_id": "d6_sains_u05",
+      "difficulty_1_to_5": 4,
+      "diff": "H",
+      "exam_part": "A",
+      "prompt_text": "Peningkatan suhu global menyebabkan pencairan ais di kutub dan peningkatan paras air laut, manakala pencemaran laut turut menjejaskan populasi alga marin. Mengapakah usaha pemeliharaan dan pemuliharaan daratan serta lautan sangat penting kepada kelangsungan hidup di Bumi?",
+      "options_json": {
+        "A": "Pencairan ais hanya memberi kesan kepada haiwan darat, manakala semua bekalan oksigen Bumi dihasilkan oleh tumbuhan hutan darat sahaja.",
+        "B": "Pencairan ais mengancam habitat kutub dan kawasan pantai, manakala alga laut menyumbang sebahagian besar bekalan oksigen Bumi selain mengekalkan keseimbangan rantai makanan.",
+        "C": "Usaha pemuliharaan membolehkan haiwan yang telah pupus seperti burung Dodo dibiakkan semula di pusat perlindungan.",
+        "D": "Pemeliharaan hutan bertujuan menghentikan semua proses fotosintesis supaya suhu atmosfera dapat diturunkan."
+      },
+      "correct_option": "B",
+      "explanation_text": "Pemanasan global mencairkan ais kutub lalu memusnahkan habitat kutub dan menenggelamkan habitat pantai; selain itu, alga marin di lautan ialah penyumbang utama oksigen Bumi, bukan tumbuhan darat semata-mata (pilihan A). Pilihan C salah kerana haiwan yang sudah pupus tidak boleh dipulihara lagi; pilihan D salah kerana fotosintesis menyerap karbon dioksida."
+    },
+    {
+      "id": "d6s_u06_q1",
+      "syllabus_node_id": "d6_sains_u06",
+      "difficulty_1_to_5": 1,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Daya ialah tarikan atau tolakan yang bertindak ke atas sesuatu objek. Antara aktiviti harian berikut, yang manakah melibatkan KEDUA-DUA daya tarikan dan daya tolakan secara berulang?",
+      "options_json": {
+        "A": "Menendang bola pegun ke arah pintu gol",
+        "B": "Menarik tali bendera ke bawah untuk menaikkan bendera",
+        "C": "Menggergaji sekeping papan kayu sehingga terbelah dua",
+        "D": "Menekan suis lampu pada dinding"
+      },
+      "correct_option": "C",
+      "explanation_text": "Aktiviti menggergaji kayu memerlukan daya tolakan ke hadapan dan daya tarikan ke belakang secara berulang. Pilihan A dan D hanya melibatkan daya tolakan; pilihan B hanya melibatkan daya tarikan. Selain itu, daya juga boleh bertindak tanpa sentuhan seperti graviti dan magnet."
+    },
+    {
+      "id": "d6s_u06_q2",
+      "syllabus_node_id": "d6_sains_u06",
+      "difficulty_1_to_5": 2,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Sebuah kotak berat ditolak sehingga menggelongsor ke arah kanan di atas lantai simen. Ke arah manakah daya geseran bertindak, dan apakah kesan daya apabila penjaga gol menangkap bola yang sedang melaju ke arahnya?",
+      "options_json": {
+        "A": "Daya geseran bertindak ke arah kiri; menangkap bola menunjukkan daya boleh memberhentikan objek yang sedang bergerak.",
+        "B": "Daya geseran bertindak ke arah kanan; menangkap bola menunjukkan daya boleh menggerakkan objek pegun.",
+        "C": "Daya geseran bertindak ke atas; menangkap bola menunjukkan daya hanya mengubah bentuk bola.",
+        "D": "Tiada daya geseran bertindak kerana lantai simen licin; menangkap bola mengubah arah gerakan bola."
+      },
+      "correct_option": "A",
+      "explanation_text": "Daya geseran sentiasa bertindak pada arah yang bertentangan dengan arah gerakan objek, iaitu ke kiri apabila kotak bergerak ke kanan. Menangkap bola yang sedang bergerak menunjukkan kesan daya memberhentikan objek bergerak. Pilihan B menyamakan arah geseran dengan arah gerakan; pilihan C dan D salah tentang arah dan kewujudan geseran."
+    },
+    {
+      "id": "d6s_u06_q3",
+      "syllabus_node_id": "d6_sains_u06",
+      "difficulty_1_to_5": 3,
+      "diff": "M",
+      "exam_part": "A",
+      "prompt_text": "Sebuah kereta mainan dilepaskan dari puncak landasan condong yang sama ke atas tiga jenis permukaan: cermin kaca (jarak 120 cm), papan kayu (jarak 75 cm) dan permaidani berbulu (jarak 30 cm). Mengapakah kereta mainan berhenti paling awal di atas permaidani, dan kaedah manakah yang mengurangkan daya geseran pada engsel pintu yang berbunyi nyaring?",
+      "options_json": {
+        "A": "Permaidani paling licin lalu mengurangkan geseran; menampal kertas pasir pada engsel pintu.",
+        "B": "Jisim kereta bertambah di atas permaidani; menyapu serbuk kapur pada engsel pintu.",
+        "C": "Luas permukaan kereta mengecil di atas permaidani; mengetatkan skru engsel pintu.",
+        "D": "Permukaan permaidani paling kasar lalu menghasilkan daya geseran paling besar; menitiskan minyak pelincir pada engsel pintu."
+      },
+      "correct_option": "D",
+      "explanation_text": "Dua faktor utama daya geseran ialah jenis permukaan dan jisim objek. Permukaan permaidani yang kasar menghasilkan daya geseran terbesar sehingga jarak gerakan paling pendek (30 cm). Minyak pelincir mengurangkan geseran pada engsel pintu, manakala kertas pasir dan serbuk kapur (pilihan A dan B) menambah geseran. Pilihan C silap mengaitkan luas permukaan."
+    },
+    {
+      "id": "d6s_u06_q4",
+      "syllabus_node_id": "d6_sains_u06",
+      "difficulty_1_to_5": 3,
+      "diff": "M",
+      "exam_part": "A",
+      "prompt_text": "Farah menghabiskan air di dalam sebotol plastik di puncak gunung yang tinggi, lalu menutup penutup botol itu dengan sangat ketat. Apabila dia membawa botol kosong bertutup itu turun ke kaki gunung, apakah yang akan berlaku pada botol tersebut dan mengapa?",
+      "options_json": {
+        "A": "Botol akan mengembung dan meletup kerana tekanan udara di kaki gunung lebih rendah daripada di puncak gunung.",
+        "B": "Botol akan menjadi kemik kerana tekanan udara di kaki gunung lebih tinggi daripada tekanan udara yang terperangkap di dalam botol.",
+        "C": "Bentuk botol tidak berubah kerana tekanan udara adalah sama pada semua aras ketinggian.",
+        "D": "Botol akan menjadi kemik kerana zarah udara di kaki gunung lebih sedikit dan tidak melanggar dinding botol."
+      },
+      "correct_option": "B",
+      "explanation_text": "Tekanan udara berkurang apabila altitud meningkat (hubungan songsang). Udara yang terperangkap dari puncak gunung bertekanan rendah; apabila dibawa turun ke kaki gunung yang bertekanan udara lebih tinggi, perlanggaran zarah udara luar yang lebih kuat menolak dinding botol sehingga kemik. Pilihan A membalikkan hubungan altitud; pilihan C dan D salah konsep tekanan udara."
+    },
+    {
+      "id": "d6s_u06_q5",
+      "syllabus_node_id": "d6_sains_u06",
+      "difficulty_1_to_5": 5,
+      "diff": "H",
+      "exam_part": "A",
+      "prompt_text": "Apabila Encik Danial menebuk hanya satu lubang kecil pada penutup tin susu pekat dan menuangkannya, susu mengalir keluar dengan sangat perlahan dan tersangkut-sangkut. Selepas dia menebuk lubang kedua di bahagian bertentangan, susu mengalir keluar dengan lancar. Terangkan fenomena ini menggunakan prinsip tekanan udara.",
+      "options_json": {
+        "A": "Lubang kedua membolehkan udara luar masuk ke dalam tin supaya tekanan udara di dalam tin menyamai tekanan udara di luar, lalu menolak susu keluar dengan lancar.",
+        "B": "Lubang kedua menyedut susu keluar dengan kuasa tarikan vakum dari luar tin.",
+        "C": "Lubang kedua mengurangkan daya graviti yang menarik susu ke bawah sehingga susu lebih ringan.",
+        "D": "Lubang kedua menyebabkan tekanan udara di luar tin jatuh menjadi sifar."
+      },
+      "correct_option": "A",
+      "explanation_text": "Dengan hanya satu lubang, tekanan udara luar yang lebih tinggi di mulut lubang menghalang susu mengalir keluar. Apabila lubang kedua ditebuk, udara luar masuk dan mengenakan tekanan di atas permukaan susu di dalam tin untuk menolaknya keluar dengan lancar. Pilihan B ialah miskonsepsi 'daya sedutan'; pilihan C dan D tidak tepat secara saintifik."
+    },
+    {
+      "id": "d6s_u07_q1",
+      "syllabus_node_id": "d6_sains_u07",
+      "difficulty_1_to_5": 1,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Antara padanan objek dan unit kelajuan berikut, yang manakah paling sesuai, serta apakah maksud bacaan kelajuan 0 km/j pada meter laju sebuah kenderaan?",
+      "options_json": {
+        "A": "Siput: km/j; kereta api: cm/s; 0 km/j bermaksud kenderaan bergerak sangat perlahan.",
+        "B": "Siput: cm/s; kereta api: km/j; 0 km/j bermaksud kenderaan berada dalam keadaan pegun.",
+        "C": "Pelari pecut: km/j; kura-kura: m/s; 0 km/j bermaksud kenderaan bergerak mengundur.",
+        "D": "Kapal terbang: cm/s; basikal: cm/s; 0 km/j bermaksud jarak yang dilalui sangat jauh."
+      },
+      "correct_option": "B",
+      "explanation_text": "Unit cm/s sesuai bagi objek kecil yang bergerak perlahan seperti siput, manakala km/j sesuai bagi kenderaan laju yang menempuh jarak jauh seperti kereta api. Kelajuan 0 km/j bermaksud objek tidak bergerak atau pegun, bukannya bergerak perlahan (pilihan A). Pilihan C dan D memilih unit yang tidak sesuai atau mentafsir 0 km/j dengan salah."
+    },
+    {
+      "id": "d6s_u07_q2",
+      "syllabus_node_id": "d6_sains_u07",
+      "difficulty_1_to_5": 2,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Sebuah bas ekspres bergerak sejauh 240 km dari Kuala Lumpur ke Ipoh dalam masa 3 jam. Berapakah kelajuan bas ekspres tersebut?",
+      "options_json": {
+        "A": "60 km/j",
+        "B": "120 km/j",
+        "C": "80 km/j",
+        "D": "720 km/j"
+      },
+      "correct_option": "C",
+      "explanation_text": "Menggunakan rumus Kelajuan = Jarak ÷ Masa, kelajuan bas = 240 km ÷ 3 jam = 80 km/j. Pilihan D (720 km/j) berpunca daripada kesilapan mendarab jarak dengan masa (240 × 3); pilihan A (60 km/j) dan B (120 km/j) berpunca daripada kesilapan membahagi dengan 4 atau 2.",
+      "check": {
+        "type": "js",
+        "mode": "exact",
+        "code": "return (240 / 3) + ' km/j';",
+        "ans": "80 km/j"
+      }
+    },
+    {
+      "id": "d6s_u07_q3",
+      "syllabus_node_id": "d6_sains_u07",
+      "difficulty_1_to_5": 3,
+      "diff": "M",
+      "exam_part": "A",
+      "prompt_text": "Sebuah kereta menempuh jarak sejauh 45 km dalam masa 30 minit. Berapakah kelajuan kereta itu dalam unit km/j?",
+      "options_json": {
+        "A": "90 km/j",
+        "B": "1.5 km/j",
+        "C": "22.5 km/j",
+        "D": "75 km/j"
+      },
+      "correct_option": "A",
+      "explanation_text": "Tukarkan masa kepada jam terlebih dahulu: 30 minit = 30 ÷ 60 = 0.5 jam. Maka Kelajuan = 45 km ÷ 0.5 jam = 90 km/j. Pilihan B (1.5 km/j) ialah kesilapan lazim membahagi terus 45 ÷ 30 tanpa menukar minit kepada jam; pilihan C (22.5 km/j) terhasil daripada mendarab 45 × 0.5; pilihan D (75 km/j) menambah 45 + 30.",
+      "check": {
+        "type": "js",
+        "mode": "exact",
+        "code": "const jam = 30 / 60; return (45 / jam) + ' km/j';",
+        "ans": "90 km/j"
+      }
+    },
+    {
+      "id": "d6s_u07_q4",
+      "syllabus_node_id": "d6_sains_u07",
+      "difficulty_1_to_5": 3,
+      "diff": "M",
+      "exam_part": "A",
+      "prompt_text": "Seorang atlet berjoging dengan kelajuan seragam 4 m/s selama 5 minit. Berapakah jumlah jarak yang dilaluinya dalam unit meter?",
+      "options_json": {
+        "A": "20 m",
+        "B": "75 m",
+        "C": "240 m",
+        "D": "1200 m"
+      },
+      "correct_option": "D",
+      "explanation_text": "Tukarkan masa daripada minit kepada saat terlebih dahulu: 5 minit = 5 × 60 = 300 saat. Menggunakan rumus Jarak = Kelajuan × Masa, jarak = 4 m/s × 300 s = 1200 m. Pilihan A (20 m) lupa menukar minit kepada saat (4 × 5); pilihan B (75 m) membahagi 300 ÷ 4; pilihan C (240 m) hanya mengira jarak bagi 1 minit.",
+      "check": {
+        "type": "js",
+        "mode": "exact",
+        "code": "const saat = 5 * 60; return (4 * saat) + ' m';",
+        "ans": "1200 m"
+      }
+    },
+    {
+      "id": "d6s_u07_q5",
+      "syllabus_node_id": "d6_sains_u07",
+      "difficulty_1_to_5": 5,
+      "diff": "H",
+      "exam_part": "A",
+      "prompt_text": "Sebuah kereta api bergerak dengan kelajuan seragam 120 km/j untuk menempuh jarak sejauh 150 km. Berapakah tempoh masa perjalanan kereta api tersebut dalam jam dan minit?",
+      "options_json": {
+        "A": "48 minit",
+        "B": "1 jam 25 minit",
+        "C": "1 jam 15 minit",
+        "D": "1 jam 30 minit"
+      },
+      "correct_option": "C",
+      "explanation_text": "Menggunakan rumus Masa = Jarak ÷ Kelajuan, masa = 150 km ÷ 120 km/j = 1.25 jam. Tukarkan 0.25 jam kepada minit: 0.25 × 60 = 15 minit, jadi tempohnya ialah 1 jam 15 minit. Pilihan B (1 jam 25 minit) ialah miskonsepsi lazim mendarab 0.25 dengan 100; pilihan A (48 minit) terbalik membahagi kelajuan dengan jarak (120 ÷ 150 = 0.8 jam).",
+      "check": {
+        "type": "js",
+        "mode": "exact",
+        "code": "const t = 150 / 120; const j = Math.floor(t); const m = Math.round((t - j) * 60); return j + ' jam ' + m + ' minit';",
+        "ans": "1 jam 15 minit"
+      }
+    },
+    {
+      "id": "d6s_u08_q1",
+      "syllabus_node_id": "d6_sains_u08",
+      "difficulty_1_to_5": 1,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Segelas susu segar yang dibiarkan di atas meja dapur selama dua hari didapati berbau masam, berbuih dan berketul-ketul. Apakah punca utama kerosakan susu tersebut?",
+      "options_json": {
+        "A": "Susu bertindak balas dengan udara sejuk di dalam bilik.",
+        "B": "Air di dalam susu tersejat sepenuhnya sehingga meninggalkan ketulan.",
+        "C": "Susu kekurangan cahaya matahari untuk kekal segar.",
+        "D": "Tindakan bakteria yang membiak di dalam susu dan menghasilkan asid."
+      },
+      "correct_option": "D",
+      "explanation_text": "Kerosakan makanan berpunca daripada tindakan mikroorganisma; bagi susu segar, bakteria membiak pada suhu bilik dan menghasilkan asid sehingga susu menjadi masam, berbuih dan berketul-ketul. Pilihan A, B dan C tidak menerangkan peranan mikroorganisma dalam kerosakan makanan."
+    },
+    {
+      "id": "d6s_u08_q2",
+      "syllabus_node_id": "d6_sains_u08",
+      "difficulty_1_to_5": 2,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Apakah perbezaan utama antara kaedah pengawetan PENDINGINAN dengan PENYEJUKBEKUAN terhadap pertumbuhan mikroorganisma?",
+      "options_json": {
+        "A": "Pendinginan membunuh semua mikroorganisma dengan haba, manakala penyejukbekuan menyingkirkan udara.",
+        "B": "Pendinginan pada suhu sekitar 4°C memperlahankan pertumbuhan mikroorganisma, manakala penyejukbekuan pada suhu 0°C dan ke bawah menghentikan pertumbuhannya.",
+        "C": "Pendinginan menghentikan pertumbuhan mikroorganisma sepenuhnya, manakala penyejukbekuan hanya memperlahankan pertumbuhannya.",
+        "D": "Kedua-dua kaedah menggunakan suhu bilik tetapi berbeza daripada segi penggunaan garam."
+      },
+      "correct_option": "B",
+      "explanation_text": "Pendinginan (sekitar 4°C, seperti menyimpan sayur dan buah di bahagian bawah peti sejuk) memperlahankan pertumbuhan mikroorganisma, manakala penyejukbekuan (0°C dan ke bawah, seperti daging dan ikan di ruang beku) menghentikan pertumbuhan mikroorganisma. Pilihan C menukarkan kedua-duanya; pilihan A dan D tidak tepat."
+    },
+    {
+      "id": "d6s_u08_q3",
+      "syllabus_node_id": "d6_sains_u08",
+      "difficulty_1_to_5": 3,
+      "diff": "M",
+      "exam_part": "A",
+      "prompt_text": "Kacang tanah panggang diawet menggunakan kaedah pembungkusan vakum, manakala potongan mangga muda diawet melalui penjerukan di dalam larutan cuka dan gula. Apakah faktor pertumbuhan mikroorganisma yang dihalang oleh setiap kaedah ini?",
+      "options_json": {
+        "A": "Pembungkusan vakum: Suhu tidak sesuai; Penjerukan: Ketiadaan udara",
+        "B": "Pembungkusan vakum: Ketiadaan nutrien; Penjerukan: Suhu didih",
+        "C": "Pembungkusan vakum: Ketiadaan udara; Penjerukan: Keasidan tidak sesuai",
+        "D": "Pembungkusan vakum: Keasidan tidak sesuai; Penjerukan: Ketiadaan cahaya"
+      },
+      "correct_option": "C",
+      "explanation_text": "Pembungkusan vakum menyedut keluar udara daripada bungkusan sehingga mikroorganisma tidak dapat membiak akibat ketiadaan udara. Penjerukan menggunakan cuka mewujudkan keadaan berasid yang tidak sesuai bagi pertumbuhan mikroorganisma. Pilihan A, B dan D tersilap memadankan faktor pertumbuhan yang dihalang."
+    },
+    {
+      "id": "d6s_u08_q4",
+      "syllabus_node_id": "d6_sains_u08",
+      "difficulty_1_to_5": 3,
+      "diff": "M",
+      "exam_part": "A",
+      "prompt_text": "Bagaimanakah kaedah pempasteuran memanjangkan jangka hayat susu segar sambil mengekalkan rasa asal dan nilai nutrisinya?",
+      "options_json": {
+        "A": "Susu dipanaskan pada suhu tertentu seperti 63°C selama 30 minit atau 72°C selama 15 saat untuk memusnahkan mikroorganisma berbahaya, lalu disejukkan segera pada suhu 4°C.",
+        "B": "Susu dididihkan secara berterusan selama dua jam sehingga semua airnya tersejat menjadi serbuk.",
+        "C": "Susu dicampurkan dengan larutan cuka dan garam yang pekat lalu dibungkus secara vakum.",
+        "D": "Susu hanya disimpan terus pada suhu 10°C tanpa melalui sebarang proses pemanasan."
+      },
+      "correct_option": "A",
+      "explanation_text": "Pempasteuran melibatkan pemanasan susu pada suhu dan tempoh terkawal (seperti 63°C selama 30 minit, 72°C selama 15 saat atau UHT 135°C selama 2 saat) diikuti pendinginan segera pada 4°C untuk membunuh mikroorganisma tanpa merosakkan rasa asli. Pilihan B menggambarkan pengeringan; pilihan C ialah penjerukan/pemasinan; pilihan D mengabaikan tahap pemanasan."
+    },
+    {
+      "id": "d6s_u08_q5",
+      "syllabus_node_id": "d6_sains_u08",
+      "difficulty_1_to_5": 4,
+      "diff": "H",
+      "exam_part": "A",
+      "prompt_text": "Semasa musim tangkapan ikan yang melimpah, sekumpulan nelayan melumur ikan segar dengan garam kasar secara banyak dan menjemurnya di bawah cahaya matahari sehingga kering. Apakah gabungan kaedah pengawetan yang digunakan, faktor pertumbuhan mikroorganisma yang dihalang serta kepentingan amalan ini?",
+      "options_json": {
+        "A": "Pengetinan dan penyalaian; menyingkirkan udara; hanya sesuai dimakan dalam tempoh 24 jam.",
+        "B": "Pelilinan dan pendinginan; menurunkan suhu; menambah berat air di dalam ikan untuk tujuan eksport.",
+        "C": "Pempasteuran dan penjerukan; meningkatkan keasidan; memastikan ikan hanya boleh diawet melalui satu kaedah tunggal.",
+        "D": "Pemasinan dan pengeringan; menyingkirkan kandungan air daripada ikan; mengelakkan pembaziran makanan serta membolehkan penyimpanan jangka panjang dan eksport."
+      },
+      "correct_option": "D",
+      "explanation_text": "Ikan masin dihasilkan melalui gabungan kaedah pemasinan (garam menyingkirkan kelembapan) dan pengeringan (cahaya matahari menyejatkan air) untuk menyingkirkan air supaya mikroorganisma tidak dapat bertumbuh. Teknologi ini mengelakkan pembaziran, menjimatkan ruang penyimpanan serta memudahkan pemasaran dan eksport. Pilihan A, B dan C salah mengenal pasti kaedah dan manfaatnya."
+    },
+    {
+      "id": "d6s_u09_q1",
+      "syllabus_node_id": "d6_sains_u09",
+      "difficulty_1_to_5": 1,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Bahan buangan terbiodegradasi ialah bahan yang boleh diuraikan oleh mikroorganisma. Antara kumpulan berikut, yang manakah kesemuanya bahan TERBIODEGRADASI?",
+      "options_json": {
+        "A": "Sisa makanan, surat khabar lama dan tinja haiwan",
+        "B": "Botol kaca, tin aluminium dan kertas tisu",
+        "C": "Beg plastik, sisa makanan dan botol minuman plastik",
+        "D": "Tin keluli, kotak kertas dan bateri terpakai"
+      },
+      "correct_option": "A",
+      "explanation_text": "Sisa makanan, kertas (surat khabar lama) dan tinja haiwan ialah bahan terbiodegradasi kerana dapat diuraikan oleh mikroorganisma. Ramai murid tersilap menganggap kertas tidak terbiodegradasi atau mengelaskan kaca dan tin aluminium (pilihan B dan D) sebagai terbiodegradasi hanya kerana boleh dikitar semula; plastik dan bateri (pilihan C dan D) juga tidak terbiodegradasi."
+    },
+    {
+      "id": "d6s_u09_q2",
+      "syllabus_node_id": "d6_sains_u09",
+      "difficulty_1_to_5": 2,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Murid-murid Tahun 6 ingin mengasingkan majalah lama, botol kicap kaca dan tin minuman aluminium ke dalam tiga tong kitar semula berwarna biru, coklat dan jingga. Padanan warna tong kitar semula manakah yang BETUL?",
+      "options_json": {
+        "A": "Biru: Botol kicap kaca; Coklat: Majalah lama; Jingga: Tin minuman aluminium",
+        "B": "Biru: Tin minuman aluminium; Coklat: Botol kicap kaca; Jingga: Majalah lama",
+        "C": "Biru: Majalah lama; Coklat: Botol kicap kaca; Jingga: Tin minuman aluminium",
+        "D": "Biru: Majalah lama; Coklat: Tin minuman aluminium; Jingga: Botol kicap kaca"
+      },
+      "correct_option": "C",
+      "explanation_text": "Kod warna rasmi tong kitar semula di Malaysia ialah biru untuk kertas (majalah lama), coklat untuk kaca (botol kicap kaca), dan jingga untuk tin aluminium, tin keluli serta plastik. Pilihan A, B dan D menukarkan warna tong bagi kategori bahan tersebut."
+    },
+    {
+      "id": "d6s_u09_q3",
+      "syllabus_node_id": "d6_sains_u09",
+      "difficulty_1_to_5": 2,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Setiap kali memesan minuman di restoran, Puan Aini menolak pemberian penyedut minuman plastik sekali guna bagi mengurangkan penghasilan sisa plastik. Apakah amalan dalam konsep 5R yang ditunjukkan oleh Puan Aini?",
+      "options_json": {
+        "A": "Repair (Baik pulih)",
+        "B": "Recycle (Kitar semula)",
+        "C": "Reuse (Guna semula)",
+        "D": "Refuse (Tolak)"
+      },
+      "correct_option": "D",
+      "explanation_text": "Refuse (Tolak) bermaksud menolak penggunaan bahan tidak terbiodegradasi atau barang pakai buang yang tidak diperlukan seperti penyedut minuman dan beg plastik. Pilihan A (Repair) ialah membaiki barang rosak; pilihan B (Recycle) ialah memproses semula bahan buangan menjadi produk baharu; pilihan C (Reuse) ialah menggunakan semula barang sedia ada."
+    },
+    {
+      "id": "d6s_u09_q4",
+      "syllabus_node_id": "d6_sains_u09",
+      "difficulty_1_to_5": 3,
+      "diff": "M",
+      "exam_part": "A",
+      "prompt_text": "Seorang peniaga gerai kerap membuang sisa nasi dan kuah makanan ke dalam sungai berhampiran dengan alasan bahan tersebut bersifat terbiodegradasi dan tidak berbahaya. Mengapakah tindakan ini masih memudaratkan hidupan akuatik di sungai itu?",
+      "options_json": {
+        "A": "Sisa makanan bertukar menjadi serpihan plastik tajam apabila terendam dalam air sungai.",
+        "B": "Penguraian sisa makanan yang banyak oleh mikroorganisma menggunakan oksigen terlarut dalam air sehingga hidupan akuatik kekurangan oksigen dan mati.",
+        "C": "Sisa makanan menyebabkan suhu air sungai turun mendadak ke paras beku.",
+        "D": "Mikroorganisma tidak mampu menguraikan sisa makanan apabila berada di dalam air."
+      },
+      "correct_option": "B",
+      "explanation_text": "Walaupun sisa makanan bersifat terbiodegradasi, pembuangannya secara berlebihan ke dalam sungai menyebabkan mikroorganisma pengurai membiak dengan pesat lalu menggunakan oksigen terlarut dalam air. Akibatnya, ikan dan hidupan akuatik mati lemas selain air berbau busuk. Pilihan A, C dan D tidak tepat secara saintifik."
+    },
+    {
+      "id": "d6s_u09_q5",
+      "syllabus_node_id": "d6_sains_u09",
+      "difficulty_1_to_5": 4,
+      "diff": "H",
+      "exam_part": "A",
+      "prompt_text": "Penduduk sebuah taman perumahan mengumpul kulit sayur, sisa buah dan daun kering di dalam tong kompos, manakala bateri terpakai dan bekas racun serangga diasingkan untuk dihantar ke pusat pelupusan khas. Mengapakah kedua-dua jenis bahan buangan ini perlu diuruskan dengan kaedah yang berbeza?",
+      "options_json": {
+        "A": "Sisa sayur dan daun kering ialah bahan terbiodegradasi yang boleh diuraikan oleh mikroorganisma menjadi baja kompos, manakala bateri dan racun serangga ialah sisa toksik yang berbahaya jika mencemarkan tanah dan air.",
+        "B": "Kulit sayur dan daun kering merupakan sisa toksik yang perlu dibakar di dalam tong kompos, manakala bateri ialah bahan terbiodegradasi.",
+        "C": "Bateri terpakai dan bekas racun serangga boleh dikitar semula di dalam tong biru bersama kertas untuk dijadikan baja organik.",
+        "D": "Kedua-dua jenis bahan itu sebenarnya tidak terbiodegradasi dan hanya dipisahkan mengikut saiz bekasnya sahaja."
+      },
+      "correct_option": "A",
+      "explanation_text": "Pengurusan bahan buangan terancang membezakan bahan organik terbiodegradasi (boleh dijadikan baja kompos melalui penguraian mikroorganisma) daripada sisa toksik seperti bateri dan racun serangga yang mengandungi bahan kimia beracun serta perlu dilupuskan di pusat khas supaya tidak mencemarkan tanah dan sumber air. Pilihan B, C dan D tersilap mengelaskan sifat bahan buangan."
+    },
+    {
+      "id": "d6s_u10_q1",
+      "syllabus_node_id": "d6_sains_u10",
+      "difficulty_1_to_5": 1,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Antara pernyataan berikut, yang manakah menerangkan susunan kedudukan dan fasa Bulan yang BETUL semasa berlakunya fenomena Gerhana Bulan?",
+      "options_json": {
+        "A": "Matahari – Bulan – Bumi dalam satu garis lurus pada fasa Bulan baharu.",
+        "B": "Matahari – Bumi – Bulan dalam satu garis lurus pada fasa Bulan purnama.",
+        "C": "Bumi – Matahari – Bulan dalam satu garis lurus pada fasa Bulan sabit.",
+        "D": "Matahari – Bumi – Bulan dalam satu garis lurus pada fasa Bulan baharu."
+      },
+      "correct_option": "B",
+      "explanation_text": "Gerhana Bulan berlaku apabila Bumi berada di antara Matahari dengan Bulan dalam satu garis lurus (Matahari – Bumi – Bulan) semasa fasa Bulan purnama, sehingga bayang-bayang Bumi jatuh ke atas Bulan. Pilihan A menerangkan Gerhana Matahari; pilihan C tidak mungkin berlaku dalam Sistem Suria; pilihan D tersilap fasa Bulan."
+    },
+    {
+      "id": "d6s_u10_q2",
+      "syllabus_node_id": "d6_sains_u10",
+      "difficulty_1_to_5": 2,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Semasa Gerhana Matahari, Bulan berada di antara Matahari dengan Bumi dalam satu garis lurus pada fasa Bulan baharu lalu menghasilkan bayang-bayang pada permukaan Bumi. Apakah sifat cahaya yang menyebabkan fenomena ini berlaku?",
+      "options_json": {
+        "A": "Cahaya boleh dibiaskan dan melengkung mengelilingi Bulan.",
+        "B": "Cahaya hanya bergerak pada waktu malam dan menembusi objek legap.",
+        "C": "Cahaya dipantulkan sepenuhnya oleh atmosfera Bumi ke Matahari.",
+        "D": "Cahaya bergerak dalam garis lurus dan tidak dapat menembusi objek legap seperti Bulan."
+      },
+      "correct_option": "D",
+      "explanation_text": "Kejadian gerhana berkait rapat dengan dua sifat cahaya: cahaya bergerak dalam garis lurus dan tidak dapat menembusi objek legap (Bulan menghalang cahaya Matahari daripada sampai ke sebahagian Bumi). Pilihan A, B dan C bercanggah dengan prinsip pembentukan bayang-bayang."
+    },
+    {
+      "id": "d6s_u10_q3",
+      "syllabus_node_id": "d6_sains_u10",
+      "difficulty_1_to_5": 3,
+      "diff": "M",
+      "exam_part": "A",
+      "prompt_text": "Semasa satu kejadian Gerhana Matahari, Bandar X berada tepat di dalam kawasan bayang-bayang umbra Bulan, manakala Bandar Y berada di dalam kawasan bayang-bayang penumbra Bulan. Apakah fenomena yang dapat dilihat oleh penduduk di Bandar X dan Bandar Y?",
+      "options_json": {
+        "A": "Penduduk di Bandar X dapat melihat Gerhana Matahari penuh (dan separa sebelum serta selepasnya), manakala penduduk di Bandar Y hanya melihat Gerhana Matahari separa.",
+        "B": "Penduduk di Bandar X hanya melihat Gerhana Matahari separa, manakala penduduk di Bandar Y melihat Gerhana Matahari penuh.",
+        "C": "Kedua-dua Bandar X dan Bandar Y melihat langit kekal cerah tanpa sebarang gerhana.",
+        "D": "Penduduk di Bandar X melihat Gerhana Bulan penuh, manakala penduduk di Bandar Y melihat Gerhana Matahari separa."
+      },
+      "correct_option": "A",
+      "explanation_text": "Zon umbra ialah kawasan bayang-bayang paling gelap yang terlindung sepenuhnya daripada cahaya Matahari, maka pemerhati di Bandar X melihat Gerhana Matahari penuh (serta fasa separa sebelum dan selepas kemuncaknya). Zon penumbra ialah bayang-bayang separa gelap, maka Bandar Y hanya melihat Gerhana Matahari separa. Pilihan B membalikkan umbra dan penumbra; pilihan C dan D tidak tepat."
+    },
+    {
+      "id": "d6s_u10_q4",
+      "syllabus_node_id": "d6_sains_u10",
+      "difficulty_1_to_5": 3,
+      "diff": "M",
+      "exam_part": "A",
+      "prompt_text": "Pernyataan manakah yang BETUL mengenai cara memerhatikan gerhana dengan selamat serta kesannya terhadap keadaan di Bumi?",
+      "options_json": {
+        "A": "Gerhana Matahari selamat dilihat terus dengan mata kasar kerana cahayanya telah terlindung sepenuhnya.",
+        "B": "Gerhana Bulan sangat berbahaya dilihat dengan mata kasar dan memerlukan kamera lubang jarum.",
+        "C": "Gerhana Matahari mesti dilihat menggunakan penuras suria khas atau kamera lubang jarum, manakala Gerhana Bulan selamat dilihat dengan mata kasar dan dikaitkan dengan air pasang yang lebih tinggi daripada biasa.",
+        "D": "Semasa Gerhana Matahari penuh, suhu persekitaran di Bumi meningkat dengan mendadak dan langit menjadi lebih cerah."
+      },
+      "correct_option": "C",
+      "explanation_text": "Sinaran Matahari semasa Gerhana Matahari boleh merosakkan mata secara kekal jika dilihat terus tanpa penuras suria khas atau kamera lubang jarum (pilihan A salah). Gerhana Bulan selamat dilihat dengan mata kasar (pilihan B salah) dan kedudukan segaris menyebabkan daya tarikan graviti menghasilkan air pasang lebih tinggi. Semasa Gerhana Matahari penuh, langit menjadi gelap dan suhu menurun (pilihan D salah)."
+    },
+    {
+      "id": "d6s_u10_q5",
+      "syllabus_node_id": "d6_sains_u10",
+      "difficulty_1_to_5": 5,
+      "diff": "H",
+      "exam_part": "A",
+      "prompt_text": "Fasa Bulan purnama dan Bulan baharu berlaku pada setiap bulan, tetapi Gerhana Bulan dan Gerhana Matahari tidak berlaku setiap bulan. Selain itu, tempoh kejadian Gerhana Bulan adalah lebih lama daripada Gerhana Matahari. Apakah penjelasan saintifik yang tepat bagi kedua-dua kenyataan ini?",
+      "options_json": {
+        "A": "Bulan berhenti mengorbit Bumi pada bulan-bulan tertentu, dan saiz Bulan jauh lebih besar daripada Bumi.",
+        "B": "Orbit Bulan condong kira-kira 5° berbanding orbit Bumi mengelilingi Matahari sehingga ketiga-tiganya jarang berada tepat dalam satu garis lurus; selain itu, bayang-bayang Bumi jauh lebih besar daripada bayang-bayang Bulan.",
+        "C": "Matahari bergerak mengelilingi Bumi secara tidak sekata, dan awan tebal sentiasa menghalang gerhana setiap bulan.",
+        "D": "Cahaya Matahari hanya bergerak lurus dua kali setahun, manakala kelajuan putaran Bumi terhenti semasa Gerhana Bulan."
+      },
+      "correct_option": "B",
+      "explanation_text": "Kecondongan orbit Bulan sekitar 5° terhadap satah orbit Bumi menyebabkan Bulan biasanya berada sedikit di atas atau di bawah bayang-bayang Bumi (atau bayang-bayang Bulan tersasar daripada Bumi), maka gerhana tidak berlaku setiap bulan. Saiz Bumi yang jauh lebih besar menghasilkan zon bayang-bayang yang lebih luas, menyebabkan Gerhana Bulan berlangsung lebih lama. Pilihan A, C dan D bercanggah dengan fakta astronomi."
+    },
+    {
+      "id": "d6s_u11_q1",
+      "syllabus_node_id": "d6_sains_u11",
+      "difficulty_1_to_5": 1,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Apakah maksud galaksi di alam semesta?",
+      "options_json": {
+        "A": "Kumpulan lapan buah planet yang mengelilingi Matahari semata-mata.",
+        "B": "Himpunan bintang-bintang sahaja tanpa sebarang gas atau debu.",
+        "C": "Suatu sistem di alam semesta yang terdiri daripada jutaan hingga bilion bintang, gas, debu dan jirim lain.",
+        "D": "Sebuah bintang gergasi tunggal yang memancarkan cahaya ke seluruh ruang angkasa."
+      },
+      "correct_option": "C",
+      "explanation_text": "Galaksi ialah sistem besar di alam semesta yang mengandungi jutaan hingga bilion bintang bersama-sama gas, debu dan jirim lain. Pilihan A ialah takrif Sistem Suria; pilihan B ialah miskonsepsi yang mengabaikan kehadiran gas, debu dan jirim lain; pilihan D menyamakan galaksi dengan satu bintang sahaja."
+    },
+    {
+      "id": "d6s_u11_q2",
+      "syllabus_node_id": "d6_sains_u11",
+      "difficulty_1_to_5": 1,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Galaksi di alam semesta dikelaskan kepada tiga bentuk utama iaitu elips, berpilin dan tidak sekata. Apakah bentuk khusus bagi Galaksi Bima Sakti?",
+      "options_json": {
+        "A": "Galaksi pilin berpalang yang mempunyai dua lengan berpilin utama.",
+        "B": "Galaksi elips berbentuk bujur licin tanpa sebarang lengan.",
+        "C": "Galaksi tidak sekata tanpa pusat atau struktur yang jelas.",
+        "D": "Galaksi segi empat tepat yang terdiri daripada bintang biru sahaja."
+      },
+      "correct_option": "A",
+      "explanation_text": "Galaksi Bima Sakti ialah galaksi berpilin jenis pilin berpalang (barred spiral) yang mempunyai bahagian tengah berbentuk palang serta dua lengan berpilin utama. Pilihan B dan C mengelaskan Bima Sakti kepada jenis bentuk galaksi yang salah; pilihan D tidak wujud sebagai kelas bentuk galaksi."
+    },
+    {
+      "id": "d6s_u11_q3",
+      "syllabus_node_id": "d6_sains_u11",
+      "difficulty_1_to_5": 2,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Di manakah kedudukan Sistem Suria kita di dalam Galaksi Bima Sakti?",
+      "options_json": {
+        "A": "Tepat di pusat palang Galaksi Bima Sakti.",
+        "B": "Di pinggir salah satu daripada lengan berpilin Galaksi Bima Sakti.",
+        "C": "Di luar sempadan Galaksi Bima Sakti dan terapung bebas antara galaksi.",
+        "D": "Di tengah-tengah Galaksi Andromeda yang mengelilingi Bima Sakti."
+      },
+      "correct_option": "B",
+      "explanation_text": "Sistem Suria terletak di pinggir salah satu lengan berpilin Galaksi Bima Sakti, jauh dari pusat galaksi. Pilihan A ialah miskonsepsi lazim murid yang menyangka Matahari berada di tengah-tengah galaksi; pilihan C dan D meletakkan Sistem Suria di luar Bima Sakti."
+    },
+    {
+      "id": "d6s_u11_q4",
+      "syllabus_node_id": "d6_sains_u11",
+      "difficulty_1_to_5": 3,
+      "diff": "M",
+      "exam_part": "A",
+      "prompt_text": "Jika saiz keseluruhan Sistem Suria diibaratkan sebesar diameter sebatang pensel (kira-kira 0.7 cm), apakah perbandingan yang paling sesuai bagi saiz Galaksi Bima Sakti, dan apakah nama galaksi pilin besar yang paling hampir dengan Bima Sakti?",
+      "options_json": {
+        "A": "Sebesar sebiji bola pingpong; Galaksi Zuhrah",
+        "B": "Sebesar sebuah buku latihan; Galaksi Musytari",
+        "C": "Lebih kecil daripada mata pensel; Galaksi Matahari",
+        "D": "Seluas sebuah padang sekolah; Galaksi Andromeda"
+      },
+      "correct_option": "D",
+      "explanation_text": "Saiz Sistem Suria amat kecil berbanding Galaksi Bima Sakti: jika Sistem Suria sebesar diameter pensel, Bima Sakti meliputi keluasan sebuah padang sekolah. Galaksi pilin besar yang paling hampir dengan kita ialah Galaksi Andromeda. Pilihan A, B dan C memperkecil saiz Bima Sakti serta menyebut nama planet atau bintang, bukan galaksi."
+    },
+    {
+      "id": "d6s_u11_q5",
+      "syllabus_node_id": "d6_sains_u11",
+      "difficulty_1_to_5": 4,
+      "diff": "H",
+      "exam_part": "A",
+      "prompt_text": "Pada waktu malam yang sangat gelap tanpa pencemaran cahaya, penduduk Bumi melihat Galaksi Bima Sakti sebagai satu jaluran cahaya berkabus yang merentangi langit dan bukannya bentuk pilin yang terbuka luas. Mengapakah Bima Sakti kelihatan sebegitu dari Bumi?",
+      "options_json": {
+        "A": "Kerana Galaksi Bima Sakti sebenarnya berbentuk garisan lurus dan bukannya pilin.",
+        "B": "Kerana atmosfera Bumi memotong separuh daripada bintang di dalam galaksi.",
+        "C": "Kerana Bumi berada di dalam cakera rata Galaksi Bima Sakti itu sendiri, lalu kita memerhatikannya dari sudut pandangan sisi cakera tersebut.",
+        "D": "Kerana semua bintang di dalam Bima Sakti telah bergerak keluar menuju ke Galaksi Andromeda."
+      },
+      "correct_option": "C",
+      "explanation_text": "Dari pandangan sisi, Galaksi Bima Sakti berbentuk cakera nipis yang membonjol di bahagian tengah. Oleh sebab Sistem Suria berada di dalam cakera itu sendiri, kita melihat taburan bintang, gas dan debu dari arah sisi sehingga tampak seperti jaluran samar merentangi langit. Pilihan A, B dan D tidak menjelaskan kesan sudut pemerhatian."
+    },
+    {
+      "id": "d6s_u12_q1",
+      "syllabus_node_id": "d6_sains_u12",
+      "difficulty_1_to_5": 1,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Kestabilan sesuatu objek atau binaan merujuk kepada keupayaannya untuk kekal dalam kedudukan asal dan tidak mudah tumbang. Apakah dua faktor utama yang mempengaruhi KESTABILAN sesuatu objek?",
+      "options_json": {
+        "A": "Jenis bahan binaan dan warna permukaan",
+        "B": "Bentuk struktur dan jenis bahan binaan",
+        "C": "Kos pembinaan dan tempoh masa binaan",
+        "D": "Ketinggian objek dan luas tapak objek"
+      },
+      "correct_option": "D",
+      "explanation_text": "Kestabilan sesuatu objek atau binaan dipengaruhi oleh dua faktor utama, iaitu ketinggian objek (semakin rendah, semakin stabil) dan luas tapak objek (semakin besar luas tapak, semakin stabil). Pilihan B ialah faktor kekuatan struktur (miskonsepsi lazim mencampuradukkan kestabilan dengan kekuatan); pilihan A dan C bukan faktor kestabilan."
+    },
+    {
+      "id": "d6s_u12_q2",
+      "syllabus_node_id": "d6_sains_u12",
+      "difficulty_1_to_5": 2,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Mengapakah kereta lumba direka bentuk dengan badan yang sangat rendah serta jarak antara tayar kiri dan kanannya yang lebar?",
+      "options_json": {
+        "A": "Untuk meninggikan pusat graviti supaya kereta boleh melompat lebih jauh di selekoh.",
+        "B": "Untuk merendahkan pusat graviti dan menambahkan luas tapak supaya kereta lebih stabil dan tidak mudah terbalik ketika membelok laju.",
+        "C": "Untuk mengurangkan luas tapak supaya kereta menggunakan kurang bahan api.",
+        "D": "Untuk menjadikan badan kereta lebih tinggi daripada lori supaya pemandu lebih mudah melihat."
+      },
+      "correct_option": "B",
+      "explanation_text": "Reka bentuk yang rendah menurunkan pusat graviti, manakala jarak tayar yang lebar membesarkan luas tapak; kedua-duanya meningkatkan kestabilan kereta lumba agar tidak mudah terbalik ketika mengambil selekoh pada kelajuan tinggi. Pilihan A dan D menyangka objek lebih tinggi lebih stabil; pilihan C bercanggah dengan fakta reka bentuk tayar lebar."
+    },
+    {
+      "id": "d6s_u12_q3",
+      "syllabus_node_id": "d6_sains_u12",
+      "difficulty_1_to_5": 3,
+      "diff": "M",
+      "exam_part": "A",
+      "prompt_text": "Empat model menara yang sama jisim dan sama ketinggian (30 cm) diletakkan di atas sekeping papan yang dicondongkan secara perlahan-lahan. Ukuran tapak segi empat tepat bagi setiap model ialah: Model P (4 cm × 6 cm), Model Q (5 cm × 5 cm), Model R (3 cm × 10 cm) dan Model S (4 cm × 5 cm). Model manakah yang PALING STABIL berdasarkan keluasan tapaknya?",
+      "options_json": {
+        "A": "Model P",
+        "B": "Model Q",
+        "C": "Model R",
+        "D": "Model S"
+      },
+      "correct_option": "C",
+      "explanation_text": "Apabila ketinggian sama (30 cm), kestabilan ditentukan oleh jumlah luas tapak: Model P = 24 cm², Model Q = 25 cm², Model R = 30 cm², dan Model S = 20 cm². Model R mempunyai luas tapak paling besar (30 cm²), maka paling stabil. Pilihan B sering dipilih murid yang hanya melihat panjang sisi yang seimbang (5 cm) tanpa mengira luas tapak penuh."
+    },
+    {
+      "id": "d6s_u12_q4",
+      "syllabus_node_id": "d6_sains_u12",
+      "difficulty_1_to_5": 3,
+      "diff": "M",
+      "exam_part": "A",
+      "prompt_text": "Dalam pembinaan jambatan moden bagi menampung kenderaan berat, jurutera banyak menggunakan bentuk kekuda segi tiga, bentuk lengkungan serta bahan konkrit bertetulang. Mengapakah gabungan bentuk struktur dan jenis bahan ini dipilih?",
+      "options_json": {
+        "A": "Bentuk segi tiga dan lengkungan mengagihkan daya serta beban dengan lebih baik, manakala konkrit bertetulang sangat kuat, kukuh dan tidak mereput seperti kayu.",
+        "B": "Bentuk segi empat sama lebih kuat daripada segi tiga, tetapi konkrit mudah berkarat apabila terkena air hujan.",
+        "C": "Konkrit bertetulang dipilih kerana ringan seperti plastik dan mudah dilenturkan mengikut angin.",
+        "D": "Bentuk lengkungan hanya bertujuan mencantikkan jambatan tanpa memberi sebarang kesan terhadap kekuatannya."
+      },
+      "correct_option": "A",
+      "explanation_text": "Kekuatan binaan dipengaruhi oleh bentuk struktur dan jenis bahan. Bentuk kekuda segi tiga, lengkungan, kubah dan silinder jauh lebih kuat menampung beban berbanding segi empat rata, manakala konkrit bertetulang kukuh dan tidak mereput seperti kayu atau berkarat seperti besi kosong (pilihan B salah). Pilihan C dan D salah tentang sifat konkrit dan fungsi lengkungan."
+    },
+    {
+      "id": "d6s_u12_q5",
+      "syllabus_node_id": "d6_sains_u12",
+      "difficulty_1_to_5": 4,
+      "diff": "H",
+      "exam_part": "A",
+      "prompt_text": "Dua buah bangku diuji di makmal: Bangku J mudah tumbang apabila ditolak sedikit dari sisi walaupun kayunya tidak patah, manakala Bangku K kekal tegak pada kedudukannya tetapi papan duduknya melengkung lalu patah apabila diletakkan beban 60 kg. Analisis manakah yang PALING TEPAT bagi kedua-dua bangku ini?",
+      "options_json": {
+        "A": "Bangku J kurang kuat tetapi sangat stabil; Bangku K kurang stabil tetapi sangat kuat.",
+        "B": "Kedua-dua Bangku J dan Bangku K hanya mengalami masalah ketinggian tapak semata-mata.",
+        "C": "Bangku J patah kerana bahannya lemah, manakala Bangku K tumbang kerana tapaknya terlalu luas.",
+        "D": "Bangku J kurang stabil kerana luas tapak kecil atau terlalu tinggi, manakala Bangku K kurang kuat kerana bahan atau bentuk strukturnya gagal menampung beban berat tanpa rosak."
+      },
+      "correct_option": "D",
+      "explanation_text": "Kestabilan ialah keupayaan kekal tegak tanpa tumbang (kelemahan Bangku J), manakala kekuatan ialah keupayaan menampung beban tanpa rosak atau berubah bentuk (kelemahan Bangku K). Pilihan A membalikkan konsep kestabilan dan kekuatan; pilihan B dan C tidak selaras dengan pemerhatian ujian."
+    },
+    {
+      "id": "d6s_u13_q1",
+      "syllabus_node_id": "d6_sains_u13",
+      "difficulty_1_to_5": 1,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Teknologi ialah aplikasi pengetahuan sains untuk mengatasi had keupayaan manusia. Seorang doktor menggunakan stetoskop semasa memeriksa pesakit, manakala seorang ahli astronomi menggunakan teleskop pada waktu malam. Had keupayaan manakah yang diatasi oleh kedua-dua alat tersebut?",
+      "options_json": {
+        "A": "Stetoskop mengatasi had pendengaran untuk mendengar bunyi perlahan seperti degupan jantung; teleskop mengatasi had penglihatan untuk melihat objek sangat jauh di angkasa.",
+        "B": "Stetoskop mengatasi had penglihatan untuk melihat organ dalaman; teleskop mengatasi had penglihatan untuk melihat mikroorganisma.",
+        "C": "Stetoskop mengatasi had keupayaan mengangkat objek berat; teleskop mengatasi had ingatan manusia.",
+        "D": "Stetoskop mengatasi had pertuturan; teleskop mengatasi had pendengaran bunyi dari angkasa."
+      },
+      "correct_option": "A",
+      "explanation_text": "Stetoskop membolehkan doktor mendengar bunyi perlahan dalam badan (seperti degupan jantung), bukannya melihat organ dalaman (pilihan B). Teleskop melihat objek jauh di angkasa, manakala mikroskop pula melihat objek seni seperti mikroorganisma (miskonsepsi pada pilihan B). Pilihan C dan D tidak menepati fungsi kedua-dua alat."
+    },
+    {
+      "id": "d6s_u13_q2",
+      "syllabus_node_id": "d6_sains_u13",
+      "difficulty_1_to_5": 2,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Antara padanan ciptaan teknologi moden dengan bidang perkembangannya berikut, yang manakah TEPAT?",
+      "options_json": {
+        "A": "Kereta api laju elektrik -> Bidang pembinaan",
+        "B": "Kaedah pembinaan pasang siap (IBS) -> Bidang pertanian",
+        "C": "Jentera penuai padi automatik -> Bidang komunikasi",
+        "D": "Mesin pengimejan resonans magnetik (MRI) -> Bidang perubatan"
+      },
+      "correct_option": "D",
+      "explanation_text": "Mesin MRI ialah ciptaan teknologi dalam bidang perubatan untuk mengimbas organ dalaman pesakit tanpa pembedahan. Pilihan A, B dan C salah memadankan bidang: kereta api laju elektrik ialah bidang pengangkutan, kaedah pasang siap (IBS) ialah bidang pembinaan, dan jentera penuai padi ialah bidang pertanian."
+    },
+    {
+      "id": "d6s_u13_q3",
+      "syllabus_node_id": "d6_sains_u13",
+      "difficulty_1_to_5": 2,
+      "diff": "L",
+      "exam_part": "A",
+      "prompt_text": "Penggunaan jentera pembajak moden dan dron penyembur baja kini meluas di kawasan ladang pertanian. Apakah sumbangan utama perkembangan teknologi ini berbanding kaedah tradisional?",
+      "options_json": {
+        "A": "Memerlukan lebih ramai pekerja ladang dan memanjangkan masa kerja menuai.",
+        "B": "Mempercepat kerja pertanian di kawasan luas, menjimatkan tenaga buruh serta meningkatkan hasil tanaman.",
+        "C": "Menggantikan sepenuhnya keperluan cahaya matahari dan air bagi pertumbuhan tanaman.",
+        "D": "Menghapuskan keperluan tanah subur dan baja untuk semua jenis tanaman ladang."
+      },
+      "correct_option": "B",
+      "explanation_text": "Teknologi pertanian moden seperti jentera pembajak, jentera penuai dan dron penyembur baja membantu petani mengusahakan kawasan lebih luas dalam masa singkat, menjimatkan tenaga manusia serta meningkatkan kuantiti dan kualiti hasil. Pilihan A bertentangan dengan manfaat teknologi; pilihan C dan D tidak tepat secara biologi."
+    },
+    {
+      "id": "d6s_u13_q4",
+      "syllabus_node_id": "d6_sains_u13",
+      "difficulty_1_to_5": 3,
+      "diff": "M",
+      "exam_part": "A",
+      "prompt_text": "Walaupun teknologi moden banyak memudahkan kehidupan, penggunaannya secara tidak terkawal boleh membawa keburukan. Antara pernyataan berikut, yang manakah merupakan contoh keburukan teknologi yang TEPAT mengikut bidangnya?",
+      "options_json": {
+        "A": "Teknologi moden hanya membawa kebaikan semata-mata dan tidak pernah mencemarkan alam sekitar.",
+        "B": "Dalam bidang komunikasi, teknologi telefon pintar menyebabkan kepupusan oksigen di atmosfera.",
+        "C": "Dalam bidang perubatan, penyalahgunaan ubat-ubatan moden boleh menyebabkan ketagihan, manakala dalam komunikasi boleh berlaku pencerobohan data peribadi.",
+        "D": "Dalam bidang pertanian, penggunaan dron penyembur baja tidak menghasilkan sebarang sisa elektronik apabila baterinya rosak."
+      },
+      "correct_option": "C",
+      "explanation_text": "Setiap bidang teknologi mempunyai keburukan jika disalahgunakan: penyalahgunaan ubat-ubatan dalam perubatan membawa risiko ketagihan, manakala perkembangan komunikasi digital mendedahkan pengguna kepada pencerobohan data peribadi dan penipuan siber. Pilihan A menafikan kesan negatif teknologi; pilihan B tidak logik; pilihan D mengabaikan isu sisa elektronik (e-waste) bateri dron."
+    },
+    {
+      "id": "d6s_u13_q5",
+      "syllabus_node_id": "d6_sains_u13",
+      "difficulty_1_to_5": 4,
+      "diff": "H",
+      "exam_part": "A",
+      "prompt_text": "Pembinaan sebuah lebuh raya moden merentasi kawasan berbukit berjaya memendekkan tempoh perjalanan antara dua negeri daripada 4 jam kepada 1.5 jam, tetapi melibatkan penebangan hutan di lereng bukit secara meluas. Penilaian manakah yang paling seimbang tentang projek teknologi ini?",
+      "options_json": {
+        "A": "Projek ini hanya memberi kebaikan kerana penebangan hutan di kawasan berbukit tidak pernah menjejaskan hidupan liar.",
+        "B": "Projek ini meningkatkan kecekapan pengangkutan dan ekonomi, tetapi boleh memusnahkan habitat flora dan fauna serta meningkatkan risiko hakisan tanah jika langkah pengukuhan cerun dan pemeliharaan alam tidak dilaksanakan.",
+        "C": "Projek ini wajar dibatalkan sepenuhnya dan semua kenderaan bermotor harus digantikan dengan kereta kuda.",
+        "D": "Penebangan pokok di lereng bukit menguatkan struktur tanah sehingga menghalang berlakunya tanah runtuh dan banjir kilat."
+      },
+      "correct_option": "B",
+      "explanation_text": "Penilaian teknologi yang matang menimbang kedua-dua kebaikan (pengangkutan pantas, penjimatan masa dan pertumbuhan ekonomi) serta keburukan (kemusnahan habitat flora dan fauna, hakisan tanah dan risiko tanah runtuh) supaya langkah kelestarian dapat dirancang. Pilihan A dan D salah tentang kesan penebangan hutan cerun; pilihan C bersifat ekstrem dan tidak seimbang."
+    }
+  ]
+}

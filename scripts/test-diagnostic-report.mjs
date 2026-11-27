@@ -1,6 +1,7 @@
 import { createRequire } from "node:module";
 import fs from "node:fs";
 import path from "node:path";
+import vm from "node:vm";
 import { fileURLToPath } from "node:url";
 
 const require = createRequire(import.meta.url);
@@ -157,6 +158,68 @@ eq("null date returns dash", Report.formatDateDdMonYyyy(null), "-");
   ok("HTML flags unprobed prerequisite probe", html.includes("Semak asas dahulu") && html.includes("Membina dan Menukar Perkara Rumus"));
   ok("HTML flags unverified SPM scale note", html.includes("belum disahkan dengan slip peperiksaan sebenar"));
   ok("XSS payload in studentName is escaped in WhatsApp text attribute", !html.includes("<script>alert(1)</script>"));
+}
+
+// ======================= 6. HTML PARITY & MULTI-SUBJECT DARJAH 6 DIAGNOSTIC REPORT =======================
+{
+  const studentHtml = fs.readFileSync(path.join(rootDir, "index.html"), "utf8");
+  const parentHtml = fs.readFileSync(path.join(rootDir, "parent", "index.html"), "utf8");
+  const diagFiles = fs
+    .readdirSync(path.join(rootDir, "js", "data"))
+    .filter((f) => /^diagnostic_[a-z0-9]+_[a-z0-9]+\.js$/i.test(f))
+    .sort();
+  eq("index.html loads every diagnostic_*.js file on disk", diagFiles.every((f) => studentHtml.includes(`js/data/${f}`)), true);
+  eq("parent/index.html loads every diagnostic_*.js file on disk", diagFiles.every((f) => parentHtml.includes(`../js/data/${f}`)), true);
+
+  const pCtx = { console, document: {} };
+  pCtx.window = pCtx;
+  pCtx.globalThis = pCtx;
+  for (const match of parentHtml.matchAll(/<script[^>]+src="\.\.\/(js\/[^"?]+)/g)) {
+    const relFile = match[1];
+    vm.runInNewContext(fs.readFileSync(path.join(rootDir, relFile), "utf8"), pCtx, { filename: relFile });
+  }
+  const d6Nodes = pCtx.App.DiagnosticReport.collectSyllabusNodes("d6", pCtx.App.DiagnosticBanks);
+  eq("parent/index.html loads all 47 Darjah 6 diagnostic syllabus nodes", d6Nodes.length, 47);
+
+  const att = (id, nodeId, okBool, ms, at) => ({
+    id,
+    student_id: "kid_d6",
+    syllabus_node_id: nodeId,
+    is_correct: okBool ? 1 : 0,
+    time_spent_ms: ms,
+    answered_at_myt: at
+  });
+  // 6/10 = 60% -> UASA C (Baik); Strength: d6_math_nom_01 (3/3); Weakness: d6_math_wang_01 (2/2 wrong -> probe d6_math_pec_02)
+  const d6Attempts = [
+    att("d1", "d6_math_nom_01", true, 15000, "2026-11-27T15:01:00+08:00"),
+    att("d2", "d6_math_nom_01", true, 18000, "2026-11-27T15:02:00+08:00"),
+    att("d3", "d6_math_nom_01", true, 16000, "2026-11-27T15:03:00+08:00"),
+    att("d4", "d6_sains_u01", true, 20000, "2026-11-27T15:04:00+08:00"),
+    att("d5", "d6_bm_kosa_01", true, 15000, "2026-11-27T15:05:00+08:00"),
+    att("d6", "d6_sej_pemb_01", true, 14000, "2026-11-27T15:06:00+08:00"),
+    att("d7", "d6_math_wang_01", false, 35000, "2026-11-27T15:07:00+08:00"),
+    att("d8", "d6_math_wang_01", false, 38000, "2026-11-27T15:08:00+08:00"),
+    att("d9", "d6_bi_vocab_01", false, 5000, "2026-11-27T15:09:00+08:00"),
+    att("d10", "d6_sains_u04", false, 25000, "2026-11-27T15:10:00+08:00")
+  ];
+
+  const d6Rep = Report.buildReportData({
+    studentId: "kid_d6",
+    studentName: "Along",
+    gradeId: "d6",
+    sessions: [{ id: "s_d6", started_at: "2026-11-27T15:00:00+08:00", completed_at: "2026-11-27T15:10:00+08:00" }],
+    attempts: d6Attempts,
+    syllabusNodes: d6Nodes
+  });
+  eq("D6 multi-subject report computes 60% UASA C Baik", [d6Rep.summary.overallGrade.scale, d6Rep.summary.overallGrade.pct, d6Rep.summary.overallGrade.grade], ["UASA", 60, "C"]);
+  eq("D6 report traces unprobed prerequisite from Wang to Pecahan/Peratus", [d6Rep.summary.topStrength.nodeId, d6Rep.summary.topRootCauseWeakness.needsPrerequisiteProbe, d6Rep.summary.topRootCauseWeakness.probeNode && d6Rep.summary.topRootCauseWeakness.probeNode.id], [
+    "d6_math_nom_01",
+    true,
+    "d6_math_pec_02"
+  ]);
+  eq("D6 report date formatted dd/Mon/yyyy", d6Rep.lastCheckupDate, "27/Nov/2026");
+  const d6Html = Report.renderCardHtml(d6Rep);
+  ok("D6 report HTML shows Semak asas dahulu & WhatsApp includes Darjah 6 and 27/Nov/2026", d6Html.includes("Semak asas dahulu") && d6Rep.whatsappText.includes("Darjah 6") && d6Rep.whatsappText.includes("27/Nov/2026") && d6Rep.whatsappText.includes("Cadangan Tuisyen:"));
 }
 
 console.log(failed === 0 ? "DIAGNOSTIC_REPORT_TESTS_PASSED" : `DIAGNOSTIC_REPORT_TESTS_FAILED (${failed})`);

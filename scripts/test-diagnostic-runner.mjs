@@ -215,5 +215,42 @@ let finalSummary = null;
   rawDb.close();
 }
 
+// ======================= 4. DARJAH 6 ALL-5 UASA DIAGNOSTIC BANKS =======================
+{
+  const d6Specs = [
+    ["math", 10, 50],
+    ["sains", 13, 65],
+    ["bm", 8, 40],
+    ["bi", 8, 40],
+    ["sejarah", 8, 40]
+  ];
+  const d6BanksMap = { d6: {} };
+  for (const [subj] of d6Specs) {
+    d6BanksMap.d6[subj] = JSON.parse(fs.readFileSync(path.join(rootDir, "js", "data", `diagnostic_d6_${subj}.json`), "utf8"));
+  }
+
+  const avail = Runner.getAvailableBanks(d6BanksMap, "d6");
+  eq("getAvailableBanks lists all 5 D6 UASA subjects", avail.map((b) => [b.subjectId, b.nodeCount, b.questionCount]), d6Specs);
+
+  for (const [subj, nodeCount] of d6Specs) {
+    const subjBank = d6BanksMap.d6[subj];
+    const picked = Runner.selectDiagnosticQuestions(subjBank, { count: 15, seed: 2027 });
+    eq(`D6 ${subj}: selects 15 unique questions`, [picked.length, new Set(picked.map((q) => q.id)).size], [15, 15]);
+    eq(`D6 ${subj}: covers all ${nodeCount} syllabus_nodes in 15 questions`, new Set(picked.map((q) => q.syllabus_node_id)).size, nodeCount);
+  }
+
+  // Prerequisite prioritization on D6 math chain (failing d6_math_wang_01 boosts unprobed d6_math_pec_02)
+  const prioritizedD6 = Runner.selectDiagnosticQuestions(d6BanksMap.d6.math, {
+    count: 15,
+    seed: 77,
+    priorAttempts: [
+      { syllabus_node_id: "d6_math_wang_01", is_correct: 0 },
+      { syllabus_node_id: "d6_math_wang_01", is_correct: 0 }
+    ]
+  });
+  const pec02Count = prioritizedD6.filter((q) => q.syllabus_node_id === "d6_math_pec_02").length;
+  ok("D6 math prioritizes unprobed prerequisite d6_math_pec_02 (>= 2 slots)", pec02Count >= 2, `got ${pec02Count}`);
+}
+
 console.log(failed === 0 ? "DIAGNOSTIC_RUNNER_TESTS_PASSED" : `DIAGNOSTIC_RUNNER_TESTS_FAILED (${failed})`);
 process.exit(failed === 0 ? 0 : 1);

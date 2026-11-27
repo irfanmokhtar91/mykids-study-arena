@@ -1,5 +1,11 @@
+import fs from "node:fs";
+import path from "node:path";
+import vm from "node:vm";
+import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const rootDir = path.resolve(__dirname, "..");
 const G = require("../js/gradeBands.js");
 const B = require("../js/data/blueprints.js");
 const M = require("../js/mockExam.js");
@@ -271,6 +277,26 @@ const biPartial = M.scorePaper(biPaper, wordOnlyAnswers, {});
 eq("D6 BI Part 5 scores 1/5 for 1 case-insensitive trimmed match", biPartial.sections[4].earned, 1);
 const wordRecs = M.itemRecords(biPaper, wordOnlyAnswers, {});
 eq("D6 BI Part 5 omits whitespace-only answer from itemRecords", [wordRecs.length, wordRecs.filter((r) => r.correct).length], [2, 1]);
+
+// ======================= HTML PARITY & PARENT MARKING STACK (D6 UASA) =======================
+const studentHtml = fs.readFileSync(path.join(rootDir, "index.html"), "utf8");
+const parentHtml = fs.readFileSync(path.join(rootDir, "parent", "index.html"), "utf8");
+const mockDataFiles = fs
+  .readdirSync(path.join(rootDir, "js", "data"))
+  .filter((f) => /^(structured_|mock_).*\.js$/i.test(f))
+  .sort();
+eq("index.html loads every structured_/mock_ file on disk", mockDataFiles.every((f) => studentHtml.includes(`js/data/${f}`)), true);
+eq("parent/index.html loads every structured_/mock_ file on disk", mockDataFiles.every((f) => parentHtml.includes(`../js/data/${f}`)), true);
+
+const parentCtx = { console, document: {}, location: { search: "", pathname: "/parent/" } };
+parentCtx.window = parentCtx;
+parentCtx.globalThis = parentCtx;
+for (const match of parentHtml.matchAll(/<script[^>]+src="\.\.\/(js\/[^"?]+)/g)) {
+  const relFile = match[1];
+  vm.runInNewContext(fs.readFileSync(path.join(rootDir, relFile), "utf8"), parentCtx, { filename: relFile });
+}
+const sampleD6Ids = ["d6m-A01", "d6s-B01", "d6sj-B01", "d6bm-B01", "d6bi-P6-01"];
+eq("Parent MarkingUI.findItem resolves all 5 D6 UASA subjects", sampleD6Ids.map((id) => Boolean(parentCtx.App.MarkingUI.findItem(id))), [true, true, true, true, true]);
 
 console.log(failed === 0 ? "MOCK_TESTS_PASSED" : `MOCK_TESTS_FAILED (${failed})`);
 process.exit(failed === 0 ? 0 : 1);
