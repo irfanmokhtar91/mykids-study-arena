@@ -130,48 +130,55 @@ if (sErrors.length) {
 console.log(`SAINS_GEN_VERIFIED: ${sGens.length} generators, ${sGenSkills.size} numeric skills, ${SEEDS} seeds each`);
 console.log(`SAINS_POOL_VERIFIED: ${sStatic.length} static items, ${sStaticCounts.size} concept skills, ${sAll.length} total entries`);
 
-// ---------- D6 Bahasa Inggeris pool verification ----------
-const bCtx = { console, Math, Date, Set, Map, Array, Number, String, Object, JSON, BigInt };
-bCtx.window = bCtx;
-for (const f of ["js/data/curriculum/d6_bi.js", "js/data/pools/d6_bi.js"]) {
-  vm.runInNewContext(fs.readFileSync(f, "utf8"), bCtx, { filename: f });
-}
-const bCurr = bCtx.App.Curriculum.d6.bi;
-const bItems = bCtx.App.Pools.d6.bi;
-const bUnits = new Set(bCurr.units.map((u) => u.id));
-const bSkills = new Set(bCurr.units.flatMap((u) => u.skills.map((s) => s.id)));
-const bErrors = [];
-const bCounts = new Map();
-const bDiffs = { L: 0, M: 0, H: 0 };
-const bSeenQ = new Set();
-const bSeenId = new Set();
-
-for (const it of bItems) {
-  const id = it.id || "(no-id)";
-  if (bSeenId.has(id)) bErrors.push(`bi ${id}: duplicate id`);
-  bSeenId.add(id);
-  if (!bSkills.has(it.skill)) bErrors.push(`bi ${id}: unknown skill ${it.skill}`);
-  if (!bUnits.has(it.unit)) bErrors.push(`bi ${id}: unknown unit ${it.unit}`);
-  if (!["L", "M", "H"].includes(it.diff)) bErrors.push(`bi ${id}: bad diff`);
-  else bDiffs[it.diff]++;
-  if (!it.q || !Array.isArray(it.options) || it.options.length !== 4) bErrors.push(`bi ${id}: bad options`);
-  else if (new Set(it.options.map(norm)).size !== 4) bErrors.push(`bi ${id}: duplicate options`);
-  if (!(it.correctIndex >= 0 && it.correctIndex < 4)) bErrors.push(`bi ${id}: bad correctIndex`);
-  if (!it.explanation || !it.ref) bErrors.push(`bi ${id}: missing explanation/ref`);
-  if (/NaN|undefined|Infinity|\[object/.test(JSON.stringify(it))) bErrors.push(`bi ${id}: NaN/undefined`);
-  const nq = norm(it.q);
-  if (bSeenQ.has(nq)) bErrors.push(`bi ${id}: duplicate prompt`);
-  bSeenQ.add(nq);
-  bCounts.set(it.skill, (bCounts.get(it.skill) || 0) + 1);
-}
-for (const sk of bSkills) {
-  if ((bCounts.get(sk) || 0) < 8) {
-    bErrors.push(`bi skill ${sk}: only ${bCounts.get(sk) || 0} items (need >= 8)`);
+// ---------- D6 static variant pool verification helper ----------
+function verifyStaticPool(subj, label, minPerSkill) {
+  const ctxPool = { console, Math, Date, Set, Map, Array, Number, String, Object, JSON, BigInt };
+  ctxPool.window = ctxPool;
+  for (const f of [`js/data/curriculum/d6_${subj}.js`, `js/data/pools/d6_${subj}.js`]) {
+    vm.runInNewContext(fs.readFileSync(f, "utf8"), ctxPool, { filename: f });
   }
+  const curr = ctxPool.App.Curriculum.d6[subj];
+  const items = ctxPool.App.Pools.d6[subj];
+  const units = new Set(curr.units.map((u) => u.id));
+  const skills = new Set(curr.units.flatMap((u) => u.skills.map((s) => s.id)));
+  const errs = [];
+  const counts = new Map();
+  const diffs = { L: 0, M: 0, H: 0 };
+  const seenQ = new Set();
+  const seenId = new Set();
+
+  for (const it of items) {
+    const id = it.id || "(no-id)";
+    if (seenId.has(id)) errs.push(`${subj} ${id}: duplicate id`);
+    seenId.add(id);
+    if (!skills.has(it.skill)) errs.push(`${subj} ${id}: unknown skill ${it.skill}`);
+    if (!units.has(it.unit)) errs.push(`${subj} ${id}: unknown unit ${it.unit}`);
+    if (!["L", "M", "H"].includes(it.diff)) errs.push(`${subj} ${id}: bad diff`);
+    else diffs[it.diff]++;
+    if (!it.q || !Array.isArray(it.options) || it.options.length !== 4) errs.push(`${subj} ${id}: bad options`);
+    else if (new Set(it.options.map(norm)).size !== 4) errs.push(`${subj} ${id}: duplicate options`);
+    if (!(it.correctIndex >= 0 && it.correctIndex < 4)) errs.push(`${subj} ${id}: bad correctIndex`);
+    if (!it.explanation || !it.ref) errs.push(`${subj} ${id}: missing explanation/ref`);
+    if (/NaN|undefined|Infinity|\[object/.test(JSON.stringify(it))) errs.push(`${subj} ${id}: NaN/undefined`);
+    const nq = norm(it.q);
+    if (seenQ.has(nq)) errs.push(`${subj} ${id}: duplicate prompt`);
+    seenQ.add(nq);
+    counts.set(it.skill, (counts.get(it.skill) || 0) + 1);
+  }
+  for (const sk of skills) {
+    if ((counts.get(sk) || 0) < minPerSkill) {
+      errs.push(`${subj} skill ${sk}: only ${counts.get(sk) || 0} items (need >= ${minPerSkill})`);
+    }
+  }
+  if (errs.length) {
+    console.error(errs.slice(0, 40).join("\n"));
+    console.error(`${errs.length} ${subj} errors`);
+    process.exit(1);
+  }
+  console.log(`${label}_POOL_VERIFIED: ${items.length} static items, ${skills.size} skills, ${units.size} units, diff L/M/H=${diffs.L}/${diffs.M}/${diffs.H}`);
 }
-if (bErrors.length) {
-  console.error(bErrors.slice(0, 40).join("\n"));
-  console.error(`${bErrors.length} bi errors`);
-  process.exit(1);
-}
-console.log(`BI_POOL_VERIFIED: ${bItems.length} static items, ${bSkills.size} skills, ${bUnits.size} units, diff L/M/H=${bDiffs.L}/${bDiffs.M}/${bDiffs.H}`);
+
+verifyStaticPool("bi", "BI", 8);
+verifyStaticPool("rbt", "RBT", 10);
+verifyStaticPool("psv", "PSV", 10);
+verifyStaticPool("pjpk", "PJPK", 10);

@@ -1382,62 +1382,67 @@
           const meta = { unit: "b2", skill: "b2_s1", diff: "L", template: tpl };
 
           if (tpl === "b2_s1_L_prop_by_whole") {
-            const cases = [
-              { n: 4, d: 5, k: 2 },
-              { n: 3, d: 4, k: 6 },
-              { n: 8, d: 9, k: 4 },
-              { n: 6, d: 7, k: 3 },
-              { n: 5, d: 8, k: 5 },
-              { n: 3, d: 5, k: 9 },
-              { n: 2, d: 3, k: 4 },
-              { n: 5, d: 6, k: 10 }
-            ];
-            const c = pick(rng, cases);
-            const ansF = simpFrac(c.n, c.d * c.k);
+            const propPool = [];
+            for (const dd of [3, 4, 5, 6, 7, 8, 9, 10]) {
+              for (let nn = 1; nn < dd; nn++) {
+                if (gcd(nn, dd) === 1) propPool.push({ n: nn, d: dd });
+              }
+            }
+            const c = pick(rng, propPool);
+            const k = randInt(rng, 2, 10);
+            const ansF = simpFrac(c.n, c.d * k);
             const ans = fmtFrac(ansF.n, ansF.d);
-            const wrongMul = simpFrac(c.n * c.k, c.d);
-            const wrongInvFirst = simpFrac(c.d * c.k, c.n);
-            const q = `Hitung dalam bentuk termudah:\n${c.n}/${c.d} ÷ ${c.k} =`;
+            const wrongMul = simpFrac(c.n * k, c.d);
+            const wrongInvFirst = simpFrac(c.d * k, c.n);
+            const q = `Hitung dalam bentuk termudah:\n${c.n}/${c.d} ÷ ${k} =`;
             return buildMcq(
               rng, meta, q, ans,
               [
                 fmtFrac(wrongMul.n, wrongMul.d),
                 fmtFrac(wrongInvFirst.n, wrongInvFirst.d),
-                fmtFrac(simpFrac(c.n, c.d + c.k).n, simpFrac(c.n, c.d + c.k).d),
-                fmtFrac(simpFrac(c.n + 1, c.d * c.k).n, simpFrac(c.n + 1, c.d * c.k).d)
+                fmtFrac(simpFrac(c.n, c.d + k).n, simpFrac(c.n, c.d + k).d),
+                fmtFrac(simpFrac(c.n + 1, c.d * k).n, simpFrac(c.n + 1, c.d * k).d)
               ],
-              `${c.n}/${c.d} ÷ ${c.k}/1 = ${c.n}/${c.d} × 1/${c.k} = ${ans}.`,
-              `pw:${c.n}/${c.d}:${c.k}`
+              `${c.n}/${c.d} ÷ ${k}/1 = ${c.n}/${c.d} × 1/${k} = ${ans}.`,
+              `pw:${c.n}/${c.d}:${k}`
             );
           } else {
-            const cases = [
-              { n1: 1, d1: 2, n2: 1, d2: 4 },
-              { n1: 2, d1: 3, n2: 1, d2: 6 },
-              { n1: 3, d1: 4, n2: 1, d2: 8 },
-              { n1: 4, d1: 5, n2: 2, d2: 5 },
-              { n1: 3, d1: 5, n2: 3, d2: 10 },
-              { n1: 5, d1: 6, n2: 5, d2: 12 },
-              { n1: 3, d1: 4, n2: 2, d2: 3 },
-              { n1: 5, d1: 8, n2: 3, d2: 4 }
+            const baseFracs = [
+              [1, 2], [1, 3], [2, 3], [1, 4], [3, 4], [1, 5], [2, 5], [3, 5], [4, 5],
+              [1, 6], [5, 6], [1, 8], [3, 8], [5, 8], [7, 8], [1, 9], [2, 9], [4, 9],
+              [1, 10], [3, 10], [7, 10], [9, 10]
             ];
-            const c = pick(rng, cases);
-            const f1 = { n: c.n1, d: c.d1 };
-            const f2 = { n: c.n2, d: c.d2 };
-            const ansF = divFrac(f1, f2);
+            let f1 = { n: 3, d: 4 };
+            let f2 = { n: 2, d: 3 };
+            let ansF = divFrac(f1, f2);
+            for (let t = 0; t < 40; t++) {
+              const p1 = pick(rng, baseFracs);
+              const p2 = pick(rng, baseFracs);
+              if (p1[0] === p2[0] && p1[1] === p2[1]) continue;
+              const cf1 = { n: p1[0], d: p1[1] };
+              const cf2 = { n: p2[0], d: p2[1] };
+              const cand = divFrac(cf1, cf2);
+              if (cand.d <= 12 && cand.n <= 24) {
+                f1 = cf1;
+                f2 = cf2;
+                ansF = cand;
+                break;
+              }
+            }
             const ans = fmtFrac(ansF.n, ansF.d);
             const noInv = mulFrac(f1, f2);
             const invFirst = divFrac(f2, f1);
-            const q = `Hitung dalam bentuk termudah:\n${c.n1}/${c.d1} ÷ ${c.n2}/${c.d2} =`;
+            const q = `Hitung dalam bentuk termudah:\n${f1.n}/${f1.d} ÷ ${f2.n}/${f2.d} =`;
             return buildMcq(
               rng, meta, q, ans,
               [
                 fmtFrac(noInv.n, noInv.d),
                 fmtFrac(invFirst.n, invFirst.d),
                 fmtFrac(simpFrac(ansF.n + 1, ansF.d).n, simpFrac(ansF.n + 1, ansF.d).d),
-                fmtFrac(simpFrac(c.n1 + c.n2, c.d1 + c.d2).n, simpFrac(c.n1 + c.n2, c.d1 + c.d2).d)
+                fmtFrac(simpFrac(f1.n + f2.n, f1.d + f2.d).n, simpFrac(f1.n + f2.n, f1.d + f2.d).d)
               ],
-              `${c.n1}/${c.d1} ÷ ${c.n2}/${c.d2} = ${c.n1}/${c.d1} × ${c.d2}/${c.n2} = ${ans}.`,
-              `pp:${c.n1}/${c.d1}:${c.n2}/${c.d2}`
+              `${f1.n}/${f1.d} ÷ ${f2.n}/${f2.d} = ${f1.n}/${f1.d} × ${f2.d}/${f2.n} = ${ans}.`,
+              `pp:${f1.n}/${f1.d}:${f2.n}/${f2.d}`
             );
           }
         }
@@ -1455,43 +1460,44 @@
           const meta = { unit: "b2", skill: "b2_s1", diff: "M", template: tpl };
 
           if (tpl === "b2_s1_M_mixed_by_whole") {
-            const cases = [
-              { w: 2, n: 1, d: 4, k: 3 },
-              { w: 3, n: 1, d: 5, k: 4 },
-              { w: 4, n: 2, d: 3, k: 7 },
-              { w: 1, n: 3, d: 4, k: 5 },
-              { w: 2, n: 2, d: 5, k: 6 },
-              { w: 3, n: 3, d: 8, k: 9 },
-              { w: 5, n: 1, d: 3, k: 8 }
-            ];
-            const c = pick(rng, cases);
-            const impN = c.w * c.d + c.n;
-            const ansF = simpFrac(impN, c.d * c.k);
+            const w = randInt(rng, 1, 6);
+            const [n, d] = pick(rng, [
+              [1, 2], [1, 3], [2, 3], [1, 4], [3, 4], [1, 5], [2, 5], [3, 5], [4, 5], [1, 6], [5, 6], [3, 8], [5, 8]
+            ]);
+            const k = randInt(rng, 2, 9);
+            const impN = w * d + n;
+            const ansF = simpFrac(impN, d * k);
             const ans = fmtFrac(ansF.n, ansF.d);
-            const wrongNoConvert = simpFrac(c.w * c.d * c.k + c.n, c.d * c.k); // kept whole part untouched
-            const wrongMul = simpFrac(impN * c.k, c.d);
-            const q = `Selesaikan dalam bentuk termudah:\n${c.w} ${c.n}/${c.d} ÷ ${c.k} =`;
+            const wrongNoConvert = simpFrac(w * d * k + n, d * k); // kept whole part untouched
+            const wrongMul = simpFrac(impN * k, d);
+            const q = `Selesaikan dalam bentuk termudah:\n${w} ${n}/${d} ÷ ${k} =`;
             return buildMcq(
               rng, meta, q, ans,
               [
                 fmtFrac(wrongNoConvert.n, wrongNoConvert.d),
                 fmtFrac(wrongMul.n, wrongMul.d),
                 fmtFrac(simpFrac(ansF.d, ansF.n).n, simpFrac(ansF.d, ansF.n).d),
-                fmtFrac(simpFrac(c.w + c.n, c.d * c.k).n, simpFrac(c.w + c.n, c.d * c.k).d)
+                fmtFrac(simpFrac(w + n, d * k).n, simpFrac(w + n, d * k).d)
               ],
-              `Tukar kepada pecahan tak wajar: ${impN}/${c.d} ÷ ${c.k} = ${impN}/${c.d} × 1/${c.k} = ${ans}.`,
-              `mw:${c.w}:${c.n}/${c.d}:${c.k}`
+              `Tukar kepada pecahan tak wajar: ${impN}/${d} ÷ ${k} = ${impN}/${d} × 1/${k} = ${ans}.`,
+              `mw:${w}:${n}/${d}:${k}`
             );
           } else {
-            const cases = [
-              { w: 1, n1: 1, d1: 2, n2: 1, d2: 4 },
-              { w: 2, n1: 2, d1: 3, n2: 4, d2: 9 },
-              { w: 3, n1: 3, d1: 4, n2: 5, d2: 8 },
-              { w: 2, n1: 1, d1: 5, n2: 1, d2: 5 },
-              { w: 4, n1: 1, d1: 2, n2: 3, d2: 4 },
-              { w: 6, n1: 2, d1: 9, n2: 7, d2: 8 }
-            ];
-            const c = pick(rng, cases);
+            const smallProps = [[1, 2], [1, 3], [2, 3], [1, 4], [3, 4], [1, 5], [2, 5], [3, 5], [4, 5], [1, 6], [5, 6], [1, 8], [3, 8], [5, 8]];
+            let w = 2, p1 = [1, 2], p2 = [1, 4];
+            for (let t = 0; t < 40; t++) {
+              const cw = randInt(rng, 1, 6);
+              const cp1 = pick(rng, smallProps);
+              const cp2 = pick(rng, smallProps);
+              const cand = divFrac({ n: cw * cp1[1] + cp1[0], d: cp1[1] }, { n: cp2[0], d: cp2[1] });
+              if (cand.d <= 12) {
+                w = cw;
+                p1 = cp1;
+                p2 = cp2;
+                break;
+              }
+            }
+            const c = { w, n1: p1[0], d1: p1[1], n2: p2[0], d2: p2[1] };
             const impN = c.w * c.d1 + c.n1;
             const f1 = { n: impN, d: c.d1 };
             const f2 = { n: c.n2, d: c.d2 };
@@ -1499,7 +1505,8 @@
             const ans = fmtFrac(ansF.n, ansF.d);
             const noInv = mulFrac(f1, f2);
             const invFirst = divFrac(f2, f1);
-            const q = `Ada berapa bahagian ${c.n2}/${c.d2} kg di dalam ${c.w} ${c.n1}/${c.d1} kg tepung?`;
+            const item = pick(rng, ["tepung", "gula", "beras", "kacang hijau"]);
+            const q = `Ada berapa bahagian ${c.n2}/${c.d2} kg di dalam ${c.w} ${c.n1}/${c.d1} kg ${item}?`;
             return buildMcq(
               rng, meta, q, ans,
               [
@@ -1509,7 +1516,7 @@
                 fmtFrac(simpFrac(c.w * c.d2, c.n2).n, simpFrac(c.w * c.d2, c.n2).d)
               ],
               `${c.w} ${c.n1}/${c.d1} ÷ ${c.n2}/${c.d2} = ${impN}/${c.d1} × ${c.d2}/${c.n2} = ${ans}.`,
-              `mp:${c.w}:${c.n1}/${c.d1}:${c.n2}/${c.d2}`
+              `mp:${c.w}:${c.n1}/${c.d1}:${c.n2}/${c.d2}:${item}`
             );
           }
         }
@@ -1527,15 +1534,26 @@
           const meta = { unit: "b2", skill: "b2_s1", diff: "H", template: tpl };
 
           if (tpl === "b2_s1_H_mixed_by_mixed") {
-            const cases = [
-              { w1: 3, n1: 1, d1: 2, w2: 1, n2: 1, d2: 4 },
-              { w1: 4, n1: 2, d1: 3, w2: 1, n2: 1, d2: 6 },
-              { w1: 2, n1: 3, d1: 4, w2: 1, n2: 3, d2: 8 },
-              { w1: 5, n1: 1, d1: 4, w2: 1, n2: 1, d2: 2 },
-              { w1: 6, n1: 1, d1: 4, w2: 2, n2: 1, d2: 2 },
-              { w1: 3, n1: 3, d1: 5, w2: 1, n2: 1, d2: 5 }
-            ];
-            const c = pick(rng, cases);
+            const props = [[1, 2], [1, 3], [2, 3], [1, 4], [3, 4], [1, 5], [2, 5], [3, 5], [4, 5], [1, 6], [5, 6], [3, 8]];
+            let w1 = 3, w2 = 1, p1 = [1, 2], p2 = [1, 4];
+            for (let t = 0; t < 40; t++) {
+              const cw2 = randInt(rng, 1, 3);
+              const cw1 = cw2 + randInt(rng, 1, 4);
+              const cp1 = pick(rng, props);
+              const cp2 = pick(rng, props);
+              const cand = divFrac(
+                { n: cw1 * cp1[1] + cp1[0], d: cp1[1] },
+                { n: cw2 * cp2[1] + cp2[0], d: cp2[1] }
+              );
+              if (cand.d <= 12) {
+                w1 = cw1;
+                w2 = cw2;
+                p1 = cp1;
+                p2 = cp2;
+                break;
+              }
+            }
+            const c = { w1, n1: p1[0], d1: p1[1], w2, n2: p2[0], d2: p2[1] };
             const f1 = { n: c.w1 * c.d1 + c.n1, d: c.d1 };
             const f2 = { n: c.w2 * c.d2 + c.n2, d: c.d2 };
             const ansF = divFrac(f1, f2);
@@ -1555,18 +1573,37 @@
               `mm:${f1.n}/${f1.d}:${f2.n}/${f2.d}`
             );
           } else {
-            const cases = [
-              { total: [5, 1, 2], piece: [1, 3, 8], unit: "m", item: "reben" },
-              { total: [4, 1, 2], piece: [1, 1, 8], unit: "ℓ", item: "air sirap" },
-              { total: [6, 3, 4], piece: [2, 1, 4], unit: "kg", item: "gula" },
-              { total: [7, 1, 2], piece: [1, 1, 4], unit: "ℓ", item: "susu segar" }
+            const pieces = [
+              [1, 1, 2], [1, 1, 4], [1, 3, 4], [1, 1, 5], [1, 2, 5],
+              [1, 3, 5], [1, 1, 8], [1, 3, 8], [2, 1, 4], [2, 1, 2]
             ];
-            const c = pick(rng, cases);
+            let piece = [1, 3, 8];
+            let tot = [5, 1, 2];
+            for (let t = 0; t < 40; t++) {
+              const ca = randInt(rng, 2, 6);
+              const cp = pick(rng, pieces);
+              const pNum = cp[0] * cp[2] + cp[1];
+              const prod = simpFrac(ca * pNum, cp[2]);
+              if (prod.d > 1 && prod.n > prod.d) {
+                piece = cp;
+                tot = [Math.floor(prod.n / prod.d), prod.n % prod.d, prod.d];
+                break;
+              }
+            }
+            const ctxObj = pick(rng, [
+              { unit: "m", item: "reben" },
+              { unit: "ℓ", item: "air sirap" },
+              { unit: "kg", item: "gula" },
+              { unit: "ℓ", item: "susu segar" },
+              { unit: "m", item: "tali" }
+            ]);
+            const person = pick(rng, ["Puan Aina", "Encik Faizal", "Puan Mei Ling", "Cikgu Kavitha"]);
+            const c = { total: tot, piece, unit: ctxObj.unit, item: ctxObj.item };
             const f1 = { n: c.total[0] * c.total[2] + c.total[1], d: c.total[2] };
             const f2 = { n: c.piece[0] * c.piece[2] + c.piece[1], d: c.piece[2] };
             const ansF = divFrac(f1, f2);
             const ans = fmtFrac(ansF.n, ansF.d);
-            const q = `Puan Aina mempunyai ${c.total[0]} ${c.total[1]}/${c.total[2]} ${c.unit} ${c.item}. Beliau membahagikannya kepada beberapa bahagian yang sama, setiap satu berukuran ${c.piece[0]} ${c.piece[1]}/${c.piece[2]} ${c.unit}. Berapakah bilangan bahagian yang diperoleh?`;
+            const q = `${person} mempunyai ${c.total[0]} ${c.total[1]}/${c.total[2]} ${c.unit} ${c.item}. Beliau membahagikannya kepada beberapa bahagian yang sama, setiap satu berukuran ${c.piece[0]} ${c.piece[1]}/${c.piece[2]} ${c.unit}. Berapakah bilangan bahagian yang diperoleh?`;
             return buildMcq(
               rng, meta, q, ans,
               [
@@ -1754,7 +1791,8 @@
           const meta = { unit: "b2", skill: "b2_s3", diff: "L", template: tpl };
 
           if (tpl === "b2_s3_L_dec_to_pct") {
-            const val100 = pick(rng, [45, 85, 120, 150, 175, 206, 240, 315, 345, 420]);
+            let val100 = randInt(rng, 4, 150) * 5;
+            if (val100 % 100 === 0) val100 += 25;
             const dec = val100 / 100;
             const q = `Tukarkan ${fmtDec(dec, 2)} kepada peratus.`;
             return buildMcq(
@@ -1769,7 +1807,8 @@
               `dp:${val100}`
             );
           } else {
-            const pct = pick(rng, [65, 108, 135, 175, 206, 250, 345, 480, 670, 910]);
+            let pct = randInt(rng, 4, 180) * 5;
+            if (pct % 100 === 0) pct += 15;
             const ans = pct / 100;
             const q = `Nyatakan ${pct}% dalam bentuk perpuluhan.`;
             return buildMcq(
@@ -2066,70 +2105,85 @@
           const meta = { unit: "b2", skill: "b2_s5", diff: "L", template: tpl };
 
           if (tpl === "b2_s5_L_add_sub_frac_dec") {
-            const cases = [
-              { w: 1, fn: 3, fd: 4, fdec: 0.75, d: 0.8, ans: 0.95 },
-              { w: 2, fn: 1, fd: 4, fdec: 0.25, d: 0.65, ans: 1.6 },
-              { w: 1, fn: 2, fd: 5, fdec: 0.4, d: 0.55, ans: 0.85 },
-              { w: 3, fn: 1, fd: 2, fdec: 0.5, d: 1.25, ans: 2.25 },
-              { w: 2, fn: 3, fd: 5, fdec: 0.6, d: 0.9, ans: 1.7 }
+            const fracs = [
+              { fn: 1, fd: 2, fdec: 0.5 },
+              { fn: 1, fd: 4, fdec: 0.25 },
+              { fn: 3, fd: 4, fdec: 0.75 },
+              { fn: 1, fd: 5, fdec: 0.2 },
+              { fn: 2, fd: 5, fdec: 0.4 },
+              { fn: 3, fd: 5, fdec: 0.6 },
+              { fn: 4, fd: 5, fdec: 0.8 }
             ];
-            const c = pick(rng, cases);
-            const fracStr = fmtFrac(c.fn, c.fd);
-            const q = `Hitung dalam perpuluhan:\n${c.w} + ${fracStr} − ${fmtDec(c.d, 2)} =`;
+            const w = randInt(rng, 1, 6);
+            const fr = pick(rng, fracs);
+            const maxStep = Math.floor((w + Math.min(fr.fdec, fr.fn / 10) - 0.1) * 20);
+            const d = Math.round(randInt(rng, 5, Math.max(5, maxStep)) * 5) / 100;
+            const ans = Math.round((w + fr.fdec - d) * 100) / 100;
+            const fracStr = fmtFrac(fr.fn, fr.fd);
+            const q = `Hitung dalam perpuluhan:\n${w} + ${fracStr} − ${fmtDec(d, 2)} =`;
             return buildMcq(
-              rng, meta, q, fmtDec(c.ans, 2),
+              rng, meta, q, fmtDec(ans, 2),
               [
-                fmtDec(c.w + c.fn / 10 - c.d, 2), // wrong frac-to-dec e.g. 3/4 -> 0.3
-                fmtDec(c.w + c.fdec + c.d, 2), // added instead of subtracted
-                fmtDec(c.ans + 0.25, 2),
-                fmtDec(Math.max(0.1, c.ans - 0.15), 2)
+                fmtDec(w + fr.fn / 10 - d, 2),
+                fmtDec(w + fr.fdec + d, 2),
+                fmtDec(ans + 0.25, 2),
+                fmtDec(Math.max(0.1, ans - 0.15), 2)
               ],
-              `${fracStr} = ${fmtDec(c.fdec, 2)}. Jadi ${c.w} + ${fmtDec(c.fdec, 2)} − ${fmtDec(c.d, 2)} = ${fmtDec(c.ans, 2)}.`,
-              `asfd:${c.w}:${fracStr}:${c.d}`
+              `${fracStr} = ${fmtDec(fr.fdec, 2)}. Jadi ${w} + ${fmtDec(fr.fdec, 2)} − ${fmtDec(d, 2)} = ${fmtDec(ans, 2)}.`,
+              `asfd:${w}:${fracStr}:${d}`
             );
           } else {
             const isMul = pick(rng, [true, false]);
             if (isMul) {
-              const cases = [
-                { d: 0.5, fn: 3, fd: 4, ans: 0.375 },
-                { d: 0.8, fn: 3, fd: 4, ans: 0.6 },
-                { d: 1.5, fn: 2, fd: 5, ans: 0.6 },
-                { d: 2.4, fn: 3, fd: 8, ans: 0.9 },
-                { d: 1.2, fn: 3, fd: 4, ans: 0.9 }
+              const fracs = [
+                { fn: 1, fd: 2 }, { fn: 1, fd: 4 }, { fn: 3, fd: 4 },
+                { fn: 1, fd: 5 }, { fn: 2, fd: 5 }, { fn: 3, fd: 5 },
+                { fn: 4, fd: 5 }, { fn: 3, fd: 8 }, { fn: 5, fd: 8 }
               ];
-              const c = pick(rng, cases);
-              const q = `Hitung dalam perpuluhan:\n${fmtDec(c.d, 1)} × ${c.fn}/${c.fd} =`;
+              const fr = pick(rng, fracs);
+              let d10 = randInt(rng, 4, 45);
+              if (fr.fd === 8 && d10 % 2 !== 0) d10++;
+              const d = d10 / 10;
+              const ans = Math.round(((d * fr.fn) / fr.fd) * 1000) / 1000;
+              const q = `Hitung dalam perpuluhan:\n${fmtDec(d, 1)} × ${fr.fn}/${fr.fd} =`;
               return buildMcq(
-                rng, meta, q, fmtDec(c.ans, 3),
+                rng, meta, q, fmtDec(ans, 3),
                 [
-                  fmtDec((c.d * c.fd) / c.fn, 3), // divided instead of multiplied
-                  fmtDec(c.ans * 10, 3),
-                  fmtDec(c.ans + 0.25, 3),
-                  fmtDec(Math.max(0.05, c.ans - 0.2), 3)
+                  fmtDec(Math.round(((d * fr.fd) / fr.fn) * 1000) / 1000, 3),
+                  fmtDec(ans * 10, 3),
+                  fmtDec(ans + 0.25, 3),
+                  fmtDec(Math.max(0.05, ans - 0.2), 3)
                 ],
-                `${fmtDec(c.d, 1)} × ${c.fn}/${c.fd} = ${fmtDec((c.d * c.fn) / c.fd, 3)}.`,
-                `mfd:${c.d}:${c.fn}/${c.fd}`
+                `${fmtDec(d, 1)} × ${fr.fn}/${fr.fd} = ${fmtDec(ans, 3)}.`,
+                `mfd:${d}:${fr.fn}/${fr.fd}`
               );
             } else {
-              const cases = [
-                { d: 1.2, fn: 3, fd: 5, ans: 2 },
-                { d: 1.5, fn: 3, fd: 4, ans: 2 },
-                { d: 2.1, fn: 7, fd: 10, ans: 3 },
-                { d: 1.8, fn: 3, fd: 4, ans: 2.4 },
-                { d: 2.5, fn: 5, fd: 8, ans: 4 }
+              const divPairs = [
+                { fn: 1, fd: 2, fdec: 0.5 }, { fn: 1, fd: 4, fdec: 0.25 }, { fn: 3, fd: 4, fdec: 0.75 },
+                { fn: 2, fd: 5, fdec: 0.4 }, { fn: 3, fd: 5, fdec: 0.6 }, { fn: 4, fd: 5, fdec: 0.8 },
+                { fn: 5, fd: 8, fdec: 0.625 }, { fn: 7, fd: 10, fdec: 0.7 }
               ];
-              const c = pick(rng, cases);
-              const q = `Hitung dalam perpuluhan:\n${fmtDec(c.d, 1)} ÷ ${c.fn}/${c.fd} =`;
+              let d = 1.2, fn = 3, fd = 5, fdec = 0.6, ans = 2;
+              for (let t = 0; t < 40; t++) {
+                const fr = pick(rng, divPairs);
+                const candAns = randInt(rng, 12, 64) / 10;
+                const cd = Math.round(candAns * fr.fdec * 1000) / 1000;
+                if (cd >= 0.3 && Math.abs(Math.round(cd * 100) - cd * 100) < 1e-6) {
+                  d = cd; fn = fr.fn; fd = fr.fd; fdec = fr.fdec; ans = candAns;
+                  break;
+                }
+              }
+              const q = `Hitung dalam perpuluhan:\n${fmtDec(d, 2)} ÷ ${fn}/${fd} =`;
               return buildMcq(
-                rng, meta, q, fmtDec(c.ans, 2),
+                rng, meta, q, fmtDec(ans, 2),
                 [
-                  fmtDec((c.d * c.fn) / c.fd, 2), // multiplied without inverting
-                  fmtDec(c.ans / 10, 2),
-                  fmtDec(c.ans + 0.5, 2),
-                  fmtDec(Math.max(0.2, c.ans - 0.6), 2)
+                  fmtDec(Math.round(((d * fn) / fd) * 1000) / 1000, 3),
+                  fmtDec(ans / 10, 2),
+                  fmtDec(ans + 0.5, 2),
+                  fmtDec(Math.max(0.2, ans - 0.6), 2)
                 ],
-                `${c.fn}/${c.fd} = ${fmtDec(c.fn / c.fd, 3)}. Maka ${fmtDec(c.d, 1)} ÷ ${fmtDec(c.fn / c.fd, 3)} = ${fmtDec(c.ans, 2)}.`,
-                `dfd:${c.d}:${c.fn}/${c.fd}`
+                `${fn}/${fd} = ${fmtDec(fdec, 3)}. Maka ${fmtDec(d, 2)} ÷ ${fmtDec(fdec, 3)} = ${fmtDec(ans, 2)}.`,
+                `dfd:${d}:${fn}/${fd}`
               );
             }
           }
@@ -2148,52 +2202,64 @@
           const meta = { unit: "b2", skill: "b2_s5", diff: "M", template: tpl };
 
           if (tpl === "b2_s5_M_bodmas_frac_dec") {
-            const cases = [
-              { a: 2.25, w: 0, fn: 3, fd: 4, k: 2, op1: "-", op2: "/", ans: 1.875, wrong: 0.75 },
-              { a: 1.8, w: 1, fn: 1, fd: 2, k: 0.4, op1: "+", op2: "*", ans: 2.4, wrong: 1.32 },
-              { a: 3.5, w: 1, fn: 1, fd: 4, k: 2, op1: "-", op2: "*", ans: 1.0, wrong: 4.5 },
-              { a: 0.85, w: 1, fn: 1, fd: 5, k: 3, op1: "+", op2: "/", ans: 1.25, wrong: 0.683 },
-              { a: 4.2, w: 1, fn: 3, fd: 4, k: 0.8, op1: "-", op2: "*", ans: 2.8, wrong: 1.96 }
-            ];
-            const c = pick(rng, cases);
+            const fracOpts = [[1, 2, 0.5], [1, 4, 0.25], [3, 4, 0.75], [1, 5, 0.2], [2, 5, 0.4], [3, 5, 0.6], [4, 5, 0.8]];
+            const aOpts = [1.2, 1.5, 1.75, 1.8, 2.25, 2.4, 2.5, 3.2, 3.5, 4.2, 4.5, 4.75, 5.4, 6.25];
+            let c = { a: 2.25, w: 0, fn: 3, fd: 4, fdec: 0.75, k: 2, op1: "-", op2: "/", ans: 1.875, wrong: 0.75 };
+            for (let t = 0; t < 60; t++) {
+              const op1 = pick(rng, ["+", "-"]);
+              const op2 = pick(rng, ["*", "/"]);
+              const w = pick(rng, [0, 1, 2]);
+              const [fn, fd, fdec] = pick(rng, fracOpts);
+              const fVal = w + fdec;
+              const k = op2 === "*" ? pick(rng, [0.4, 0.5, 0.8, 2, 3, 4]) : pick(rng, [2, 4, 5]);
+              const term2 = op2 === "*" ? Math.round(fVal * k * 1000) / 1000 : fVal / k;
+              if (Math.abs(Math.round(term2 * 1000) - term2 * 1000) >= 1e-6) continue;
+              const a = pick(rng, aOpts);
+              const ans = Math.round((op1 === "+" ? a + term2 : a - term2) * 1000) / 1000;
+              if (ans < 0.25) continue;
+              const step1 = op1 === "+" ? a + fVal : a - fVal;
+              const wrong = Math.round((op2 === "*" ? step1 * k : step1 / k) * 1000) / 1000;
+              if (wrong < 0.1 || Math.abs(wrong - ans) < 0.05) continue;
+              if (Math.abs(Math.round(wrong * 1000) - wrong * 1000) >= 1e-6) continue;
+              c = { a, w, fn, fd, fdec, k, op1, op2, ans, wrong };
+              break;
+            }
             const fStr = c.w > 0 ? `${c.w} ${c.fn}/${c.fd}` : `${c.fn}/${c.fd}`;
-            const fVal = c.w + c.fn / c.fd;
+            const fVal = c.w + c.fdec;
             const op1Sym = c.op1 === "-" ? "−" : "+";
             const op2Sym = c.op2 === "/" ? "÷" : "×";
             const q = `Selesaikan mengikut tertib operasi:\n${fmtDec(c.a, 2)} ${op1Sym} ${fStr} ${op2Sym} ${fmtDec(c.k, 1)} =`;
             return buildMcq(
               rng, meta, q, fmtDec(c.ans, 3),
               [
-                fmtDec(c.wrong, 3), // ignored BODMAS (left-to-right)
+                fmtDec(c.wrong, 3),
                 fmtDec(c.ans + 0.5, 3),
                 fmtDec(Math.max(0.1, c.ans - 0.35), 3),
-                fmtDec(Math.round((c.op1 === "-" ? c.a + fVal : c.a - fVal) * 100) / 100, 2)
+                fmtDec(Math.max(0.15, Math.round((c.op1 === "-" ? c.a + fVal : Math.abs(c.a - fVal)) * 100) / 100), 2)
               ],
               `Selesaikan ${op2Sym} dahulu: ${fmtDec(fVal, 2)} ${op2Sym} ${fmtDec(c.k, 1)} = ${fmtDec(c.op2 === "/" ? fVal / c.k : fVal * c.k, 3)}. Kemudian ${fmtDec(c.a, 2)} ${op1Sym} hasil tersebut = ${fmtDec(c.ans, 3)}.`,
-              `bfd:${c.a}:${fStr}:${c.k}`
+              `bfd:${c.a}:${fStr}:${c.k}:${c.op1}:${c.op2}`
             );
           } else {
-            const cases = [
-              { dec: 1.25, pct: 35, fn: 1, fd: 5, fPct: 20 },
-              { dec: 1.5, pct: 45, fn: 1, fd: 4, fPct: 25 },
-              { dec: 0.85, pct: 20, fn: 3, fd: 4, fPct: 75 },
-              { dec: 2.1, pct: 65, fn: 2, fd: 5, fPct: 40 },
-              { dec: 1.4, pct: 55, fn: 1, fd: 2, fPct: 50 }
-            ];
-            const c = pick(rng, cases);
-            const decPct = Math.round(c.dec * 100);
-            const ansPct = decPct - c.pct + c.fPct;
-            const q = `Nyatakan jawapan dalam peratus:\n${fmtDec(c.dec, 2)} − ${c.pct}% + ${c.fn}/${c.fd} =`;
+            const dec = randInt(rng, 14, 64) * 0.05;
+            const decPct = Math.round(dec * 100);
+            const pct = randInt(rng, 3, Math.min(19, Math.floor((decPct - 15) / 5))) * 5;
+            const [fn, fd, fPct] = pick(rng, [
+              [1, 2, 50], [1, 4, 25], [3, 4, 75], [1, 5, 20], [2, 5, 40],
+              [3, 5, 60], [4, 5, 80], [3, 10, 30], [7, 10, 70], [9, 10, 90]
+            ]);
+            const ansPct = decPct - pct + fPct;
+            const q = `Nyatakan jawapan dalam peratus:\n${fmtDec(dec, 2)} − ${pct}% + ${fn}/${fd} =`;
             return buildMcq(
               rng, meta, q, `${ansPct}%`,
               [
-                `${Math.abs(Math.round(c.dec * 10) - c.pct + c.fPct)}%`, // 1.25 -> 12.5%
-                `${Math.abs(decPct - (c.pct + c.fPct))}%`, // wrong bracket grouping
+                `${Math.abs(Math.round(dec * 10) - pct + fPct)}%`,
+                `${Math.abs(decPct - (pct + fPct))}%`,
                 `${ansPct + 15}%`,
                 `${Math.max(10, ansPct - 20)}%`
               ],
-              `Tukar semua kepada peratus: ${fmtDec(c.dec, 2)} = ${decPct}% dan ${c.fn}/${c.fd} = ${c.fPct}%. Maka ${decPct}% − ${c.pct}% + ${c.fPct}% = ${ansPct}%.`,
-              `mix:${decPct}:${c.pct}:${c.fPct}`
+              `Tukar semua kepada peratus: ${fmtDec(dec, 2)} = ${decPct}% dan ${fn}/${fd} = ${fPct}%. Maka ${decPct}% − ${pct}% + ${fPct}% = ${ansPct}%.`,
+              `mix:${decPct}:${pct}:${fPct}`
             );
           }
         }
@@ -4892,7 +4958,7 @@
       }
     }),
 
-    makeGen("b6", "b6_s2", "H", ["diff_two_polygons_angles", "double_sides_polygon_pair"], (rng, meta) => {
+    makeGen("b6", "b6_s2", "H", ["diff_two_polygons_angles", "double_sides_polygon_pair", "multi_angle_pair_sum"], (rng, meta) => {
       const polys = [
         { sides: 3, angle: 60, name: "segi tiga sama sisi" },
         { sides: 4, angle: 90, name: "segi empat sama" },
@@ -4900,37 +4966,60 @@
         { sides: 6, angle: 120, name: "heksagon sekata" },
         { sides: 8, angle: 135, name: "oktagon sekata" }
       ];
-      const tpl = pick(rng, ["diff_two_polygons_angles", "double_sides_polygon_pair"]);
+      const tpl = pick(rng, ["diff_two_polygons_angles", "double_sides_polygon_pair", "multi_angle_pair_sum"]);
       if (tpl === "diff_two_polygons_angles") {
         const i1 = randInt(rng, 0, polys.length - 2);
         const i2 = randInt(rng, i1 + 1, polys.length - 1);
         const small = polys[i1];
         const big = polys[i2];
-        const diff = big.angle - small.angle;
-        const q = `Cari beza antara satu sudut pedalaman ${big.name} dengan satu sudut pedalaman ${small.name}.`;
-        const exp = `Sudut pedalaman ${big.name} = ${big.angle}° dan ${small.name} = ${small.angle}°. Beza = ${big.angle}° − ${small.angle}° = ${diff}°.`;
+        const k = randInt(rng, 1, 3);
+        const diff = k * big.angle - small.angle;
+        const q = k === 1
+          ? `Cari beza antara satu sudut pedalaman ${big.name} dengan satu sudut pedalaman ${small.name}.`
+          : `Cari beza antara jumlah ${k} sudut pedalaman ${big.name} dengan satu sudut pedalaman ${small.name}.`;
+        const exp = `Sudut pedalaman ${big.name} = ${big.angle}° dan ${small.name} = ${small.angle}°. Beza = ${k === 1 ? `${big.angle}°` : `${k} × ${big.angle}°`} − ${small.angle}° = ${diff}°.`;
         const wrongs = [
-          `${big.angle + small.angle}°`,
-          `${big.angle}°`,
+          `${k * big.angle + small.angle}°`,
+          `${k * big.angle}°`,
           `${diff + 12}°`,
           `${Math.max(10, diff - 8)}°`
         ];
-        return buildMcq(rng, { ...meta, template: tpl }, q, `${diff}°`, wrongs, exp, `b6_s2:H:${tpl}:s1=${small.sides},s2=${big.sides}`);
-      } else {
+        return buildMcq(rng, { ...meta, template: tpl }, q, `${diff}°`, wrongs, exp, `b6_s2:H:${tpl}:s1=${small.sides},s2=${big.sides},k=${k}`);
+      } else if (tpl === "double_sides_polygon_pair") {
         const pair = pick(rng, [
-          { a: polys[0], b: polys[3] }, // 3 -> 6 (60 vs 120)
-          { a: polys[1], b: polys[4] }  // 4 -> 8 (90 vs 135)
+          { a: polys[0], b: polys[3] },
+          { a: polys[1], b: polys[4] }
         ]);
-        const sumBoth = pair.a.angle + pair.b.angle;
-        const q = `Raymond melukis sebuah ${pair.a.name}. Charles pula melukis sebuah poligon sekata yang bilangan sisinya 2 kali bilangan sisi poligon Raymond. Berapakah jumlah satu sudut pedalaman poligon Raymond dan satu sudut pedalaman poligon Charles?`;
-        const exp = `Poligon Raymond mempunyai ${pair.a.sides} sisi (${pair.a.angle}°). Poligon Charles mempunyai 2 × ${pair.a.sides} = ${pair.b.sides} sisi (${pair.b.name}, ${pair.b.angle}°). Jumlah = ${pair.a.angle}° + ${pair.b.angle}° = ${sumBoth}°.`;
+        const name1 = pick(rng, ["Raymond", "Hafiz", "Mei Ling", "Kavitha"]);
+        const name2 = pick(rng, ["Charles", "Aiman", "Siti", "Daniel"]);
+        const k = randInt(rng, 1, 3);
+        const sumBoth = k * (pair.a.angle + pair.b.angle);
+        const q = `${name1} melukis sebuah ${pair.a.name}. ${name2} pula melukis sebuah poligon sekata yang bilangan sisinya 2 kali bilangan sisi poligon ${name1}. Berapakah jumlah ${k === 1 ? "satu" : k} sudut pedalaman poligon ${name1} dan ${k === 1 ? "satu" : k} sudut pedalaman poligon ${name2}?`;
+        const exp = `Poligon ${name1} mempunyai ${pair.a.sides} sisi (${pair.a.angle}°). Poligon ${name2} mempunyai 2 × ${pair.a.sides} = ${pair.b.sides} sisi (${pair.b.name}, ${pair.b.angle}°). Jumlah = ${k === 1 ? `${pair.a.angle}° + ${pair.b.angle}°` : `${k} × (${pair.a.angle}° + ${pair.b.angle}°)`} = ${sumBoth}°.`;
         const wrongs = [
-          `${pair.b.angle}°`,
-          `${pair.b.angle - pair.a.angle}°`,
-          `${pair.a.angle * 2}°`,
+          `${k * pair.b.angle}°`,
+          `${k * (pair.b.angle - pair.a.angle)}°`,
+          `${k * pair.a.angle * 2}°`,
           `${sumBoth + 15}°`
         ];
-        return buildMcq(rng, { ...meta, template: tpl }, q, `${sumBoth}°`, wrongs, exp, `b6_s2:H:${tpl}:a=${pair.a.sides},b=${pair.b.sides}`);
+        return buildMcq(rng, { ...meta, template: tpl }, q, `${sumBoth}°`, wrongs, exp, `b6_s2:H:${tpl}:a=${pair.a.sides},b=${pair.b.sides},k=${k},n=${name1}`);
+      } else {
+        const i1 = randInt(rng, 0, polys.length - 2);
+        const i2 = randInt(rng, i1 + 1, polys.length - 1);
+        const p1 = polys[i1];
+        const p2 = polys[i2];
+        const k1 = randInt(rng, 1, 3);
+        const k2 = randInt(rng, 1, 3);
+        const total = k1 * p1.angle + k2 * p2.angle;
+        const q = `Diberi sebuah ${p1.name} dan sebuah ${p2.name}. Hitung jumlah nilai bagi ${k1} sudut pedalaman ${p1.name} dan ${k2} sudut pedalaman ${p2.name}.`;
+        const exp = `Sudut pedalaman ${p1.name} = ${p1.angle}° dan ${p2.name} = ${p2.angle}°. Jumlah = (${k1} × ${p1.angle}°) + (${k2} × ${p2.angle}°) = ${total}°.`;
+        const wrongs = [
+          `${k1 * p1.angle + p2.angle}°`,
+          `${p1.angle + k2 * p2.angle}°`,
+          `${Math.abs(k2 * p2.angle - k1 * p1.angle) || total + 30}°`,
+          `${total + 15}°`
+        ];
+        return buildMcq(rng, { ...meta, template: tpl }, q, `${total}°`, wrongs, exp, `b6_s2:H:${tpl}:p1=${p1.sides},p2=${p2.sides},k1=${k1},k2=${k2}`);
       }
     }),
 
@@ -4973,7 +5062,7 @@
     makeGen("b6", "b6_s3", "M", ["radius_diameter_decimal_unit", "modified_ruler_circle"], (rng, meta) => {
       const tpl = pick(rng, ["radius_diameter_decimal_unit", "modified_ruler_circle"]);
       if (tpl === "radius_diameter_decimal_unit") {
-        const rM = pick(rng, [0.15, 0.25, 0.3, 0.35, 0.4, 0.45, 0.55, 0.65]);
+        const rM = roundDec(randInt(rng, 3, 24) * 0.05, 2);
         const rCm = Math.round(rM * 100);
         const dCm = rCm * 2;
         const askDiam = rng() > 0.4;
@@ -5000,9 +5089,10 @@
           return buildMcq(rng, { ...meta, template: tpl }, q, `${rCm} cm`, wrongs, exp, `b6_s3:M:${tpl}:r:dM=${dM}`);
         }
       } else {
-        const r = pick(rng, [3.5, 4.5, 5.5, 6.5, 7.5, 8.5]);
-        const d = r * 2;
-        const q = `Amira melukis sebuah bulatan menggunakan pembaris ubah suai dengan meletakkan satu pensel tetap pada lubang 0 cm dan satu lagi pensel pada lubang ${fmtNum(r)} cm lalu memusingkannya satu pusingan lengkap. Berapakah diameter bulatan yang terhasil?`;
+        const r = roundDec(randInt(rng, 5, 30) * 0.5, 1);
+        const d = roundDec(r * 2, 1);
+        const student = pick(rng, ["Amira", "Faris", "Siti", "Daniel", "Priya"]);
+        const q = `${student} melukis sebuah bulatan menggunakan pembaris ubah suai dengan meletakkan satu pensel tetap pada lubang 0 cm dan satu lagi pensel pada lubang ${fmtNum(r)} cm lalu memusingkannya satu pusingan lengkap. Berapakah diameter bulatan yang terhasil?`;
         const exp = `Jarak dari 0 cm ke ${fmtNum(r)} cm ialah jejari (${fmtNum(r)} cm). Diameter = 2 × ${fmtNum(r)} cm = ${fmtNum(d)} cm.`;
         const wrongs = [
           `${fmtNum(r)} cm`,
@@ -5010,30 +5100,38 @@
           `${fmtNum(roundDec(r / 2, 2))} cm`,
           `${fmtNum(d + 2)} cm`
         ];
-        return buildMcq(rng, { ...meta, template: tpl }, q, `${fmtNum(d)} cm`, wrongs, exp, `b6_s3:M:${tpl}:r=${r}`);
+        return buildMcq(rng, { ...meta, template: tpl }, q, `${fmtNum(d)} cm`, wrongs, exp, `b6_s3:M:${tpl}:r=${r}:${student}`);
       }
     }),
 
     makeGen("b6", "b6_s3", "H", ["circle_fraction_radius_compare", "circle_in_square_margin"], (rng, meta) => {
       const tpl = pick(rng, ["circle_fraction_radius_compare", "circle_in_square_margin"]);
       if (tpl === "circle_fraction_radius_compare") {
-        const rA = pick(rng, [6, 9, 12, 15, 18]);
+        const fr = pick(rng, [
+          { num: 1, den: 2, label: "1/2" },
+          { num: 1, den: 3, label: "1/3" },
+          { num: 1, den: 4, label: "1/4" },
+          { num: 2, den: 3, label: "2/3" },
+          { num: 3, den: 4, label: "3/4" }
+        ]);
+        const mult = randInt(rng, 2, 8);
+        const rA = fr.den * mult;
         const dA = rA * 2;
-        const rB = rA / 3;
+        const rB = fr.num * mult;
         const dB = rB * 2;
-        const q = `Bulatan A mempunyai diameter ${dA} cm. Bulatan B dilukis dengan jejari berukuran 1/3 daripada jejari bulatan A. Berapakah diameter bulatan B dalam cm?`;
-        const exp = `Jejari bulatan A = ${dA} ÷ 2 = ${rA} cm. Jejari bulatan B = 1/3 × ${rA} = ${rB} cm. Diameter bulatan B = 2 × ${rB} = ${dB} cm.`;
+        const q = `Bulatan A mempunyai diameter ${dA} cm. Bulatan B dilukis dengan jejari berukuran ${fr.label} daripada jejari bulatan A. Berapakah diameter bulatan B dalam cm?`;
+        const exp = `Jejari bulatan A = ${dA} ÷ 2 = ${rA} cm. Jejari bulatan B = ${fr.label} × ${rA} = ${rB} cm. Diameter bulatan B = 2 × ${rB} = ${dB} cm.`;
         const wrongs = [
           `${rB} cm`,
-          `${dA / 3 * 2} cm`,
+          `${dB * 2} cm`,
           `${rA} cm`,
           `${dB + 4} cm`
         ];
-        return buildMcq(rng, { ...meta, template: tpl }, q, `${dB} cm`, wrongs, exp, `b6_s3:H:${tpl}:rA=${rA}`);
+        return buildMcq(rng, { ...meta, template: tpl }, q, `${dB} cm`, wrongs, exp, `b6_s3:H:${tpl}:rA=${rA},f=${fr.label}`);
       } else {
-        const r = pick(rng, [6, 7, 8, 9, 10]);
+        const r = randInt(rng, 4, 15);
         const d = r * 2;
-        const S = d + pick(rng, [4, 6, 8, 10]); // even difference so margin is integer
+        const S = d + pick(rng, [4, 6, 8, 10, 12, 14]);
         const margin = (S - d) / 2;
         const q = `Chee Cheong melukis satu bulatan berjejari ${r} cm tepat di tengah-tengah sekeping papan segi empat sama berukuran ${S} cm × ${S} cm. Berapakah jarak terpendek dari lilitan bulatan ke tepi papan itu?`;
         const exp = `Diameter bulatan = 2 × ${r} = ${d} cm. Baki ruang di kedua-dua sisi = ${S} − ${d} = ${S - d} cm. Jarak ke satu tepi = ${S - d} ÷ 2 = ${margin} cm.`;
@@ -6425,7 +6523,7 @@
     const tpl = pick(rng, ["prob_five_scale_marbles", "prob_which_event_matches"]);
 
     if (tpl === "prob_five_scale_marbles") {
-      const k = randInt(rng, 2, 5);
+      const k = randInt(rng, 2, 12);
       const kind = pick(rng, ["Pasti", "Mustahil", "Sama kemungkinan", "Besar kemungkinan", "Kecil kemungkinan"]);
       let merah, biru;
       if (kind === "Pasti") {
@@ -6460,7 +6558,7 @@
       };
     }
 
-    const k = randInt(rng, 2, 4);
+    const k = randInt(rng, 2, 10);
     const events = [
       { level: "Pasti", text: `Mengambil bola kuning daripada beg berisi ${k * 4} biji bola kuning sahaja.` },
       { level: "Mustahil", text: `Mengambil bola hijau daripada beg berisi ${k * 3} biji bola merah dan ${k} biji bola biru.` },
@@ -6488,16 +6586,31 @@
 
     if (tpl === "prob_numbered_cards") {
       const bank = [
+        { n: 6, desc: "nombor genap", count: 3, note: "2, 4, 6" },
+        { n: 6, desc: "nombor lebih besar daripada 6", count: 0, note: "tiada" },
         { n: 8, desc: "nombor genap", count: 4, note: "2, 4, 6, 8" },
+        { n: 8, desc: "nombor ganjil", count: 4, note: "1, 3, 5, 7" },
         { n: 8, desc: "nombor gandaan 4", count: 2, note: "4, 8" },
         { n: 8, desc: "nombor kurang daripada 7", count: 6, note: "1, 2, 3, 4, 5, 6" },
         { n: 8, desc: "nombor lebih besar daripada 8", count: 0, note: "tiada" },
+        { n: 8, desc: "nombor bulat kurang daripada 10", count: 8, note: "semua 8 kad" },
         { n: 10, desc: "nombor ganjil", count: 5, note: "1, 3, 5, 7, 9" },
         { n: 10, desc: "nombor gandaan 5", count: 2, note: "5, 10" },
+        { n: 10, desc: "nombor kurang daripada 3", count: 2, note: "1, 2" },
         { n: 10, desc: "nombor kurang daripada 9", count: 8, note: "1 hingga 8" },
+        { n: 12, desc: "nombor genap", count: 6, note: "2, 4, 6, 8, 10, 12" },
         { n: 12, desc: "nombor gandaan 4", count: 3, note: "4, 8, 12" },
         { n: 12, desc: "nombor kurang daripada 10", count: 9, note: "1 hingga 9" },
-        { n: 12, desc: "nombor bulat kurang daripada 15", count: 12, note: "semua 12 kad" }
+        { n: 12, desc: "nombor lebih besar daripada 3", count: 9, note: "4 hingga 12" },
+        { n: 12, desc: "nombor bulat kurang daripada 15", count: 12, note: "semua 12 kad" },
+        { n: 16, desc: "nombor genap", count: 8, note: "2, 4, 6, 8, 10, 12, 14, 16" },
+        { n: 16, desc: "nombor gandaan 4", count: 4, note: "4, 8, 12, 16" },
+        { n: 16, desc: "nombor kurang daripada 13", count: 12, note: "1 hingga 12" },
+        { n: 16, desc: "nombor lebih besar daripada 20", count: 0, note: "tiada" },
+        { n: 20, desc: "nombor ganjil", count: 10, note: "1, 3, 5, ..., 19" },
+        { n: 20, desc: "nombor gandaan 4", count: 5, note: "4, 8, 12, 16, 20" },
+        { n: 20, desc: "nombor kurang daripada 16", count: 15, note: "1 hingga 15" },
+        { n: 20, desc: "nombor bulat kurang daripada 25", count: 20, note: "semua 20 kad" }
       ];
       const item = pick(rng, bank);
       const ans = classifyLikelihood(item.count, item.n);
@@ -6515,21 +6628,24 @@
       };
     }
 
-    const total = pick(rng, [8, 10, 12]);
+    const total = pick(rng, [8, 10, 12, 16, 20]);
     const regime = pick(rng, ["Sama kemungkinan", "Besar kemungkinan", "Kecil kemungkinan", "Mustahil"]);
+    const [cMain, cTwo, cThree] = pick(rng, [["biru", "kuning", "merah"], ["hijau", "jingga", "putih"]]);
+    const majorMap = { 8: 6, 10: 8, 12: 9, 16: 12, 20: 15 };
+    const minorMap = { 8: 2, 10: 2, 12: 3, 16: 4, 20: 5 };
     let targetCount;
     if (regime === "Sama kemungkinan") targetCount = total / 2;
-    else if (regime === "Besar kemungkinan") targetCount = total === 8 ? 6 : total === 10 ? 8 : 9;
-    else if (regime === "Kecil kemungkinan") targetCount = total === 8 ? 2 : total === 10 ? 2 : 3;
+    else if (regime === "Besar kemungkinan") targetCount = majorMap[total];
+    else if (regime === "Kecil kemungkinan") targetCount = minorMap[total];
     else targetCount = 0;
 
     const rem = total - targetCount;
-    const sBlue = targetCount;
-    const sYellow = Math.floor(rem / 2);
-    const sRed = rem - sYellow;
-    const askColor = targetCount === 0 ? "ungu" : "biru";
+    const sMain = targetCount;
+    const sTwo = Math.floor(rem / 2);
+    const sThree = rem - sTwo;
+    const askColor = targetCount === 0 ? "ungu" : cMain;
     const ans = classifyLikelihood(targetCount, total);
-    const qText = `Sebuah roda nombor adil dibahagikan kepada ${total} bahagian sama besar: ${sBlue} bahagian berwarna biru, ${sYellow} berwarna kuning dan ${sRed} berwarna merah. Apakah kebolehjadian jarum roda berhenti pada bahagian berwarna ${askColor}?`;
+    const qText = `Sebuah roda nombor adil dibahagikan kepada ${total} bahagian sama besar: ${sMain} bahagian berwarna ${cMain}, ${sTwo} berwarna ${cTwo} dan ${sThree} berwarna ${cThree}. Apakah kebolehjadian jarum roda berhenti pada bahagian berwarna ${askColor}?`;
     const exp = `Bahagian berwarna ${askColor} ialah ${targetCount} daripada ${total} bahagian (${targetCount}/${total}). Maka kebolehjadiannya ialah ${ans}.`;
     const wrongs = pickLikelihoodWrongs(rng, ans, ["Sama kemungkinan", "Besar kemungkinan", "Kecil kemungkinan"]);
     const mcq = buildMcq(rng, qText, ans, wrongs, exp);
@@ -6539,7 +6655,7 @@
       diff: "M",
       template: tpl,
       ...mcq,
-      sig: `b8_s2:M:${tpl}:${total},${sBlue},${sYellow},${sRed},${askColor}`
+      sig: `b8_s2:M:${tpl}:${total},${sMain},${sTwo},${sThree},${askColor},${cMain}`
     };
   });
 
@@ -6720,17 +6836,23 @@
     const tpl = pick(rng, ["prob8_pie_transfer_recalc", "prob8_combined_pie_likelihood"]);
 
     if (tpl === "prob8_pie_transfer_recalc") {
-      const mult = pick(rng, [5, 10]);
+      const mult = pick(rng, [2, 3, 4, 5, 6, 8, 10, 12]);
       const total0 = 8 * mult;
       const donat0 = 2 * mult;
       const keria0 = mult;
-      const addDonat = pick(rng, [2 * mult, 4 * mult]); // newTotal = 10*mult (40%) or 12*mult (50%)
-      const newTotal = total0 + addDonat;
-      const newDonat = donat0 + addDonat;
-      const newPct = (newDonat * 100) / newTotal;
-      const qText = `Carta pai menunjukkan jualan awal empat jenis kuih: Karipap (180°), Donat (90°), Keria (45°) dan Ketayap (45°). Diberi jualan awal Keria ialah ${keria0} biji. Kemudian, ${addDonat} biji Donat lagi berjaya dijual. Berapakah peratusan jualan Donat berbanding jumlah jualan kuih yang terkini?`;
-      const exp = `Keria (45° = 1/8) = ${keria0}, jadi jumlah awal = ${total0} dan Donat awal (90° = 1/4) = ${donat0}. Selepas ditambah ${addDonat}, Donat = ${newDonat} daripada jumlah terkini ${newTotal}, iaitu (${newDonat}/${newTotal}) × 100% = ${newPct}%.`;
-      const wrongs = makeIntWrongs(newPct, [25, 30, Math.round((newDonat * 100) / total0), newPct - 10]).map((v) => `${v}%`);
+      const variant = pick(rng, [
+        { target: "Donat", angleDesc: "90° = 1/4", init: donat0, add: 2 * mult, pct: 40 },
+        { target: "Donat", angleDesc: "90° = 1/4", init: donat0, add: 4 * mult, pct: 50 },
+        { target: "Donat", angleDesc: "90° = 1/4", init: donat0, add: 12 * mult, pct: 70 },
+        { target: "Keria", angleDesc: "45° = 1/8", init: keria0, add: 2 * mult, pct: 30 },
+        { target: "Keria", angleDesc: "45° = 1/8", init: keria0, add: 12 * mult, pct: 65 }
+      ]);
+      const newTotal = total0 + variant.add;
+      const newCount = variant.init + variant.add;
+      const newPct = variant.pct;
+      const qText = `Carta pai menunjukkan jualan awal empat jenis kuih: Karipap (180°), Donat (90°), Keria (45°) dan Ketayap (45°). Diberi jualan awal Keria ialah ${keria0} biji. Kemudian, ${variant.add} biji ${variant.target} lagi berjaya dijual. Berapakah peratusan jualan ${variant.target} berbanding jumlah jualan kuih yang terkini?`;
+      const exp = `Keria (45° = 1/8) = ${keria0}, jadi jumlah awal = ${total0} dan ${variant.target} awal (${variant.angleDesc}) = ${variant.init}. Selepas ditambah ${variant.add}, ${variant.target} = ${newCount} daripada jumlah terkini ${newTotal}, iaitu (${newCount}/${newTotal}) × 100% = ${newPct}%.`;
+      const wrongs = makeIntWrongs(newPct, [25, 35, Math.round((newCount * 100) / total0), newPct - 10]).map((v) => `${v}%`);
       const mcq = buildMcq(rng, qText, `${newPct}%`, wrongs, exp, (s) => `${newPct + s * 5}%`);
       return {
         unit: "b8",
@@ -6738,19 +6860,20 @@
         diff: "H",
         template: tpl,
         ...mcq,
-        sig: `b8_s3:H:${tpl}:${mult},${addDonat}`
+        sig: `b8_s3:H:${tpl}:${mult},${variant.target},${variant.add}`
       };
     }
 
-    // Combined pie + likelihood adjustment:
-    // Total = 8k (merah 4k = 180°, biru 2k = 90°, hijau k = 45°, kuning k = 45°).
-    // Other colors = 4k + 2k + k = 7k. To make picking hijau "Sama kemungkinan", hijau must become 7k, so add 6k!
-    const k = randInt(rng, 3, 9);
+    const k = randInt(rng, 2, 20);
     const total = 8 * k;
-    const needAdd = 6 * k;
-    const qText = `Sebuah carta pai menunjukkan ${total} keping token di dalam sebuah beg: Merah (180°), Biru (90°), Hijau (45°) dan Kuning (45°). Berapa kepingkah token Hijau yang perlu dimasukkan lagi supaya kebolehjadian mencabut token Hijau sama dengan kebolehjadian mencabut token yang bukan Hijau?`;
-    const exp = `Pada asalnya: Merah = ${4 * k}, Biru = ${2 * k}, Hijau = ${k}, Kuning = ${k}. Jumlah token bukan Hijau = ${4 * k} + ${2 * k} + ${k} = ${7 * k}. Supaya sama kemungkinan, token Hijau mesti menjadi ${7 * k}, maka perlu tambah ${7 * k} - ${k} = ${needAdd} keping.`;
-    const wrongs = makeUnitNumWrongs(needAdd, "keping", [3 * k, 4 * k, 7 * k, 2 * k]);
+    const isHijau = pick(rng, [true, false]);
+    const colorName = isHijau ? "Hijau" : "Biru";
+    const initCount = isHijau ? k : 2 * k;
+    const otherCount = total - initCount;
+    const needAdd = otherCount - initCount; // 6k for Hijau, 4k for Biru
+    const qText = `Sebuah carta pai menunjukkan ${total} keping token di dalam sebuah beg: Merah (180°), Biru (90°), Hijau (45°) dan Kuning (45°). Berapa kepingkah token ${colorName} yang perlu dimasukkan lagi supaya kebolehjadian mencabut token ${colorName} sama dengan kebolehjadian mencabut token yang bukan ${colorName}?`;
+    const exp = `Pada asalnya: Merah = ${4 * k}, Biru = ${2 * k}, Hijau = ${k}, Kuning = ${k}. Jumlah token bukan ${colorName} = ${otherCount}. Supaya sama kemungkinan, token ${colorName} mesti menjadi ${otherCount}, maka perlu tambah ${otherCount} - ${initCount} = ${needAdd} keping.`;
+    const wrongs = makeUnitNumWrongs(needAdd, "keping", [3 * k, 5 * k, otherCount, 2 * k]);
     const mcq = buildMcq(rng, qText, `${needAdd} keping`, wrongs, exp, (s) => `${needAdd + s * k} keping`);
     return {
       unit: "b8",
@@ -6758,7 +6881,7 @@
       diff: "H",
       template: tpl,
       ...mcq,
-      sig: `b8_s3:H:${tpl}:${k}`
+      sig: `b8_s3:H:${tpl}:${colorName}:${k}`
     };
   });
 

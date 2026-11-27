@@ -1201,6 +1201,99 @@ test("15c. wrong answer on d6_bi triggers same-skill retry with different item a
   assert.ok(rank(retry.q.diff) <= rank(missed.diff), `retry ${retry.q.diff} harder than ${missed.diff}`);
 });
 
+// 16. All 8 D6 pools including d6_rbt (90), d6_psv (200), d6_pjpk (280) ----
+function loadD6All8() {
+  const win = { localStorage: makeLocalStorage() };
+  const ctx = vm.createContext({ window: win, Date: FixedDate });
+  for (const rel of [
+    "js/data/pools/d6_sejarah.js",
+    "js/data/curriculum/d6_sejarah.js",
+    "js/data/curriculum/d6_math.js",
+    "js/data/pools/d6_math_gen.js",
+    "js/data/curriculum/d6_bm.js",
+    "js/data/pools/d6_bm.js",
+    "js/data/curriculum/d6_sains.js",
+    "js/data/pools/d6_sains.js",
+    "js/data/pools/d6_sains_gen.js",
+    "js/data/curriculum/d6_bi.js",
+    "js/data/pools/d6_bi.js",
+    "js/data/curriculum/d6_rbt.js",
+    "js/data/pools/d6_rbt.js",
+    "js/data/curriculum/d6_psv.js",
+    "js/data/pools/d6_psv.js",
+    "js/data/curriculum/d6_pjpk.js",
+    "js/data/pools/d6_pjpk.js",
+    "js/storage.js"
+  ]) {
+    vm.runInContext(readRel(rel), ctx, { filename: rel });
+  }
+  return win.App;
+}
+
+const D6_ALL8 = loadD6All8();
+
+function assertPoolSessionAndRetry(subj, pool, ticked, seedBase) {
+  const run = playSession({
+    pool,
+    ticked,
+    state: V.createInitialState(),
+    seed: `${seedBase}-s`,
+    id: `${seedBase}-id`,
+    answer: (q, i) => i !== 0
+  });
+  assert.equal(run.draws.length, 10, `${subj}: expected 10 draws`);
+  assert.equal(run.session.completed, true, `${subj}: session not completed`);
+  assert.equal(new Set(run.draws.map((d) => V.normalizePromptText(d.q.q))).size, 10, `${subj}: duplicate prompts in session`);
+  for (const d of run.draws) {
+    assert.ok(ticked.includes(d.q.unit), `${subj}: unexpected unit ${d.q.unit}`);
+    assert.equal(d.q.options.length, 4);
+    assert.equal(new Set(d.q.options.map((o) => String(o).toLowerCase().trim())).size, 4, `${subj}: duplicate options in ${d.q.id}`);
+    assert.ok(d.q.correctIndex >= 0 && d.q.correctIndex <= 3);
+    assert.ok(typeof d.q.explanation === "string" && d.q.explanation.trim().length > 0);
+    assert.equal(/NaN|undefined/.test(`${d.q.q}|${d.q.options.join("|")}|${d.q.explanation}`), false);
+  }
+  const missed = run.draws[0].q;
+  const retry = run.draws.find((d) => d.fromRetry && d.idx > 0);
+  assert.ok(retry, `${subj}: no retry was drawn`);
+  assert.equal(retry.q.skill, missed.skill);
+  assert.notEqual(retry.q.id, missed.id);
+  assert.notEqual(V.normalizePromptText(retry.q.q), V.normalizePromptText(missed.q));
+  assert.ok(rank(retry.q.diff) <= rank(missed.diff), `${subj}: retry ${retry.q.diff} harder than ${missed.diff}`);
+}
+
+test("16a. all 8 D6 pools auto-detect including d6_rbt (90), d6_psv (200), and d6_pjpk (280)", () => {
+  const found = V.getAvailablePools(D6_ALL8.Pools, D6_ALL8.Curriculum, "d6", D6_ALL8.Generators);
+  assert.equal(found.length, 8);
+  const expected = [
+    ["rbt", 3, 9, 90],
+    ["psv", 10, 20, 200],
+    ["pjpk", 13, 28, 280]
+  ];
+  for (const [subj, uCnt, sCnt, qCnt] of expected) {
+    const curr = D6_ALL8.Curriculum.d6[subj];
+    const pool = D6_ALL8.Pools.d6[subj];
+    assert.equal(curr.units.length, uCnt, `${subj} unit count`);
+    assert.equal(curr.units.reduce((n, u) => n + u.skills.length, 0), sCnt, `${subj} skill count`);
+    assert.equal(pool.length, qCnt, `${subj} pool length`);
+    const entry = found.find((p) => p.subjectId === subj);
+    assert.ok(entry, `${subj} missing from getAvailablePools`);
+    assert.equal(entry.isGenerator, false);
+    assert.equal(entry.pool.length, qCnt);
+  }
+});
+
+test("16b. real d6_rbt mixed session and wrong-answer retry", () => {
+  assertPoolSessionAndRetry("rbt", D6_ALL8.Pools.d6.rbt, ["u1", "u2", "u3"], "rbt-mix");
+});
+
+test("16c. real d6_psv mixed session and wrong-answer retry", () => {
+  assertPoolSessionAndRetry("psv", D6_ALL8.Pools.d6.psv, ["u1", "u5", "u8", "u10"], "psv-mix");
+});
+
+test("16d. real d6_pjpk mixed session and wrong-answer retry", () => {
+  assertPoolSessionAndRetry("pjpk", D6_ALL8.Pools.d6.pjpk, ["u1", "u6", "u11", "u13"], "pjpk-mix");
+});
+
 const failed = results.filter((r) => !r.ok);
 console.log(
   failed.length === 0
