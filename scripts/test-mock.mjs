@@ -214,5 +214,63 @@ eq("T4 K2: while items are still draft nothing is drawn", pd4.sections.every((x)
 // Mesin is excluded from Darjah 6 graded mock papers
 eq("D6 Sains Mesin is excluded from mock banks", M.MOCK_EXCLUDE["d6:sains"], ["mesin"]);
 
+// ======================= DARJAH 6 UASA FULL 50-MARK PAPERS (all 5 subjects) =======================
+const D6_MATH = require("../js/data/structured_d6_math.js");
+const D6_SAINS = require("../js/data/structured_d6_sains.js");
+const D6_SEJARAH = require("../js/data/structured_d6_sejarah.js");
+const D6_BM = require("../js/data/mock_d6_bm.js");
+const D6_BI = require("../js/data/mock_d6_bi.js");
+
+const d6StrMap = { d6_math: D6_MATH.ITEMS, d6_sains: D6_SAINS.ITEMS, d6_sejarah: D6_SEJARAH.ITEMS, d6_bm: D6_BM.ITEMS, d6_bi: D6_BI.ITEMS };
+const d6SetMap = { d6_bm: D6_BM.SETS, d6_bi: D6_BI.SETS };
+const d6FullBank = {
+  chapterIds: ["kemahiran_saintifik", "manusia", "mikroorganisma", "interaksi", "pemeliharaan", "daya", "kelajuan", "pengawetan", "pembentukan_malaysia", "negeri_malaysia", "rukun_negara", "kaum_budaya"],
+  getQuestions: (cid) => Array.from({ length: 4 }, (_, i) => mkQ(cid, i)),
+  getStructured: (pool) => d6StrMap[pool] || [],
+  getObjectiveSets: (pool) => d6SetMap[pool] || []
+};
+
+function verifyD6FullPaper(subjId, expectedCounts, expectedMarks) {
+  const bp = B.find("d6", subjId);
+  const paper = M.buildPaper(bp, "k1", d6FullBank, `d6-seed-${subjId}`);
+  eq(`D6 ${subjId}: all sections sedia`, paper.sections.every((s) => s.state === "sedia" && s.supported), true);
+  eq(`D6 ${subjId}: section item counts`, paper.sections.map((s) => s.items.length), expectedCounts);
+  eq(`D6 ${subjId}: section mark totals`, paper.sections.map((s) => s.marks), expectedMarks);
+  const ans = {};
+  const pm = {};
+  paper.sections.forEach((sec) => {
+    sec.items.forEach((it) => {
+      if (it.type === "structured") pm[it.id] = mark(it, allSteps);
+      else if (it.inputType === "word") ans[it.id] = `  ${it.answer.toUpperCase()} `;
+      else ans[it.id] = it.correctIndex;
+    });
+  });
+  const waitSc = M.scorePaper(paper, ans, {});
+  eq(`D6 ${subjId}: unmarked structured sections block grade`, [waitSc.complete, waitSc.grade], [false, null]);
+  const fullSc = M.scorePaper(paper, ans, pm);
+  eq(`D6 ${subjId}: full 50/50 marks -> 100% grade A`, [fullSc.complete, fullSc.markedEarned, fullSc.pct, fullSc.grade && fullSc.grade.grade], [true, 50, 100, "A"]);
+  return paper;
+}
+
+verifyD6FullPaper("math", [13, 2], [26, 24]);
+verifyD6FullPaper("sains", [10, 2, 4], [10, 8, 32]);
+verifyD6FullPaper("sejarah", [20, 4, 2], [20, 20, 10]);
+const bmPaper = verifyD6FullPaper("bm", [10, 2, 1, 1], [10, 10, 10, 20]);
+eq("D6 BM Bahagian A has reading passage on items 5..10", bmPaper.sections[0].items.slice(4).every((it) => it.passage && it.passage.length > 50), true);
+
+const biPaper = verifyD6FullPaper("bi", [5, 4, 5, 6, 5, 1, 1], [5, 4, 5, 6, 5, 10, 15]);
+eq("D6 BI Part 4 uses 3 matching options", biPaper.sections[3].items.every((it) => it.options.length === 3), true);
+eq("D6 BI Part 5 uses word input with clues", biPaper.sections[4].items.every((it) => it.inputType === "word" && it.clue && it.answer), true);
+
+// Draft objective sets are never drawn; Part 5 wrong/blank word scores 0 and blank is omitted from itemRecords
+const draftObjBank = { chapterIds: [], getQuestions: () => [], getStructured: () => [], getObjectiveSets: () => D6_BM.SETS.map((s) => ({ ...s, status: "draft" })) };
+eq("D6 BM draft objective set is never drawn", M.buildPaper(B.find("d6", "bm"), "k1", draftObjBank, "d").sections[0].state, "kosong");
+
+const wordOnlyAnswers = { "51": "   ", "52": "wrongword", "53": ` ${biPaper.sections[4].items[2].answer.toUpperCase()} ` };
+const biPartial = M.scorePaper(biPaper, wordOnlyAnswers, {});
+eq("D6 BI Part 5 scores 1/5 for 1 case-insensitive trimmed match", biPartial.sections[4].earned, 1);
+const wordRecs = M.itemRecords(biPaper, wordOnlyAnswers, {});
+eq("D6 BI Part 5 omits whitespace-only answer from itemRecords", [wordRecs.length, wordRecs.filter((r) => r.correct).length], [2, 1]);
+
 console.log(failed === 0 ? "MOCK_TESTS_PASSED" : `MOCK_TESTS_FAILED (${failed})`);
 process.exit(failed === 0 ? 0 : 1);

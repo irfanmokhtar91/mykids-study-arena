@@ -31,7 +31,7 @@
         id: "k1", name: "Ujian Bertulis: Pemahaman & Penulisan", minutes: 75, marks: 50,
         sections: [
           sec("A", "Tatabahasa & pemahaman petikan", ["OAP"], 10, 10, "objective", { countNote: "Tatabahasa 3-5 + pemahaman petikan 5-7 soalan; bilangan tepat bergantung kertas" }),
-          sec("B", "Tatabahasa, pemahaman & respons kritis kreatif", ["OPB", "SRT"], null, 10, "subjective", { countNote: "Tatabahasa/pemahaman 3-5 soalan + respons kritis dan kreatif 1 soalan" }),
+          sec("B", "Tatabahasa, pemahaman & respons kritis kreatif", ["OPB", "SRT"], 2, 10, "subjective", { countNote: "2 soalan (5 markah setiap satu): tatabahasa/pemahaman + respons kritis dan kreatif" }),
           sec("C", "Penulisan perenggan", ["SRTb"], 1, 10, "subjective"),
           sec("D", "Penulisan karangan", ["SRTb"], 1, 20, "subjective")
         ]

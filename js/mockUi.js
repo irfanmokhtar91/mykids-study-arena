@@ -96,6 +96,10 @@
         const p = App.Data && App.Data.structured && App.Data.structured[pool];
         return p ? p.ITEMS : [];
       },
+      getObjectiveSets: (pool) => {
+        const p = App.Data && App.Data.mockObjective && App.Data.mockObjective[pool];
+        return p ? p.SETS : [];
+      },
       getQuestions: (cid) => {
         const n = App.QuestionEngine.getChapterSetCount(gradeId, subject.id, cid, false);
         const all = [];
@@ -145,7 +149,11 @@
             const secs = p.sections.filter((s) => App.MockExam.isSupported(gradeId, sub.id, p.id, s.id));
             return secs.map((s) => `Bahagian ${s.id}`);
           }).flat();
-          if (probe.length) {
+          const totalSecs = bp.papers.reduce((n, p) => n + p.sections.length, 0);
+          if (probe.length === totalSecs && totalSecs > 0) {
+            can = true;
+            badge = `✅ Kertas penuh tersedia (${probe.join(", ")}).`;
+          } else if (probe.length) {
             can = true;
             badge = `✅ Tersedia: ${probe.join(", ")}. Bahagian lain belum ada soalan dan tidak dinilai.`;
           } else {
@@ -396,18 +404,28 @@
     return keep;
   }
 
+  function isItemAnswered(it, val) {
+    if (it.type === "structured") {
+      return !!(val && typeof val === "object" && Object.values(val).some((v) => String(v).trim()));
+    }
+    if (it.inputType === "word") {
+      return typeof val === "string" && val.trim().length > 0;
+    }
+    return val !== undefined;
+  }
+
   function renderRun(main) {
     const sec = currentSection();
     const item = sec.items[session.cur.idx];
     const tabs = session.sectionIds
       .map((id) => {
         const s = lastPaper.sections.find((x) => x.id === id);
-        const done = s.items.filter((it) => session.answers[it.id] !== undefined && (typeof session.answers[it.id] !== "object" || Object.values(session.answers[it.id]).some((v) => String(v).trim()))).length;
+        const done = s.items.filter((it) => isItemAnswered(it, session.answers[it.id])).length;
         return `<button type="button" class="mock-tab ${id === session.cur.sec ? "is-on" : ""}" data-tab="${esc(id)}">Bahagian ${esc(id)} <small>${done}/${s.items.length}</small></button>`;
       })
       .join("");
     const dots = sec.items
-      .map((it, i) => `<button type="button" class="mock-dot ${i === session.cur.idx ? "is-on" : ""} ${session.answers[it.id] !== undefined && (typeof session.answers[it.id] !== "object" || Object.values(session.answers[it.id]).some((v) => String(v).trim())) ? "is-done" : ""}" data-idx="${i}" aria-label="Soalan ${i + 1}">${i + 1}</button>`)
+      .map((it, i) => `<button type="button" class="mock-dot ${i === session.cur.idx ? "is-on" : ""} ${isItemAnswered(it, session.answers[it.id]) ? "is-done" : ""}" data-idx="${i}" aria-label="Soalan ${i + 1}">${i + 1}</button>`)
       .join("");
     const isStructured = item.type === "structured";
     const opts = (item.options || [])
@@ -446,7 +464,11 @@
                    )
                    .join("")}
                  <p class="mock-note">Jalan kerja (foto atau taip) ditanda oleh ibu bapa selepas kertas dihantar.</p>`
-              : `<p class="mock-q">${esc(item.q)}</p><div class="mock-opts">${opts}</div>`
+              : `${item.passage ? `<div class="mock-passage">${esc(item.passage).replace(/\n/g, "<br>")}</div>` : ""}<p class="mock-q">${esc(item.q)}</p>${
+                  item.inputType === "word"
+                    ? `<div class="mock-word-clue"><code>${esc(item.clue || "")}</code></div><input type="text" class="mock-word-input" autocomplete="off" spellcheck="false" placeholder="Taip perkataan lengkap..." value="${esc(typeof session.answers[item.id] === "string" ? session.answers[item.id] : "")}" />`
+                    : `<div class="mock-opts">${opts}</div>`
+                }`
           }
         </div>
         <div class="mock-dots">${dots}</div>
@@ -457,6 +479,19 @@
         </div>
       </section>`;
     if (isStructured) wirePhotos(main, item);
+    main.querySelectorAll(".mock-word-input").forEach((inp) =>
+      inp.addEventListener("input", () => {
+        session.answers[item.id] = inp.value.slice(0, 60);
+        saveSession();
+        const dot = main.querySelector(`.mock-dot[data-idx="${session.cur.idx}"]`);
+        if (dot) dot.classList.toggle("is-done", isItemAnswered(item, session.answers[item.id]));
+        const tabSmall = main.querySelector(`.mock-tab[data-tab="${sec.id}"] small`);
+        if (tabSmall) {
+          const doneCnt = sec.items.filter((it) => isItemAnswered(it, session.answers[it.id])).length;
+          tabSmall.textContent = `${doneCnt}/${sec.items.length}`;
+        }
+      })
+    );
     main.querySelectorAll(".mock-work").forEach((ta) =>
       ta.addEventListener("input", () => {
         const cur = session.answers[item.id] && typeof session.answers[item.id] === "object" ? session.answers[item.id] : {};
@@ -499,7 +534,7 @@
     });
     document.getElementById("mock-submit").addEventListener("click", () => {
       const unanswered = session.sectionIds.reduce(
-        (n, id) => n + lastPaper.sections.find((x) => x.id === id).items.filter((it) => session.answers[it.id] === undefined || (typeof session.answers[it.id] === "object" && !Object.values(session.answers[it.id]).some((v) => String(v).trim()))).length,
+        (n, id) => n + lastPaper.sections.find((x) => x.id === id).items.filter((it) => !isItemAnswered(it, session.answers[it.id])).length,
         0
       );
       const msg = unanswered ? `Masih ada ${unanswered} soalan belum dijawab. Hantar sekarang?` : "Hantar jawapan sekarang?";
@@ -604,21 +639,26 @@
       s.items.forEach((it) => {
         if (it.type === "structured") return; // marked by a parent, never auto-judged here
         const a = session.answers[it.id];
-        if (a !== it.correctIndex) wrong.push({ it, a });
+        if (!App.MockExam.isObjectiveCorrect(it, a)) wrong.push({ it, a });
       })
     );
     const review = wrong.length
       ? `<h3>Semak jawapan salah (${wrong.length})</h3>` +
         wrong
-          .map(
-            ({ it, a }) => `
+          .map(({ it, a }) => {
+            const isWord = it.inputType === "word";
+            const userTxt = isWord
+              ? !a || !String(a).trim() ? "⏱️ Tidak dijawab" : `❌ ${esc(a)}`
+              : a === undefined ? "⏱️ Tidak dijawab" : `❌ ${esc(it.options[a])}`;
+            const keyTxt = isWord ? esc(it.answer) : esc(it.options[it.correctIndex]);
+            return `
           <div class="mock-review">
             <div class="m-q">${esc(it.q)}</div>
-            <div class="m-ans">${a === undefined ? "⏱️ Tidak dijawab" : `❌ ${esc(it.options[a])}`} → ✅ <strong>${esc(it.options[it.correctIndex])}</strong></div>
+            <div class="m-ans">${userTxt} → ✅ <strong>${keyTxt}</strong></div>
             ${it.explanation ? `<small>${esc(it.explanation)}</small>` : ""}
             <button type="button" class="btn-report" data-mock-report="${esc(it.id)}">🚩 Laporkan soalan ini</button>
-          </div>`
-          )
+          </div>`;
+          })
           .join("")
       : `<p class="mock-note">Semua soalan yang dinilai betul. 🎉</p>`;
     main.innerHTML = `
@@ -637,15 +677,16 @@
       b.addEventListener("click", () => {
         const found = wrong.find((w) => w.it.id === b.getAttribute("data-mock-report"));
         if (!found) return;
+        const isWord = found.it.inputType === "word";
         const added = App.Storage.addReport(ctx.profile.id, {
           gradeId: ctx.profile.gradeId,
           subjectId: pickedSubject.id,
           subjectName: pickedSubject.name,
           chapterTitle: (pickedSubject.chapters.find((c) => c.id === found.it.chapterId) || {}).title || "",
           q: found.it.q,
-          options: found.it.options,
-          keyAnswer: found.it.options[found.it.correctIndex],
-          chosen: found.a === undefined ? "" : found.it.options[found.a]
+          options: found.it.options || [],
+          keyAnswer: isWord ? found.it.answer : found.it.options[found.it.correctIndex],
+          chosen: isWord ? String(found.a || "") : (found.a === undefined ? "" : found.it.options[found.a])
         });
         b.textContent = added ? "✅ Dilaporkan" : "✅ Sudah dilaporkan";
         b.disabled = true;

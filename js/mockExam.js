@@ -41,11 +41,35 @@
    * Only items with status "verified" are ever drawn.
    */
   const STRUCTURED_MAP = {
+    "d6:math:k1:A": { pool: "d6_math", part: "A" },
+    "d6:math:k1:B": { pool: "d6_math", part: "B" },
+    "d6:sains:k1:B": { pool: "d6_sains", part: "B" },
+    "d6:sains:k1:C": { pool: "d6_sains", part: "C" },
+    "d6:sejarah:k1:B": { pool: "d6_sejarah", part: "B" },
+    "d6:sejarah:k1:C": { pool: "d6_sejarah", part: "C" },
+    "d6:bm:k1:B": { pool: "d6_bm", part: "B" },
+    "d6:bm:k1:C": { pool: "d6_bm", part: "C" },
+    "d6:bm:k1:D": { pool: "d6_bm", part: "D" },
+    "d6:bi:k1:6": { pool: "d6_bi", part: "6" },
+    "d6:bi:k1:7": { pool: "d6_bi", part: "7" },
     "t2:math:k1:B": { pool: "t2_math", part: "B" },
     "t2:math:k1:C": { pool: "t2_math", part: "C" },
     "t4:math:k2:A": { pool: "t4_math", part: "A" },
     "t4:math:k2:B": { pool: "t4_math", part: "B" },
     "t4:math:k2:C": { pool: "t4_math", part: "C" }
+  };
+
+  /**
+   * Passage-backed or word-completion objective sections drawn as whole cohesive sets.
+   * Only sets with status "verified" are ever drawn.
+   */
+  const OBJECTIVE_SET_MAP = {
+    "d6:bm:k1:A": { pool: "d6_bm", part: "A" },
+    "d6:bi:k1:1": { pool: "d6_bi", part: "1" },
+    "d6:bi:k1:2": { pool: "d6_bi", part: "2" },
+    "d6:bi:k1:3": { pool: "d6_bi", part: "3" },
+    "d6:bi:k1:4": { pool: "d6_bi", part: "4" },
+    "d6:bi:k1:5": { pool: "d6_bi", part: "5" }
   };
 
   /** Chapters that must NOT feed graded mock papers (outside the year's DSKP body). Practice sets still use them. */
@@ -83,11 +107,24 @@
 
   function isSupported(gradeId, subjectId, paperId, sectionId) {
     const k = `${gradeId}:${subjectId}:${paperId}:${sectionId}`;
-    return !!OBJECTIVE_MAP[k] || !!STRUCTURED_MAP[k];
+    return !!OBJECTIVE_MAP[k] || !!STRUCTURED_MAP[k] || !!OBJECTIVE_SET_MAP[k];
   }
 
   function structuredSpec(gradeId, subjectId, paperId, sectionId) {
     return STRUCTURED_MAP[`${gradeId}:${subjectId}:${paperId}:${sectionId}`] || null;
+  }
+
+  function objectiveSetSpec(gradeId, subjectId, paperId, sectionId) {
+    return OBJECTIVE_SET_MAP[`${gradeId}:${subjectId}:${paperId}:${sectionId}`] || null;
+  }
+
+  function isObjectiveCorrect(item, answer) {
+    if (item && item.inputType === "word") {
+      if (typeof answer !== "string" || !norm(answer).length) return false;
+      const accepted = Array.isArray(item.accept) && item.accept.length ? item.accept : [item.answer];
+      return accepted.some((a) => norm(a) === norm(answer));
+    }
+    return answer === (item && item.correctIndex);
   }
 
   /**
@@ -153,6 +190,39 @@
           if (!took) break;
         }
         base.state = base.items.length === s.count ? "sedia" : base.items.length > 0 ? "separa" : "kosong";
+        return base;
+      }
+      const setSpec = objectiveSetSpec(blueprint.gradeId, blueprint.subjectId, paperId, s.id);
+      if (setSpec && typeof bank.getObjectiveSets === "function") {
+        const sets = (bank.getObjectiveSets(setSpec.pool, setSpec.part) || []).filter(
+          (b) => b.status === "verified" && b.part === setSpec.part && Array.isArray(b.items) && b.items.length === s.count
+        );
+        const picked = shuffle(rng, sets)[0];
+        if (picked) {
+          base.supported = true;
+          base.items = picked.items.map((it, idx) => {
+            const entry = {
+              id: `${s.id}${idx + 1}`,
+              chapterId: it.chapterId,
+              part: s.id,
+              passage: it.passage || picked.passage || "",
+              q: it.q,
+              explanation: it.explanation || "",
+              marks: s.marks / s.count
+            };
+            if (it.inputType === "word") {
+              entry.inputType = "word";
+              entry.clue = it.clue || "";
+              entry.answer = it.answer;
+              entry.accept = Array.isArray(it.accept) && it.accept.length ? it.accept.slice() : [it.answer];
+            } else {
+              entry.options = it.options.slice();
+              entry.correctIndex = it.correctIndex;
+            }
+            return entry;
+          });
+          base.state = base.items.length === s.count ? "sedia" : "kosong";
+        }
         return base;
       }
       if (s.kind !== "objective" || !OBJECTIVE_MAP[`${blueprint.gradeId}:${blueprint.subjectId}:${paperId}:${s.id}`]) return base;
@@ -254,7 +324,7 @@
       let earned = 0;
       let correct = 0;
       s.items.forEach((it) => {
-        if (answers[it.id] === it.correctIndex) {
+        if (isObjectiveCorrect(it, answers[it.id])) {
           earned += it.marks;
           correct++;
         }
@@ -316,12 +386,12 @@
           }
           return;
         }
-        if (answers[it.id] === undefined) return; // unanswered: not counted as wrong or right here
-        recs.push({ chapterId: it.chapterId, part: it.part, correct: answers[it.id] === it.correctIndex });
+        if (it.inputType === "word" ? !norm(answers[it.id]) : answers[it.id] === undefined) return; // unanswered: not counted as wrong or right here
+        recs.push({ chapterId: it.chapterId, part: it.part, correct: isObjectiveCorrect(it, answers[it.id]) });
       })
     );
     return recs;
   }
 
-  return { OBJECTIVE_MAP, STRUCTURED_MAP, MOCK_EXCLUDE, isSupported, buildPaper, scorePaper, rescoreRecord, earnedForItem, isItemMarked, itemRecords };
+  return { OBJECTIVE_MAP, STRUCTURED_MAP, OBJECTIVE_SET_MAP, MOCK_EXCLUDE, isSupported, isObjectiveCorrect, buildPaper, scorePaper, rescoreRecord, earnedForItem, isItemMarked, itemRecords };
 });
