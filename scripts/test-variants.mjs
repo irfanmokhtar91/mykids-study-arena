@@ -1357,6 +1357,84 @@ test("17c. real t2_sains mixed and numeric-only sessions pass with retry", () =>
   assertPoolSessionAndRetry("t2_sains_num", T2_W1.Pools.t2.sains, ["b8"], "t2s-b8");
 });
 
+// -------------------- Tingkatan 2 Wave 2 (Sejarah + Geografi) --------------------
+// ==================== SECTION 18: TINGKATAN 2 WAVE 2 (SEJARAH + GEOGRAFI) ====================
+function loadT2Wave2() {
+  const ctx = {
+    console,
+    Math,
+    Date,
+    Set,
+    Map,
+    Array,
+    Number,
+    String,
+    Object,
+    JSON,
+    BigInt
+  };
+  ctx.window = ctx;
+  ctx.globalThis = ctx;
+  for (const rel of [
+    "js/variants.js",
+    "js/syllabus.js",
+    "js/generators.js",
+    "js/data/curriculum/t2_math.js",
+    "js/data/pools/t2_math_gen.js",
+    "js/data/curriculum/t2_sains.js",
+    "js/data/pools/t2_sains.js",
+    "js/data/pools/t2_sains_gen.js",
+    "js/data/curriculum/t2_sejarah.js",
+    "js/data/pools/t2_sejarah.js",
+    "js/data/curriculum/t2_geografi.js",
+    "js/data/pools/t2_geografi.js",
+    "js/storage.js"
+  ]) {
+    vm.runInNewContext(readRel(rel), ctx, { filename: rel });
+  }
+  return ctx.App;
+}
+
+const T2_W2 = loadT2Wave2();
+
+test("18a. real t2_sejarah (270) and t2_geografi (300) auto-detect alongside Wave 1 subjects", () => {
+  const found = V.getAvailablePools(T2_W2.Pools, T2_W2.Curriculum, "t2", T2_W2.Generators);
+  assert.equal(found.length, 4);
+  const sej = found.find((p) => p.subjectId === "sejarah");
+  const geo = found.find((p) => p.subjectId === "geografi");
+  assert.ok(sej && geo);
+  assert.equal(T2_W2.Curriculum.t2.sejarah.units.length, 9);
+  assert.equal(T2_W2.Curriculum.t2.sejarah.units.reduce((n, u) => n + u.skills.length, 0), 27);
+  assert.equal(sej.pool.length, 270);
+  assert.equal(T2_W2.Curriculum.t2.geografi.units.length, 10);
+  assert.equal(T2_W2.Curriculum.t2.geografi.units.reduce((n, u) => n + u.skills.length, 0), 30);
+  assert.equal(geo.pool.length, 300);
+  // Wave 2 must not disturb the curated App.Data.t2 banks or the Wave 1 generators.
+  assert.equal(T2_W2.Generators.t2 && typeof T2_W2.Generators.t2, "object");
+});
+
+test("18b. real t2_sejarah mixed session passes with retry", () => {
+  assertPoolSessionAndRetry("t2_sejarah", T2_W2.Pools.t2.sejarah, ["b1", "b5", "b7", "b9"], "t2sj-mix");
+});
+
+test("18c. real t2_geografi mixed session passes with retry", () => {
+  assertPoolSessionAndRetry("t2_geografi", T2_W2.Pools.t2.geografi, ["b1", "b4", "b7", "b9"], "t2ge-mix");
+});
+
+test("18d. every t2_sejarah and t2_geografi pool item maps to a real curriculum skill", () => {
+  for (const subj of ["sejarah", "geografi"]) {
+    const curr = T2_W2.Curriculum.t2[subj];
+    const skills = new Set(curr.units.flatMap((u) => u.skills.map((s) => s.id)));
+    const units = new Set(curr.units.map((u) => u.id));
+    for (const it of T2_W2.Pools.t2[subj]) {
+      assert.ok(skills.has(it.skill), `${subj} ${it.id}: unknown skill ${it.skill}`);
+      assert.ok(units.has(it.unit), `${subj} ${it.id}: unknown unit ${it.unit}`);
+      assert.equal(it.options.length, 4, `${subj} ${it.id}: needs 4 options`);
+      assert.ok(it.correctIndex >= 0 && it.correctIndex < 4, `${subj} ${it.id}: bad key`);
+    }
+  }
+});
+
 const failed = results.filter((r) => !r.ok);
 console.log(
   failed.length === 0

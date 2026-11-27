@@ -338,5 +338,48 @@ for (const subjId of ["math", "sains"]) {
 const sampleT2Ids = ["t2m-B01", "t2m-B11", "t2m-C09", "t2s-B01", "t2s-C01", "t2s-C12"];
 eq("Parent MarkingUI.findItem resolves all T2 Wave 1 structured items", sampleT2Ids.map((id) => Boolean(parentCtx.App.MarkingUI.findItem(id))), [true, true, true, true, true, true]);
 
+// ======================= TINGKATAN 2 WAVE 2 (SEJARAH & GEOGRAFI 80-MARK UASA PAPERS) =======================
+const T2_SEJARAH = require("../js/data/structured_t2_sejarah.js");
+const T2_GEOGRAFI = require("../js/data/structured_t2_geografi.js");
+const t2W2Bank = {
+  chapterIds: [
+    ...t2Subjects.find((s) => s.id === "sejarah").chapters.map((c) => c.id),
+    ...t2Subjects.find((s) => s.id === "geografi").chapters.map((c) => c.id)
+  ],
+  getQuestions: (cid) => Array.from({ length: 4 }, (_, i) => mkQ(cid, i)),
+  getStructured: (pool) => (pool === "t2_sejarah" ? T2_SEJARAH.ITEMS : pool === "t2_geografi" ? T2_GEOGRAFI.ITEMS : [])
+};
+
+// Section A of both papers draws from the curated App.Data.t2 bank, so give the builder a real chapter list.
+{
+  const sejBp = B.find("t2", "sejarah");
+  const sejPaper = M.buildPaper(sejBp, "k1", t2W2Bank, "t2-sejarah-seed");
+  eq("T2 sejarah: all sections sedia", sejPaper.sections.every((s) => s.state === "sedia" && s.supported), true);
+  eq("T2 sejarah: section item counts", sejPaper.sections.map((s) => s.items.length), [20, 4, 2]);
+  eq("T2 sejarah: section mark totals", sejPaper.sections.map((s) => s.marks), [20, 40, 20]);
+
+  const sejAns = {};
+  const sejPm = {};
+  sejPaper.sections.forEach((sec) => {
+    sec.items.forEach((it) => {
+      if (it.type === "structured") sejPm[it.id] = mark(it, allSteps);
+      else sejAns[it.id] = it.correctIndex;
+    });
+  });
+  const sejWait = M.scorePaper(sejPaper, sejAns, {});
+  eq("T2 sejarah: unmarked B/C block grade", [sejWait.complete, sejWait.grade], [false, null]);
+  const sejFull = M.scorePaper(sejPaper, sejAns, sejPm);
+  eq("T2 sejarah: full 80/80 marks -> 100% grade A", [sejFull.complete, sejFull.markedEarned, sejFull.pct, sejFull.grade && sejFull.grade.grade], [true, 80, 100, "A"]);
+
+  const geoBp = B.find("t2", "geografi");
+  const geoPaper = M.buildPaper(geoBp, "k1", t2W2Bank, "t2-geografi-seed");
+  eq("T2 geografi: all sections sedia", geoPaper.sections.every((s) => s.state === "sedia" && s.supported), true);
+  eq("T2 geografi: section item counts", geoPaper.sections.map((s) => s.items.length), [20, 4, 4]);
+  eq("T2 geografi: Bahagian B is 4 x 10 marks (blueprint fix)", geoPaper.sections.map((s) => s.marks), [20, 40, 20]);
+}
+
+const sampleT2W2Ids = ["t2sj-B01", "t2sj-C01", "t2ge-B01", "t2ge-C01", "t2ge-C04"];
+eq("Parent MarkingUI.findItem resolves all T2 Wave 2 structured items", sampleT2W2Ids.map((id) => Boolean(parentCtx.App.MarkingUI.findItem(id))), [true, true, true, true, true]);
+
 console.log(failed === 0 ? "MOCK_TESTS_PASSED" : `MOCK_TESTS_FAILED (${failed})`);
 process.exit(failed === 0 ? 0 : 1);

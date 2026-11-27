@@ -1,0 +1,822 @@
+{
+  "grade": "t2",
+  "subject": "sejarah",
+  "nodes": [
+    {
+      "id": "t2_sejarah_b01",
+      "chapterId": "alam_melayu",
+      "topic": "Bab 1: Kerajaan Alam Melayu",
+      "subtopic": "Konsep Alam Melayu, kerajaan awal dan faktor kemunculannya",
+      "prereq": null,
+      "time": 35000,
+      "bloom": "Understand"
+    },
+    {
+      "id": "t2_sejarah_b02",
+      "chapterId": "alam_melayu",
+      "topic": "Bab 2: Sistem Pemerintahan dan Ekonomi Alam Melayu",
+      "subtopic": "Pemerintahan beraja, perdagangan maritim dan percukaian",
+      "prereq": "t2_sejarah_b01",
+      "time": 40000,
+      "bloom": "Apply"
+    },
+    {
+      "id": "t2_sejarah_b03",
+      "chapterId": "alam_melayu",
+      "topic": "Bab 3: Sosiobudaya Alam Melayu",
+      "subtopic": "Struktur sosial, tulisan dan kepercayaan",
+      "prereq": null,
+      "time": 35000,
+      "bloom": "Understand"
+    },
+    {
+      "id": "t2_sejarah_b04",
+      "chapterId": "alam_melayu",
+      "topic": "Bab 4: Alam Melayu dan Kerajaan Luar",
+      "subtopic": "Hubungan diplomatik serta pengaruh China dan India",
+      "prereq": "t2_sejarah_b02",
+      "time": 40000,
+      "bloom": "Analyze"
+    },
+    {
+      "id": "t2_sejarah_b05",
+      "chapterId": "kesultanan_melaka",
+      "topic": "Bab 5: Kesultanan Melayu Melaka",
+      "subtopic": "Pengasasan, pentadbiran, undang-undang dan kejatuhan",
+      "prereq": null,
+      "time": 40000,
+      "bloom": "Understand"
+    },
+    {
+      "id": "t2_sejarah_b06",
+      "chapterId": "johor_riau",
+      "topic": "Bab 6: Kesultanan Johor Riau",
+      "subtopic": "Pengasasan, Perang Tiga Segi dan Perjanjian 1824",
+      "prereq": "t2_sejarah_b05",
+      "time": 45000,
+      "bloom": "Apply"
+    },
+    {
+      "id": "t2_sejarah_b07",
+      "chapterId": "pahang_perak_terengganu_selangor",
+      "topic": "Bab 7: Kesultanan Pahang, Perak, Terengganu dan Selangor",
+      "subtopic": "Pengasasan kesultanan dan kegiatan ekonominya",
+      "prereq": "t2_sejarah_b05",
+      "time": 40000,
+      "bloom": "Apply"
+    },
+    {
+      "id": "t2_sejarah_b08",
+      "chapterId": "kedah_kelantan_perlis",
+      "topic": "Bab 8: Kerajaan Kedah, Kelantan, Negeri Sembilan dan Perlis",
+      "subtopic": "Pengaruh Siam dan Minangkabau dalam pengasasan",
+      "prereq": null,
+      "time": 40000,
+      "bloom": "Understand"
+    },
+    {
+      "id": "t2_sejarah_b09",
+      "chapterId": "kedah_kelantan_perlis",
+      "topic": "Bab 9: Warisan Kedah, Kelantan, Negeri Sembilan dan Perlis",
+      "subtopic": "Adat Perpatih, Adat Temenggung dan warisan budaya",
+      "prereq": "t2_sejarah_b08",
+      "time": 45000,
+      "bloom": "Analyze"
+    },
+    {
+      "id": "t2_sejarah_b10",
+      "chapterId": "sarawak_sabah",
+      "topic": "Bab 10: Warisan Sarawak dan Sabah",
+      "subtopic": "Pemerintahan Brooke, SBUB dan kepelbagaian etnik",
+      "prereq": null,
+      "time": 40000,
+      "bloom": "Understand"
+    },
+    {
+      "id": "t2_sejarah_b11",
+      "chapterId": "sarawak_sabah",
+      "topic": "Bab 10: Warisan Sarawak dan Sabah",
+      "subtopic": "Penentangan tempatan dan kegiatan ekonomi tradisional",
+      "prereq": "t2_sejarah_b10",
+      "time": 45000,
+      "bloom": "Analyze"
+    }
+  ],
+  "items": [
+    {
+      "node": "t2_sejarah_b01",
+      "diff": 1,
+      "key": 0,
+      "q": "Apakah maksud Alam Melayu?",
+      "opts": [
+        "Kawasan kepulauan dan semenanjung di Asia Tenggara yang dihuni masyarakat Melayu",
+        "Kawasan tanah tinggi di Asia Timur yang beriklim sejuk",
+        "Wilayah jajahan Portugis di Semenanjung Tanah Melayu",
+        "Kawasan perdagangan di sekitar Laut Mediterranean"
+      ],
+      "exp": "Alam Melayu merujuk kawasan kepulauan dan semenanjung di Asia Tenggara yang dihuni masyarakat Melayu, termasuk Semenanjung Tanah Melayu, Sumatera, Jawa, Borneo dan Sulawesi."
+    },
+    {
+      "node": "t2_sejarah_b01",
+      "diff": 1,
+      "key": 1,
+      "q": "Kerajaan awal manakah yang terletak di Kemboja?",
+      "opts": [
+        "Funan",
+        "Angkor",
+        "Srivijaya",
+        "Majapahit"
+      ],
+      "exp": "Angkor ialah kerajaan awal Alam Melayu yang berpusat di Kemboja. Funan terletak di selatan Vietnam, manakala Srivijaya berpusat di Sumatera dan Majapahit di Jawa."
+    },
+    {
+      "node": "t2_sejarah_b01",
+      "diff": 2,
+      "key": 2,
+      "q": "Kedudukan manakah yang paling menguntungkan kerajaan Alam Melayu sebagai pusat perdagangan?",
+      "opts": [
+        "Terletak jauh di kawasan pergunungan",
+        "Berada di kawasan beriklim gurun",
+        "Berada di laluan perdagangan antara Timur dan Barat",
+        "Terpisah daripada laluan laut utama"
+      ],
+      "exp": "Kerajaan Alam Melayu berkembang sebagai pusat perdagangan kerana kedudukannya di laluan perdagangan antara Timur dan Barat, terutamanya berhampiran Selat Melaka."
+    },
+    {
+      "node": "t2_sejarah_b01",
+      "diff": 3,
+      "key": 0,
+      "q": "Mengapakah kemerosotan sesebuah kerajaan Alam Melayu sering berlaku selepas beberapa abad?",
+      "opts": [
+        "Kerana gabungan kelemahan pemerintahan, persaingan kuasa dan serangan luar",
+        "Kerana kerajaan tersebut menolak kegiatan perdagangan",
+        "Kerana semua penduduk berhijrah ke kawasan gurun",
+        "Kerana kerajaan tersebut tidak pernah menjalinkan hubungan diplomatik"
+      ],
+      "exp": "Kemerosotan kerajaan Alam Melayu biasanya berpunca daripada gabungan faktor dalaman seperti kelemahan pemerintahan dan perebutan kuasa, serta faktor luaran seperti persaingan perdagangan dan serangan kuasa luar."
+    },
+    {
+      "node": "t2_sejarah_b01",
+      "diff": 4,
+      "key": 3,
+      "q": "Seorang pengkaji mendapati sesebuah kerajaan Alam Melayu makmur walaupun tidak terletak di pesisir pantai. Apakah penjelasan paling munasabah?",
+      "opts": [
+        "Kemakmuran hanya bergantung pada jumlah tentera",
+        "Kerajaan itu mengimport semua barang keperluan",
+        "Kerajaan itu tidak menjalankan sebarang kegiatan ekonomi",
+        "Kerajaan itu menguasai hasil bumi pedalaman dan mengalirkannya ke pelabuhan utama"
+      ],
+      "exp": "Kerajaan pedalaman boleh makmur dengan menguasai hasil bumi seperti bijih timah, hasil hutan dan pertanian, kemudian mengalirkannya ke pelabuhan utama untuk perdagangan."
+    },
+    {
+      "node": "t2_sejarah_b02",
+      "diff": 1,
+      "key": 0,
+      "q": "Apakah kedudukan raja dalam sistem pemerintahan kerajaan Alam Melayu?",
+      "opts": [
+        "Pemerintah tertinggi yang memegang kuasa pemerintahan dan agama",
+        "Pegawai yang dilantik oleh pedagang asing",
+        "Ketua yang hanya menjaga hal kebudayaan",
+        "Pemimpin yang dipilih melalui pilihan raya"
+      ],
+      "exp": "Raja ialah pemerintah tertinggi yang memegang kuasa dalam pemerintahan, undang-undang dan hal ehwal agama, serta dibantu oleh pembesar."
+    },
+    {
+      "node": "t2_sejarah_b02",
+      "diff": 1,
+      "key": 1,
+      "q": "Apakah maksud pelabuhan entrepot?",
+      "opts": [
+        "Pelabuhan yang hanya menerima kapal tentera",
+        "Pusat pengumpulan dan pengedaran barang dagangan dari pelbagai kawasan",
+        "Pelabuhan yang terletak di kawasan pergunungan",
+        "Tempat menyimpan hasil pertanian sahaja"
+      ],
+      "exp": "Pelabuhan entrepot berfungsi sebagai pusat pengumpulan dan pengedaran barang dagangan daripada pelbagai kawasan sebelum diedarkan semula kepada pedagang lain."
+    },
+    {
+      "node": "t2_sejarah_b02",
+      "diff": 2,
+      "key": 2,
+      "q": "Apakah tujuan utama undang-undang maritim seperti Undang-undang Laut Melaka digubal?",
+      "opts": [
+        "Mengawal adat istiadat diraja sahaja",
+        "Menetapkan kadar cukai tanah pertanian",
+        "Mengawal perdagangan dan pelayaran di pelabuhan",
+        "Menentukan upacara keagamaan di istana"
+      ],
+      "exp": "Undang-undang Laut Melaka mengawal perdagangan dan pelayaran di pelabuhan, termasuk tanggungjawab nakhoda, anak kapal dan peraturan jual beli di atas kapal."
+    },
+    {
+      "node": "t2_sejarah_b02",
+      "diff": 3,
+      "key": 3,
+      "q": "Bagaimanakah sistem percukaian pelabuhan menyumbang kepada kemakmuran kerajaan Alam Melayu?",
+      "opts": [
+        "Dengan menghalang semua pedagang asing berdagang",
+        "Dengan mengecualikan pedagang tempatan daripada cukai",
+        "Dengan menetapkan cukai yang sama bagi semua tanpa mengira jenis dagangan",
+        "Dengan menjana hasil kepada kerajaan untuk membiayai pentadbiran dan kemudahan pelabuhan"
+      ],
+      "exp": "Cukai yang dikenakan ke atas pedagang mengikut asal dan jenis dagangan menjana hasil kepada kerajaan untuk membiayai pentadbiran, keselamatan dan kemudahan pelabuhan, sekali gus menarik lebih ramai pedagang."
+    },
+    {
+      "node": "t2_sejarah_b02",
+      "diff": 5,
+      "key": 0,
+      "q": "Sebuah pelabuhan Alam Melayu mengutip cukai tinggi daripada pedagang asing. Apakah kesan jangka panjang yang paling mungkin berlaku?",
+      "opts": [
+        "Pedagang beralih ke pelabuhan lain yang mengenakan cukai lebih rendah",
+        "Jumlah pedagang asing bertambah dengan mendadak",
+        "Hasil bumi tempatan tidak lagi diperlukan",
+        "Pelabuhan tersebut tidak lagi memerlukan undang-undang maritim"
+      ],
+      "exp": "Cukai yang terlalu tinggi boleh menyebabkan pedagang beralih ke pelabuhan pesaing yang mengenakan cukai lebih rendah, sehingga hasil kerajaan dan kemakmuran pelabuhan terjejas."
+    },
+    {
+      "node": "t2_sejarah_b03",
+      "diff": 1,
+      "key": 0,
+      "q": "Apakah kepentingan tulisan Pallava dalam kerajaan Alam Melayu?",
+      "opts": [
+        "Digunakan pada prasasti awal sebelum kedatangan Islam",
+        "Digunakan untuk menulis kitab suci al-Quran",
+        "Diperkenalkan oleh pedagang Inggeris pada abad ke-19",
+        "Digunakan untuk mencetak wang kertas moden"
+      ],
+      "exp": "Tulisan Pallava digunakan pada prasasti awal Alam Melayu, terutamanya dalam inskripsi berbahasa Melayu kuno dan Sanskrit, sebelum penggunaan tulisan Jawi menjadi meluas."
+    },
+    {
+      "node": "t2_sejarah_b03",
+      "diff": 1,
+      "key": 1,
+      "q": "Apakah bentuk karya kesusasteraan yang berbentuk puisi empat baris?",
+      "opts": [
+        "Hikayat",
+        "Pantun",
+        "Prasasti",
+        "Manuskrip"
+      ],
+      "exp": "Pantun ialah karya kesusasteraan berbentuk puisi yang terdiri daripada empat baris, biasanya berima dan berisi nasihat atau sindiran."
+    },
+    {
+      "node": "t2_sejarah_b03",
+      "diff": 2,
+      "key": 2,
+      "q": "Kepercayaan animisme dalam masyarakat Alam Melayu merujuk kepada kepercayaan bahawa",
+      "opts": [
+        "setiap manusia mesti mengerjakan haji",
+        "raja memiliki kuasa mutlak dalam agama",
+        "benda dan alam semula jadi mempunyai semangat",
+        "hanya satu tuhan yang disembah"
+      ],
+      "exp": "Animisme ialah kepercayaan bahawa benda seperti pokok, batu dan sungai mempunyai semangat atau roh yang perlu dihormati."
+    },
+    {
+      "node": "t2_sejarah_b03",
+      "diff": 3,
+      "key": 3,
+      "q": "Bagaimanakah kedatangan Islam mengubah seni bina kerajaan Alam Melayu?",
+      "opts": [
+        "Candi dan stupa terus dibina tanpa perubahan",
+        "Seni bina Eropah mula diterapkan sepenuhnya",
+        "Tiada perubahan berlaku dalam seni bina",
+        "Masjid dengan ciri seperti kubah dan menara mula dibina"
+      ],
+      "exp": "Kedatangan Islam memperkenalkan seni bina masjid dengan ciri seperti kubah, menara dan mihrab, berbeza daripada candi dan stupa yang bercirikan Hindu-Buddha."
+    },
+    {
+      "node": "t2_sejarah_b03",
+      "diff": 4,
+      "key": 0,
+      "q": "Sebuah prasasti ditemui menggunakan tulisan Pallava tetapi berbahasa Melayu kuno. Apakah kesimpulan paling tepat tentang masyarakat ketika itu?",
+      "opts": [
+        "Masyarakat tempatan telah menyesuaikan tulisan asing untuk bahasa tempatan",
+        "Masyarakat tersebut tidak mempunyai bahasa sendiri",
+        "Masyarakat tersebut hanya menggunakan bahasa Sanskrit",
+        "Prasasti itu ditulis oleh pedagang Eropah"
+      ],
+      "exp": "Penggunaan tulisan Pallava untuk menulis bahasa Melayu kuno menunjukkan masyarakat tempatan telah menyesuaikan tulisan asing daripada India untuk keperluan bahasa mereka sendiri."
+    },
+    {
+      "node": "t2_sejarah_b04",
+      "diff": 1,
+      "key": 0,
+      "q": "Apakah bentuk hubungan utama antara kerajaan Alam Melayu dengan China pada zaman awal?",
+      "opts": [
+        "Hubungan diplomatik melalui utusan dan perdagangan",
+        "Penjajahan sepenuhnya oleh China",
+        "Peperangan berterusan sepanjang masa",
+        "Tiada sebarang hubungan langsung"
+      ],
+      "exp": "Hubungan antara kerajaan Alam Melayu dengan China lazimnya berbentuk diplomatik melalui penghantaran utusan dan hadiah, di samping hubungan perdagangan yang erat."
+    },
+    {
+      "node": "t2_sejarah_b04",
+      "diff": 1,
+      "key": 1,
+      "q": "Pengaruh India paling ketara dalam aspek manakah dalam kerajaan Alam Melayu?",
+      "opts": [
+        "Sistem percukaian pelabuhan",
+        "Agama dan budaya",
+        "Pembinaan lebuh raya",
+        "Kegiatan perlombongan"
+      ],
+      "exp": "Pengaruh India paling ketara dalam aspek agama dan budaya, terutamanya Hindu-Buddha, yang turut mempengaruhi seni bina, kesusasteraan dan sistem pemerintahan."
+    },
+    {
+      "node": "t2_sejarah_b04",
+      "diff": 2,
+      "key": 2,
+      "q": "Mengapakah pedagang asing perlu menunggu di pelabuhan Alam Melayu sebelum meneruskan pelayaran?",
+      "opts": [
+        "Kerana mereka dilarang berdagang di tempat lain",
+        "Kerana kapal mereka perlu dibaiki setiap hari",
+        "Kerana perlu menunggu perubahan angin monsun",
+        "Kerana mereka mesti mempelajari bahasa tempatan dahulu"
+      ],
+      "exp": "Pedagang terpaksa menunggu di pelabuhan Alam Melayu kerana perlu menunggu perubahan arah angin monsun sebelum boleh meneruskan pelayaran pulang atau ke destinasi seterusnya."
+    },
+    {
+      "node": "t2_sejarah_b04",
+      "diff": 3,
+      "key": 3,
+      "q": "Bagaimanakah kedudukan Alam Melayu sebagai pusat persinggahan mempengaruhi penyebaran budaya?",
+      "opts": [
+        "Budaya tempatan hilang sepenuhnya",
+        "Tiada pertukaran budaya berlaku",
+        "Hanya budaya Eropah diterima",
+        "Berlaku pertukaran budaya antara pedagang dan penduduk tempatan"
+      ],
+      "exp": "Sebagai pusat persinggahan pedagang dari pelbagai negara, Alam Melayu menjadi tempat pertukaran budaya, teknologi dan idea antara penduduk tempatan dengan pedagang asing."
+    },
+    {
+      "node": "t2_sejarah_b04",
+      "diff": 5,
+      "key": 0,
+      "q": "Sebuah kerajaan Alam Melayu menghentikan penghantaran utusan ke China. Apakah kesan yang paling mungkin berlaku?",
+      "opts": [
+        "Hubungan diplomatik dan keistimewaan perdagangan dengan China terjejas",
+        "Kerajaan tersebut serta-merta dijajah oleh India",
+        "Hasil bumi tempatan bertambah dengan mendadak",
+        "Pedagang China dilarang berdagang di seluruh Asia"
+      ],
+      "exp": "Penghantaran utusan ialah asas hubungan diplomatik dengan China. Menghentikannya boleh menjejaskan hubungan baik dan keistimewaan perdagangan yang dinikmati kerajaan tersebut."
+    },
+    {
+      "node": "t2_sejarah_b05",
+      "diff": 1,
+      "key": 0,
+      "q": "Siapakah pengasas Kesultanan Melayu Melaka?",
+      "opts": [
+        "Parameswara",
+        "Sultan Mahmud Shah",
+        "Tun Perak",
+        "Hang Tuah"
+      ],
+      "exp": "Kesultanan Melayu Melaka diasaskan oleh Parameswara, yang kemudiannya memeluk Islam dan menggunakan nama Sultan Iskandar Shah."
+    },
+    {
+      "node": "t2_sejarah_b05",
+      "diff": 1,
+      "key": 1,
+      "q": "Apakah tugas utama Bendahara dalam pentadbiran Kesultanan Melayu Melaka?",
+      "opts": [
+        "Menjaga keselamatan di pelabuhan",
+        "Mengetuai pentadbiran dan menasihati Sultan",
+        "Menguruskan hal ehwal pedagang asing",
+        "Mengetuai angkatan laut"
+      ],
+      "exp": "Bendahara ialah ketua pentadbir yang menasihati Sultan dan memangku tugas baginda semasa ketiadaan baginda."
+    },
+    {
+      "node": "t2_sejarah_b05",
+      "diff": 3,
+      "key": 2,
+      "q": "Pada tahun bilakah Melaka jatuh ke tangan Portugis?",
+      "opts": [
+        "1641",
+        "1824",
+        "1511",
+        "1957"
+      ],
+      "exp": "Melaka jatuh ke tangan Portugis pada tahun 1511. Tahun 1641 ialah tahun Belanda menguasai Melaka, manakala 1824 ialah tahun Perjanjian Inggeris-Belanda."
+    },
+    {
+      "node": "t2_sejarah_b05",
+      "diff": 3,
+      "key": 3,
+      "q": "Mengapakah bahasa Melayu dijadikan lingua franca di pelabuhan Melaka?",
+      "opts": [
+        "Kerana bahasa Melayu ialah bahasa rasmi Portugis",
+        "Kerana semua pedagang diwajibkan belajar bahasa Arab",
+        "Kerana bahasa Melayu lebih mudah daripada bahasa Sanskrit",
+        "Kerana bahasa Melayu digunakan secara meluas dalam perdagangan antara pedagang pelbagai bangsa"
+      ],
+      "exp": "Bahasa Melayu menjadi lingua franca kerana digunakan secara meluas dalam urusan perdagangan, sehingga pedagang daripada pelbagai bangsa dapat berkomunikasi di pelabuhan Melaka."
+    },
+    {
+      "node": "t2_sejarah_b05",
+      "diff": 5,
+      "key": 0,
+      "q": "Kejatuhan Melaka pada 1511 sering dikaitkan dengan faktor dalaman dan luaran. Manakah pasangan yang paling tepat?",
+      "opts": [
+        "Dalaman: perpecahan pembesar; luaran: serangan Portugis",
+        "Dalaman: kekurangan hasil bumi; luaran: banjir besar",
+        "Dalaman: ketiadaan pelabuhan; luaran: kepupusan penduduk",
+        "Dalaman: kehilangan bahasa; luaran: kemarau panjang"
+      ],
+      "exp": "Kejatuhan Melaka berpunca daripada kelemahan dalaman seperti perpecahan dan pengkhianatan dalam kalangan pembesar, serta serangan luaran oleh Portugis pada tahun 1511."
+    },
+    {
+      "node": "t2_sejarah_b06",
+      "diff": 1,
+      "key": 0,
+      "q": "Siapakah yang mengasaskan Kesultanan Johor Riau?",
+      "opts": [
+        "Sultan Alauddin Riayat Shah II",
+        "Sultan Muzaffar Shah I",
+        "Sultan Zainal Abidin I",
+        "Sultan Salehuddin"
+      ],
+      "exp": "Kesultanan Johor Riau diasaskan oleh Sultan Alauddin Riayat Shah II, iaitu kerabat diraja Melaka, selepas kejatuhan Melaka pada tahun 1511."
+    },
+    {
+      "node": "t2_sejarah_b06",
+      "diff": 1,
+      "key": 1,
+      "q": "Pihak manakah yang terlibat dalam Perang Tiga Segi?",
+      "opts": [
+        "Johor, Siam dan British",
+        "Johor, Portugis dan Aceh",
+        "Melaka, Belanda dan India",
+        "Brunei, Sepanyol dan China"
+      ],
+      "exp": "Perang Tiga Segi melibatkan Johor, Portugis dan Aceh yang bersaing untuk menguasai laluan perdagangan di Selat Melaka."
+    },
+    {
+      "node": "t2_sejarah_b06",
+      "diff": 3,
+      "key": 2,
+      "q": "Pada tahun bilakah Perjanjian Inggeris-Belanda ditandatangani?",
+      "opts": [
+        "1511",
+        "1641",
+        "1824",
+        "1946"
+      ],
+      "exp": "Perjanjian Inggeris-Belanda ditandatangani pada tahun 1824 dan membahagikan Alam Melayu kepada dua lingkungan pengaruh, iaitu British dan Belanda."
+    },
+    {
+      "node": "t2_sejarah_b06",
+      "diff": 3,
+      "key": 3,
+      "q": "Mengapakah Perjanjian Inggeris-Belanda 1824 dianggap merugikan Johor Riau?",
+      "opts": [
+        "Kerana Johor Riau dinaikkan taraf sebagai kuasa besar",
+        "Kerana Johor Riau menerima semua wilayah Belanda",
+        "Kerana Johor Riau tidak lagi memerlukan pelabuhan",
+        "Kerana wilayahnya terbahagi kepada dua pengaruh sehingga melemahkan kesatuannya"
+      ],
+      "exp": "Perjanjian 1824 membahagikan wilayah Johor Riau kepada dua lingkungan pengaruh, iaitu British dan Belanda, sehingga melemahkan kuasa dan kesatuan kerajaan tersebut."
+    },
+    {
+      "node": "t2_sejarah_b06",
+      "diff": 4,
+      "key": 0,
+      "q": "Kesultanan Johor Riau berpindah beberapa kali pusat pemerintahannya. Apakah kesan utama perpindahan ini?",
+      "opts": [
+        "Pusat pentadbiran terpaksa disesuaikan dengan ancaman dan tekanan kuasa luar",
+        "Kerajaan tersebut hilang bahasa rasminya",
+        "Penduduk tempatan berhenti berdagang sepenuhnya",
+        "Pengaruh Melaka terhapus serta-merta"
+      ],
+      "exp": "Perpindahan pusat pemerintahan Johor Riau, misalnya antara Johor Lama, Batu Sawar dan Riau, berlaku kerana tekanan ancaman dan serangan, sehingga pentadbiran perlu disesuaikan dengan keadaan keselamatan."
+    },
+    {
+      "node": "t2_sejarah_b07",
+      "diff": 1,
+      "key": 0,
+      "q": "Kesultanan Pahang dan Perak diasaskan oleh kerabat daripada",
+      "opts": [
+        "Kesultanan Melayu Melaka",
+        "Kesultanan Siam",
+        "Kerajaan British",
+        "Kesultanan Brunei sahaja"
+      ],
+      "exp": "Kesultanan Pahang dan Perak diasaskan oleh kerabat Kesultanan Melayu Melaka, dan hubungan kekeluargaan ini menjadi asas legitimasi pemerintahan mereka."
+    },
+    {
+      "node": "t2_sejarah_b07",
+      "diff": 1,
+      "key": 1,
+      "q": "Siapakah tokoh yang dikaitkan dengan pengasasan Kesultanan Selangor?",
+      "opts": [
+        "Sultan Zainal Abidin I",
+        "Sultan Salehuddin",
+        "Sultan Muzaffar Shah I",
+        "Sultan Alauddin Riayat Shah II"
+      ],
+      "exp": "Kesultanan Selangor dikaitkan dengan Sultan Salehuddin, yang berasal daripada kerabat Bugis yang mempunyai hubungan dengan Johor Riau."
+    },
+    {
+      "node": "t2_sejarah_b07",
+      "diff": 2,
+      "key": 2,
+      "q": "Negeri manakah yang paling terkenal dengan perlombongan bijih timah dalam kalangan kesultanan Bab 7?",
+      "opts": [
+        "Terengganu",
+        "Kelantan",
+        "Perak",
+        "Perlis"
+      ],
+      "exp": "Perak terkenal dengan kegiatan perlombongan bijih timah, manakala Terengganu lebih dikenali dengan hasil laut dan pertanian."
+    },
+    {
+      "node": "t2_sejarah_b07",
+      "diff": 3,
+      "key": 3,
+      "q": "Mengapakah kegiatan ekonomi keempat-empat kesultanan Bab 7 tidak seragam?",
+      "opts": [
+        "Kerana semuanya terletak di kawasan gurun",
+        "Kerana semuanya hanya bergantung pada bijih timah",
+        "Kerana tiada kegiatan ekonomi tradisional",
+        "Kerana setiap negeri mempunyai sumber semula jadi dan pengaruh tempatan yang berbeza"
+      ],
+      "exp": "Setiap kesultanan mempunyai sumber semula jadi dan pengaruh tempatan yang berbeza, menyebabkan kegiatan ekonominya berbeza-beza mengikut keadaan geografi masing-masing."
+    },
+    {
+      "node": "t2_sejarah_b07",
+      "diff": 4,
+      "key": 0,
+      "q": "Seorang pedagang ingin membeli hasil laut dalam jumlah besar. Negeri manakah paling sesuai dikunjunginya?",
+      "opts": [
+        "Terengganu",
+        "Perak",
+        "Selangor",
+        "Pahang"
+      ],
+      "exp": "Terengganu terkenal dengan hasil laut dan perikanan kerana kedudukannya di pesisir pantai, berbanding Perak dan Selangor yang lebih dikenali dengan bijih timah."
+    },
+    {
+      "node": "t2_sejarah_b08",
+      "diff": 1,
+      "key": 0,
+      "q": "Pengaruh kuasa manakah yang kuat dalam pembentukan Kerajaan Kedah dan Kelantan?",
+      "opts": [
+        "Siam",
+        "Minangkabau",
+        "Portugis",
+        "Brunei"
+      ],
+      "exp": "Kedah dan Kelantan berada dalam lingkungan pengaruh Siam, manakala pengaruh Minangkabau lebih kuat di Negeri Sembilan."
+    },
+    {
+      "node": "t2_sejarah_b08",
+      "diff": 1,
+      "key": 1,
+      "q": "Pengasasan Negeri Sembilan berkait rapat dengan kedatangan orang",
+      "opts": [
+        "Bugis dari Sulawesi",
+        "Minangkabau dari Sumatera",
+        "Arab dari Timur Tengah",
+        "Cina dari Tanah Besar"
+      ],
+      "exp": "Pengasasan Negeri Sembilan berkait rapat dengan kedatangan orang Minangkabau dari Sumatera, yang membawa adat dan budaya mereka."
+    },
+    {
+      "node": "t2_sejarah_b08",
+      "diff": 3,
+      "key": 2,
+      "q": "Perlis pada suatu ketika berada di bawah pengaruh negeri",
+      "opts": [
+        "Johor",
+        "Pahang",
+        "Kedah",
+        "Terengganu"
+      ],
+      "exp": "Perlis pada suatu ketika berada di bawah pengaruh Kedah sebelum kemudiannya menjadi negeri yang berasingan."
+    },
+    {
+      "node": "t2_sejarah_b08",
+      "diff": 3,
+      "key": 3,
+      "q": "Apakah gelaran pemerintah tertinggi di Negeri Sembilan?",
+      "opts": [
+        "Sultan",
+        "Bendahara",
+        "Temenggung",
+        "Yang di-Pertuan Besar"
+      ],
+      "exp": "Pemerintah tertinggi di Negeri Sembilan digelar Yang di-Pertuan Besar, berbeza daripada negeri lain yang menggunakan gelaran Sultan."
+    },
+    {
+      "node": "t2_sejarah_b08",
+      "diff": 5,
+      "key": 0,
+      "q": "Mengapakah pengaruh Siam dan Minangkabau sering dikelirukan dalam soalan pengelasan negeri?",
+      "opts": [
+        "Kerana kedua-duanya mempengaruhi negeri Melayu yang berbeza",
+        "Kerana kedua-duanya berasal dari Alam Melayu",
+        "Kerana kedua-duanya mempengaruhi negeri yang sama",
+        "Kerana kedua-duanya menolak sistem pemerintahan beraja"
+      ],
+      "exp": "Pengaruh Siam menonjol di Kedah, Kelantan dan Perlis, manakala pengaruh Minangkabau menonjol di Negeri Sembilan. Perbezaan ini penting supaya negeri tidak dikelaskan secara salah."
+    },
+    {
+      "node": "t2_sejarah_b09",
+      "diff": 1,
+      "key": 0,
+      "q": "Apakah maksud sistem kekeluargaan matrilineal?",
+      "opts": [
+        "Pewarisan harta dan keturunan melalui sebelah ibu",
+        "Pewarisan harta dan keturunan melalui sebelah bapa",
+        "Pewarisan harta kepada anak sulung sahaja",
+        "Pewarisan harta kepada kerajaan negeri"
+      ],
+      "exp": "Matrilineal bermaksud pewarisan harta pusaka dan keturunan ditentukan melalui sebelah ibu, iaitu ciri utama Adat Perpatih."
+    },
+    {
+      "node": "t2_sejarah_b09",
+      "diff": 1,
+      "key": 1,
+      "q": "Apakah adat yang diamalkan di Negeri Sembilan yang berkait dengan sistem matrilineal?",
+      "opts": [
+        "Adat Temenggung",
+        "Adat Perpatih",
+        "Adat Istiadat Melaka",
+        "Adat Bugis"
+      ],
+      "exp": "Adat Perpatih ialah adat yang diamalkan di Negeri Sembilan dan berkait rapat dengan sistem kekeluargaan matrilineal yang dibawa oleh orang Minangkabau."
+    },
+    {
+      "node": "t2_sejarah_b09",
+      "diff": 3,
+      "key": 2,
+      "q": "Apakah ciri utama Adat Temenggung?",
+      "opts": [
+        "Bersifat matrilineal",
+        "Diamalkan hanya di Negeri Sembilan",
+        "Bersifat patrilineal",
+        "Tidak mengiktiraf institusi raja"
+      ],
+      "exp": "Adat Temenggung bersifat patrilineal, iaitu pewarisan melalui sebelah bapa, berbeza daripada Adat Perpatih yang bersifat matrilineal."
+    },
+    {
+      "node": "t2_sejarah_b09",
+      "diff": 3,
+      "key": 3,
+      "q": "Mengapakah sistem matrilineal tidak bermaksud wanita memegang kuasa politik tertinggi?",
+      "opts": [
+        "Kerana wanita tidak dibenarkan memiliki harta",
+        "Kerana sistem ini hanya melibatkan hal perkahwinan",
+        "Kerana kuasa politik dipegang oleh kerajaan Siam",
+        "Kerana matrilineal hanya merujuk pewarisan harta dan keturunan melalui ibu"
+      ],
+      "exp": "Matrilineal hanya merujuk kepada pewarisan harta dan keturunan melalui sebelah ibu. Kuasa politik dan pentadbiran tetap dipegang oleh lelaki melalui pelantikan Undang, Lembaga dan Yang di-Pertuan Besar."
+    },
+    {
+      "node": "t2_sejarah_b09",
+      "diff": 4,
+      "key": 0,
+      "q": "Seorang pengkaji mendapati sesebuah negeri mengamalkan Adat Perpatih. Apakah kesimpulan paling tepat tentang negeri itu?",
+      "opts": [
+        "Negeri itu menerima pengaruh Minangkabau dari Sumatera",
+        "Negeri itu terletak di kawasan pengaruh Siam",
+        "Negeri itu tidak mempunyai sistem pemerintahan",
+        "Negeri itu mengamalkan pewarisan melalui sebelah bapa"
+      ],
+      "exp": "Adat Perpatih ialah warisan orang Minangkabau dari Sumatera yang diamalkan khususnya di Negeri Sembilan, dengan ciri pewarisan melalui sebelah ibu."
+    },
+    {
+      "node": "t2_sejarah_b10",
+      "diff": 1,
+      "key": 0,
+      "q": "Siapakah tokoh yang memulakan pemerintahan Brooke di Sarawak?",
+      "opts": [
+        "James Brooke",
+        "Rentap",
+        "Sharif Masahor",
+        "Sultan Omar Ali Saifuddin"
+      ],
+      "exp": "James Brooke ialah tokoh yang memulakan pemerintahan keluarga Brooke di Sarawak. Rentap dan Sharif Masahor pula ialah tokoh tempatan yang menentang pemerintahan beliau."
+    },
+    {
+      "node": "t2_sejarah_b10",
+      "diff": 1,
+      "key": 1,
+      "q": "Apakah nama syarikat yang memerintah Sabah sebelum pembentukan Malaysia?",
+      "opts": [
+        "Syarikat Hindia Timur Belanda",
+        "Syarikat Berpiagam Borneo Utara",
+        "Syarikat Brooke Sarawak",
+        "Syarikat Dagang Melaka"
+      ],
+      "exp": "Sabah diperintah oleh Syarikat Berpiagam Borneo Utara, manakala Sarawak diperintah oleh keluarga Brooke."
+    },
+    {
+      "node": "t2_sejarah_b10",
+      "diff": 3,
+      "key": 2,
+      "q": "Pemerintahan Brooke berlaku di negeri",
+      "opts": [
+        "Sabah",
+        "Perlis",
+        "Sarawak",
+        "Negeri Sembilan"
+      ],
+      "exp": "Pemerintahan Brooke berlaku di Sarawak. Sabah pula berada di bawah Syarikat Berpiagam Borneo Utara."
+    },
+    {
+      "node": "t2_sejarah_b10",
+      "diff": 3,
+      "key": 3,
+      "q": "Mengapakah James Brooke tidak boleh dianggap sebagai pemerintah Sabah?",
+      "opts": [
+        "Kerana beliau hanya seorang pedagang di Melaka",
+        "Kerana beliau menolak semua bentuk pemerintahan",
+        "Kerana beliau memerintah Negeri Sembilan",
+        "Kerana beliau memerintah Sarawak manakala Sabah diperintah Syarikat Berpiagam Borneo Utara"
+      ],
+      "exp": "James Brooke memerintah Sarawak, manakala Sabah berada di bawah Syarikat Berpiagam Borneo Utara. Kedua-dua wilayah ini mempunyai bentuk pemerintahan yang berbeza."
+    },
+    {
+      "node": "t2_sejarah_b10",
+      "diff": 4,
+      "key": 0,
+      "q": "Apakah kesimpulan terbaik tentang pemerintahan di Sarawak dan Sabah sebelum 1963?",
+      "opts": [
+        "Kedua-dua wilayah mempunyai bentuk pemerintahan berbeza yang menimbulkan penentangan tempatan",
+        "Kedua-dua wilayah diperintah oleh keluarga Brooke",
+        "Kedua-dua wilayah diperintah oleh Kesultanan Melaka",
+        "Kedua-dua wilayah tidak mempunyai sebarang pemerintahan"
+      ],
+      "exp": "Sarawak diperintah oleh keluarga Brooke dan Sabah oleh Syarikat Berpiagam Borneo Utara. Kedua-dua pemerintahan ini berbeza bentuknya dan berdepan penentangan penduduk tempatan."
+    },
+    {
+      "node": "t2_sejarah_b11",
+      "diff": 1,
+      "key": 0,
+      "q": "Siapakah tokoh tempatan yang menentang pemerintahan Brooke di Sarawak?",
+      "opts": [
+        "Rentap",
+        "James Brooke",
+        "Sultan Omar Ali Saifuddin",
+        "Sultan Salehuddin"
+      ],
+      "exp": "Rentap ialah tokoh tempatan yang mengetuai penentangan terhadap pemerintahan Brooke di Sarawak. Sharif Masahor juga merupakan tokoh penentang yang lain."
+    },
+    {
+      "node": "t2_sejarah_b11",
+      "diff": 1,
+      "key": 1,
+      "q": "Apakah kegiatan ekonomi tradisional utama penduduk pesisir Sarawak dan Sabah?",
+      "opts": [
+        "Perlombongan bijih timah",
+        "Perikanan dan hasil laut",
+        "Pembuatan kereta",
+        "Penanaman gandum"
+      ],
+      "exp": "Penduduk pesisir Sarawak dan Sabah menjalankan kegiatan perikanan dan mengumpul hasil laut, di samping pertanian dan hasil hutan."
+    },
+    {
+      "node": "t2_sejarah_b11",
+      "diff": 3,
+      "key": 2,
+      "q": "Hasil hutan manakah yang menjadi barang dagangan penting dari Sarawak dan Sabah?",
+      "opts": [
+        "Gandum dan barli",
+        "Arang batu dan petroleum sahaja",
+        "Sagu, rotan dan damar",
+        "Kain dan tembikar"
+      ],
+      "exp": "Hasil hutan seperti sagu, rotan, damar dan gaharu merupakan barang dagangan penting dari Sarawak dan Sabah kerana sukar diperoleh di tempat lain."
+    },
+    {
+      "node": "t2_sejarah_b11",
+      "diff": 3,
+      "key": 3,
+      "q": "Mengapakah penyerahan Sarawak kepada Brooke tidak boleh dikelirukan dengan pembentukan Malaysia pada tahun 1963?",
+      "opts": [
+        "Kerana kedua-dua peristiwa berlaku pada tahun yang sama",
+        "Kerana pembentukan Malaysia berlaku sebelum penyerahan Sarawak",
+        "Kerana penyerahan Sarawak tidak pernah berlaku",
+        "Kerana penyerahan Sarawak berlaku lebih awal, iaitu pada abad ke-19"
+      ],
+      "exp": "Penyerahan Sarawak kepada Brooke berlaku pada abad ke-19, jauh lebih awal daripada pembentukan Malaysia pada tahun 1963. Kedua-dua peristiwa ini berbeza dari segi masa dan konteks."
+    },
+    {
+      "node": "t2_sejarah_b11",
+      "diff": 5,
+      "key": 0,
+      "q": "Penduduk tempatan di Sarawak dan Sabah tidak menerima pemerintahan asing secara pasif. Apakah kesimpulan paling tepat tentang perkara ini?",
+      "opts": [
+        "Pemerintahan asing berdepan tentangan tempatan yang perlu diambil kira dalam kajian sejarah",
+        "Penduduk tempatan menyambut kedatangan pemerintah asing tanpa syarat",
+        "Tiada sebarang reaksi daripada penduduk tempatan",
+        "Pemerintahan asing tidak memberi kesan kepada penduduk"
+      ],
+      "exp": "Terdapat tokoh seperti Rentap dan Sharif Masahor yang menentang pemerintahan Brooke. Ini menunjukkan penduduk tempatan bertindak mempertahankan hak dan cara hidup mereka, bukan menerima pemerintahan asing secara pasif."
+    }
+  ]
+}

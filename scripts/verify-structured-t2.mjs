@@ -13,6 +13,11 @@ import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, "..");
+/** --allow-draft lets Gate 1 check structure before the Gate 2 blind solve signs items off. */
+const ALLOW_DRAFT = process.argv.includes("--allow-draft");
+/** --only <key-prefix> validates a single bank, e.g. --only t2_sejarah, while others are still being authored. */
+const onlyIdx = process.argv.indexOf("--only");
+const ONLY = onlyIdx >= 0 ? String(process.argv[onlyIdx + 1] || "") : "";
 
 function loadSyllabusChapters() {
   const ctx = { console };
@@ -43,7 +48,7 @@ function loadBrowserIife(relPath, key) {
 
 const VISUAL_REF_RE = /\b(rajah\s+di\s+bawah|rajah\s+di\s+atas|rajah\s+berikut|dalam\s+rajah|lihat\s+rajah|gambar\s+rajah|gambar\s+di\s+bawah|gambar\s+di\s+atas|foto\s+di\s+atas|lihat\s+graf)\b/i;
 
-function verifyBank({ relPath, key, validChapters, minB, minC, requireNumericCheck, requireAllChaptersInC, requireAllChaptersOverall }) {
+function verifyBank({ relPath, key, validChapters, minB, minC, requireNumericCheck, requireAllChaptersInC, requireAllChaptersOverall, marksByPart }) {
   const errors = [];
   const mod = require(path.join(rootDir, relPath));
   const browser = loadBrowserIife(relPath, key);
@@ -68,7 +73,9 @@ function verifyBank({ relPath, key, validChapters, minB, minC, requireNumericChe
     if (seenIds.has(it.id)) errors.push(`${it.id}: duplicate item id`);
     seenIds.add(it.id);
 
-    if (it.status !== "verified") errors.push(`${it.id}: expected status="verified", got "${it.status}"`);
+    // Structure can be checked before Gate 2 with --allow-draft; only "verified" ships.
+    const okStatus = ALLOW_DRAFT ? ["verified", "draft"] : ["verified"];
+    if (!okStatus.includes(it.status)) errors.push(`${it.id}: expected status="verified", got "${it.status}"`);
     if (!validChapters.has(it.chapterId)) errors.push(`${it.id}: invalid chapterId "${it.chapterId}"`);
     chaptersOverall.add(it.chapterId);
 
@@ -79,9 +86,9 @@ function verifyBank({ relPath, key, validChapters, minB, minC, requireNumericChe
     countByPart[it.part]++;
     if (it.part === "C") chaptersC.add(it.chapterId);
 
-    const expectedMarks = it.part === "B" ? 4 : 10;
+    const partMarks = (marksByPart && marksByPart[it.part]) || (it.part === "B" ? 4 : 10);
     const total = mod.marksOf(it);
-    if (total !== expectedMarks) errors.push(`${it.id}: expected ${expectedMarks} marks for Part ${it.part}, got ${total}`);
+    if (total !== partMarks) errors.push(`${it.id}: expected ${partMarks} marks for Part ${it.part}, got ${total}`);
 
     if (!Array.isArray(it.parts) || it.parts.length === 0) {
       errors.push(`${it.id}: missing parts`);
@@ -139,8 +146,8 @@ function verifyBank({ relPath, key, validChapters, minB, minC, requireNumericChe
 }
 
 const chaptersMap = loadSyllabusChapters();
-const results = [
-  verifyBank({
+const BANK_CONFIGS = [
+  {
     relPath: "js/data/structured_t2_math.js",
     key: "t2_math",
     validChapters: chaptersMap.math,
@@ -148,9 +155,10 @@ const results = [
     minC: 6,
     requireNumericCheck: true,
     requireAllChaptersInC: false,
-    requireAllChaptersOverall: true
-  }),
-  verifyBank({
+    requireAllChaptersOverall: true,
+    marksByPart: { B: 4, C: 10 }
+  },
+  {
     relPath: "js/data/structured_t2_sains.js",
     key: "t2_sains",
     validChapters: chaptersMap.sains,
@@ -158,17 +166,51 @@ const results = [
     minC: 6,
     requireNumericCheck: false,
     requireAllChaptersInC: true,
-    requireAllChaptersOverall: true
-  })
+    requireAllChaptersOverall: true,
+    marksByPart: { B: 4, C: 10 }
+  },
+  {
+    relPath: "js/data/structured_t2_sejarah.js",
+    key: "t2_sejarah",
+    validChapters: chaptersMap.sejarah,
+    minB: 4,
+    minC: 2,
+    requireNumericCheck: false,
+    requireAllChaptersInC: false,
+    requireAllChaptersOverall: true,
+    marksByPart: { B: 10, C: 20 }
+  },
+  {
+    relPath: "js/data/structured_t2_geografi.js",
+    key: "t2_geografi",
+    validChapters: chaptersMap.geografi,
+    minB: 4,
+    minC: 4,
+    requireNumericCheck: false,
+    requireAllChaptersInC: false,
+    requireAllChaptersOverall: true,
+    marksByPart: { B: 10, C: 10 }
+  }
 ];
 
+const results = BANK_CONFIGS
+  .filter((c) => !ONLY || c.key.startsWith(ONLY))
+  .map((c) => ({ ...verifyBank(c), key: c.key }));
+
 let totalErrs = 0;
+let checked = 0;
 for (const r of results) {
+  if (ONLY && !String(r.key || "").startsWith(ONLY)) continue;
+  checked++;
   if (r.summary) console.log(r.summary);
   for (const e of r.errors) {
     totalErrs++;
     console.error("ERR:", e);
   }
+}
+if (ONLY && checked === 0) {
+  console.error(`VERIFY_STRUCTURED_T2_FAILED (no bank matched --only ${ONLY})`);
+  process.exit(1);
 }
 
 if (totalErrs > 0) {

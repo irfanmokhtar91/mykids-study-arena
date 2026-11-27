@@ -1,0 +1,822 @@
+{
+  "grade": "t2",
+  "subject": "geografi",
+  "nodes": [
+    {
+      "id": "t2_geografi_b01",
+      "chapterId": "skala_jarak",
+      "topic": "Bab 1: Skala dan Jarak",
+      "subtopic": "Jenis skala, pengukuran jarak dan pengiraan jarak sebenar",
+      "prereq": null,
+      "time": 45000,
+      "bloom": "Apply"
+    },
+    {
+      "id": "t2_geografi_b02",
+      "chapterId": "skala_jarak",
+      "topic": "Bab 2: Peta Topografi",
+      "subtopic": "Ciri peta topografi, garisan kontur dan keratan rentas",
+      "prereq": "t2_geografi_b01",
+      "time": 45000,
+      "bloom": "Apply"
+    },
+    {
+      "id": "t2_geografi_b03",
+      "chapterId": "cuaca_iklim",
+      "topic": "Bab 3: Pengaruh Pergerakan Bumi terhadap Cuaca dan Iklim",
+      "subtopic": "Putaran, peredaran Bumi dan kejadian gerhana",
+      "prereq": null,
+      "time": 35000,
+      "bloom": "Understand"
+    },
+    {
+      "id": "t2_geografi_b04",
+      "chapterId": "cuaca_iklim",
+      "topic": "Bab 4: Cuaca dan Iklim di Malaysia",
+      "subtopic": "Unsur cuaca, jenis hujan dan angin monsun",
+      "prereq": "t2_geografi_b03",
+      "time": 40000,
+      "bloom": "Analyze"
+    },
+    {
+      "id": "t2_geografi_b05",
+      "chapterId": "pengangkutan_telekomunikasi",
+      "topic": "Bab 5: Pengangkutan di Malaysia",
+      "subtopic": "Jenis pengangkutan serta kesannya terhadap alam sekitar",
+      "prereq": null,
+      "time": 35000,
+      "bloom": "Understand"
+    },
+    {
+      "id": "t2_geografi_b06",
+      "chapterId": "pengangkutan_telekomunikasi",
+      "topic": "Bab 6: Telekomunikasi di Malaysia",
+      "subtopic": "Infrastruktur telekomunikasi dan kesan penggunaannya",
+      "prereq": "t2_geografi_b05",
+      "time": 35000,
+      "bloom": "Understand"
+    },
+    {
+      "id": "t2_geografi_b07",
+      "chapterId": "iklim_asia",
+      "topic": "Bab 7: Kepelbagaian Iklim dan Pengaruhnya terhadap Kegiatan Manusia di Asia",
+      "subtopic": "Jenis iklim Asia, pertanian dan bencana iklim",
+      "prereq": "t2_geografi_b04",
+      "time": 45000,
+      "bloom": "Analyze"
+    },
+    {
+      "id": "t2_geografi_b08",
+      "chapterId": "iklim_asia",
+      "topic": "Bab 8: Pengangkutan di Asia",
+      "subtopic": "Jaringan pengangkutan utama Asia dan faktornya",
+      "prereq": "t2_geografi_b07",
+      "time": 40000,
+      "bloom": "Apply"
+    },
+    {
+      "id": "t2_geografi_b09",
+      "chapterId": "pemanasan_global",
+      "topic": "Bab 9: Pemanasan Global",
+      "subtopic": "Kesan rumah hijau, punca dan kesan pemanasan global",
+      "prereq": null,
+      "time": 40000,
+      "bloom": "Understand"
+    },
+    {
+      "id": "t2_geografi_b10",
+      "chapterId": "pemanasan_global",
+      "topic": "Bab 10: Teknologi Hijau",
+      "subtopic": "Ciri teknologi hijau dan tenaga boleh baharu",
+      "prereq": "t2_geografi_b09",
+      "time": 40000,
+      "bloom": "Apply"
+    },
+    {
+      "id": "t2_geografi_b11",
+      "chapterId": "pemanasan_global",
+      "topic": "Bab 9-10: Pemanasan Global dan Teknologi Hijau",
+      "subtopic": "Langkah mitigasi dan amalan kelestarian alam",
+      "prereq": "t2_geografi_b10",
+      "time": 45000,
+      "bloom": "Analyze"
+    }
+  ],
+  "items": [
+    {
+      "node": "t2_geografi_b01",
+      "diff": 1,
+      "key": 0,
+      "q": "Apakah maksud skala pada sebuah peta?",
+      "opts": [
+        "Nisbah antara jarak yang diukur pada peta dengan jarak sebenar di permukaan bumi",
+        "Arah mata angin yang ditunjukkan oleh anak panah utara",
+        "Bilangan simbol yang digunakan dalam petunjuk peta",
+        "Beza ketinggian antara dua tempat pada peta"
+      ],
+      "exp": "Skala ialah nisbah antara jarak pada peta dengan jarak sebenar di permukaan bumi, contohnya 1:50 000."
+    },
+    {
+      "node": "t2_geografi_b01",
+      "diff": 1,
+      "key": 1,
+      "q": "Apakah bentuk skala yang dinyatakan dalam perkataan, contohnya '1 cm mewakili 1 km'?",
+      "opts": [
+        "Skala lurus",
+        "Skala penyata",
+        "Skala wakilan",
+        "Skala pepenjuru"
+      ],
+      "exp": "Skala penyata dinyatakan dalam bentuk perkataan, iaitu 1 cm pada peta mewakili 1 km di permukaan bumi."
+    },
+    {
+      "node": "t2_geografi_b01",
+      "diff": 3,
+      "key": 2,
+      "q": "Sebuah peta berskala 1:50 000. Berapakah jarak sebenar bagi 6 cm pada peta itu?",
+      "opts": [
+        "300 m",
+        "30 km",
+        "3 km",
+        "0.3 km"
+      ],
+      "exp": "Jarak sebenar = 6 x 50 000 = 300 000 cm. Oleh sebab 1 km = 100 000 cm, jarak sebenar ialah 300 000 / 100 000 = 3 km."
+    },
+    {
+      "node": "t2_geografi_b01",
+      "diff": 3,
+      "key": 3,
+      "q": "Mengapakah jarak melengkung sepanjang sungai perlu diukur menggunakan benang?",
+      "opts": [
+        "Kerana benang lebih murah daripada pembaris",
+        "Kerana benang boleh mengukur ketinggian peta",
+        "Kerana pembaris tidak boleh digunakan pada peta",
+        "Kerana benang dapat mengikut bentuk melengkung supaya panjang sebenar laluan tepat"
+      ],
+      "exp": "Benang dapat mengikut bentuk melengkung sungai sehingga panjang sebenar laluan dapat diukur dengan tepat. Pembaris lurus hanya mengukur jarak garis lurus dan akan menghasilkan jarak yang lebih pendek."
+    },
+    {
+      "node": "t2_geografi_b01",
+      "diff": 5,
+      "key": 0,
+      "q": "Dua kampung terletak 12 cm antara satu sama lain pada peta berskala 1:100 000. Sebuah basikal bergerak pada kelajuan purata 24 km/j. Berapakah masa perjalanan yang diperlukan?",
+      "opts": [
+        "30 minit",
+        "1 jam",
+        "2 jam",
+        "45 minit"
+      ],
+      "exp": "12 cm x 100 000 = 1 200 000 cm iaitu 12 km. Masa = jarak / kelajuan = 12 / 24 = 0.5 jam, bersamaan 30 minit."
+    },
+    {
+      "node": "t2_geografi_b02",
+      "diff": 1,
+      "key": 0,
+      "q": "Apakah maksud garisan kontur pada peta topografi?",
+      "opts": [
+        "Garisan yang menghubungkan titik-titik yang mempunyai ketinggian yang sama",
+        "Garisan yang menunjukkan sempadan negeri",
+        "Garisan yang menunjukkan arah aliran sungai",
+        "Garisan yang menandakan kawasan pertanian"
+      ],
+      "exp": "Garisan kontur menghubungkan titik-titik yang mempunyai ketinggian yang sama, membolehkan bentuk muka bumi ditafsirkan."
+    },
+    {
+      "node": "t2_geografi_b02",
+      "diff": 1,
+      "key": 1,
+      "q": "Apakah maksud garisan kontur yang rapat antara satu sama lain?",
+      "opts": [
+        "Cerun yang landai",
+        "Cerun yang curam",
+        "Kawasan tanah pamah yang rata",
+        "Kawasan yang tidak mempunyai ketinggian"
+      ],
+      "exp": "Garisan kontur yang rapat menunjukkan perubahan ketinggian yang besar dalam jarak yang pendek, iaitu cerun yang curam."
+    },
+    {
+      "node": "t2_geografi_b02",
+      "diff": 2,
+      "key": 2,
+      "q": "Titik X terletak antara garisan kontur 200 m dengan garisan kontur 225 m tanpa garisan lain di antaranya. Apakah anggaran ketinggian titik X?",
+      "opts": [
+        "Kurang daripada 200 m",
+        "Tepat 225 m",
+        "Antara 200 m dan 225 m",
+        "Antara 225 m dan 250 m"
+      ],
+      "exp": "Titik yang terletak di antara dua garisan kontur mempunyai ketinggian antara nilai kedua-dua garisan itu, iaitu antara 200 m dan 225 m."
+    },
+    {
+      "node": "t2_geografi_b02",
+      "diff": 3,
+      "key": 3,
+      "q": "Titik R pada kontur 275 m dan titik S pada kontur 350 m. Jarak mendatar pada peta berskala 1:25 000 ialah 6 cm. Apakah kecerunan purata antara R dan S?",
+      "opts": [
+        "1 dalam 5",
+        "1 dalam 10",
+        "1 dalam 50",
+        "1 dalam 20"
+      ],
+      "exp": "Beza tinggi = 350 - 275 = 75 m. Jarak mendatar sebenar = 6 x 25 000 = 150 000 cm = 1 500 m. Kecerunan = 75 / 1 500 = 1 dalam 20."
+    },
+    {
+      "node": "t2_geografi_b02",
+      "diff": 5,
+      "key": 0,
+      "q": "Seorang murid mengukur jarak antara dua bangunan dan mendapat 5 cm, tetapi rakannya yang mengukur dari tepi simbol mendapat 5.6 cm. Apakah penjelasan paling tepat?",
+      "opts": [
+        "Pengukuran dari tepi simbol merangkumi lebar simbol, bukan jarak antara pusatnya",
+        "Jarak sebenar antara bangunan memang berubah-ubah",
+        "Pembaris yang digunakan tidak mempunyai unit sentimeter",
+        "Skala peta berubah mengikut saiz simbol yang dilukis"
+      ],
+      "exp": "Simbol bangunan mempunyai lebar. Mengukur dari tepi ke tepi menambah lebar kedua-dua simbol ke dalam jarak, sedangkan jarak yang betul diukur dari pusat ke pusat simbol."
+    },
+    {
+      "node": "t2_geografi_b03",
+      "diff": 1,
+      "key": 0,
+      "q": "Berapa lamakah Bumi mengambil masa untuk melakukan satu putaran pada paksinya?",
+      "opts": [
+        "24 jam",
+        "12 jam",
+        "365 hari",
+        "30 hari"
+      ],
+      "exp": "Bumi mengambil masa kira-kira 24 jam untuk melengkapkan satu putaran pada paksinya, menyebabkan kejadian siang dan malam."
+    },
+    {
+      "node": "t2_geografi_b03",
+      "diff": 1,
+      "key": 1,
+      "q": "Apakah kesan utama putaran Bumi pada paksinya?",
+      "opts": [
+        "Berlakunya empat musim",
+        "Berlakunya siang dan malam",
+        "Berlakunya gerhana Bulan",
+        "Berlakunya perubahan tahun"
+      ],
+      "exp": "Putaran Bumi pada paksinya menyebabkan bahagian yang menghadap Matahari mengalami siang, manakala bahagian yang membelakangi mengalami malam."
+    },
+    {
+      "node": "t2_geografi_b03",
+      "diff": 3,
+      "key": 2,
+      "q": "Apakah kejadian yang berlaku apabila Bulan berada di antara Matahari dan Bumi?",
+      "opts": [
+        "Gerhana Bulan",
+        "Pasang surut air laut",
+        "Gerhana Matahari",
+        "Perubahan musim"
+      ],
+      "exp": "Gerhana Matahari berlaku apabila Bulan berada di antara Matahari dan Bumi, sehingga bayang-bayang Bulan jatuh ke permukaan Bumi."
+    },
+    {
+      "node": "t2_geografi_b03",
+      "diff": 3,
+      "key": 3,
+      "q": "Mengapakah Malaysia tidak mengalami empat musim seperti negara berlatitud tinggi?",
+      "opts": [
+        "Kerana Malaysia terletak di kawasan pergunungan",
+        "Kerana Malaysia lebih dekat dengan Bulan",
+        "Kerana Malaysia mempunyai banyak pulau",
+        "Kerana Malaysia terletak berhampiran khatulistiwa dan menerima cahaya matahari sepanjang tahun"
+      ],
+      "exp": "Malaysia terletak berhampiran khatulistiwa dan menerima cahaya matahari yang hampir sekata sepanjang tahun, sehingga mengalami iklim khatulistiwa tanpa empat musim."
+    },
+    {
+      "node": "t2_geografi_b03",
+      "diff": 4,
+      "key": 0,
+      "q": "Sebuah tempat mengalami gerhana Matahari pada waktu tengah hari. Apakah susunan jasad yang betul?",
+      "opts": [
+        "Matahari - Bulan - Bumi",
+        "Bulan - Bumi - Matahari",
+        "Bumi - Matahari - Bulan",
+        "Matahari - Bumi - Bulan"
+      ],
+      "exp": "Gerhana Matahari berlaku apabila susunan jasad ialah Matahari - Bulan - Bumi, iaitu Bulan berada di tengah dan menghalang cahaya Matahari daripada sampai ke Bumi."
+    },
+    {
+      "node": "t2_geografi_b04",
+      "diff": 1,
+      "key": 0,
+      "q": "Apakah alat yang digunakan untuk mengukur jumlah hujan?",
+      "opts": [
+        "Tolok hujan",
+        "Termometer",
+        "Higrometer",
+        "Barometer"
+      ],
+      "exp": "Tolok hujan digunakan untuk mengukur jumlah hujan, manakala termometer mengukur suhu dan higrometer mengukur kelembapan udara."
+    },
+    {
+      "node": "t2_geografi_b04",
+      "diff": 1,
+      "key": 1,
+      "q": "Apakah alat yang digunakan untuk mengukur kelembapan udara?",
+      "opts": [
+        "Anemometer",
+        "Higrometer",
+        "Barometer",
+        "Tolok hujan"
+      ],
+      "exp": "Higrometer digunakan untuk mengukur kelembapan udara. Anemometer mengukur kelajuan angin dan barometer mengukur tekanan udara."
+    },
+    {
+      "node": "t2_geografi_b04",
+      "diff": 2,
+      "key": 2,
+      "q": "Bilakah Monsun Timur Laut lazimnya berlaku di Malaysia?",
+      "opts": [
+        "Mei hingga September",
+        "Januari hingga Disember",
+        "November hingga Mac",
+        "April hingga Oktober"
+      ],
+      "exp": "Monsun Timur Laut berlaku sekitar November hingga Mac dan membawa hujan lebat terutama di Pantai Timur Semenanjung, Sarawak dan Sabah."
+    },
+    {
+      "node": "t2_geografi_b04",
+      "diff": 3,
+      "key": 3,
+      "q": "Mengapakah kawasan di seberang gunung menerima hujan yang lebih sedikit berbanding lereng yang menghadap angin?",
+      "opts": [
+        "Kerana kawasan itu terletak lebih tinggi",
+        "Kerana kawasan itu lebih dekat dengan laut",
+        "Kerana kawasan itu tidak mempunyai tumbuhan",
+        "Kerana udara telah kering selepas melepaskan kelembapannya di lereng pertama"
+      ],
+      "exp": "Udara lembap naik di lereng yang menghadap angin, menyejuk dan melepaskan kelembapannya sebagai hujan. Udara yang turun di seberang gunung sudah kering, sehingga kawasan itu menerima hujan yang lebih sedikit."
+    },
+    {
+      "node": "t2_geografi_b04",
+      "diff": 5,
+      "key": 0,
+      "q": "Sebuah kawasan di Pantai Timur Semenanjung menerima hujan lebat pada bulan Disember, manakala kawasan di Pantai Barat lebih kering. Apakah penjelasan paling tepat?",
+      "opts": [
+        "Monsun Timur Laut membawa udara lembap dari Laut China Selatan ke Pantai Timur",
+        "Monsun Barat Daya bertiup kuat pada bulan Disember",
+        "Kedua-dua pantai menerima monsun yang sama sekali",
+        "Pantai Barat dilindungi oleh gunung tertinggi di dunia"
+      ],
+      "exp": "Pada bulan Disember, Monsun Timur Laut bertiup dari Laut China Selatan dan membawa udara lembap ke Pantai Timur Semenanjung, menyebabkan hujan lebat di sana manakala Pantai Barat dilindungi oleh Banjaran Titiwangsa."
+    },
+    {
+      "node": "t2_geografi_b05",
+      "diff": 1,
+      "key": 0,
+      "q": "Apakah jenis pengangkutan darat yang utama di Malaysia?",
+      "opts": [
+        "Jalan raya dan landasan kereta api",
+        "Kapal dan feri",
+        "Kapal terbang dan helikopter",
+        "Perahu dan sampan"
+      ],
+      "exp": "Pengangkutan darat utama di Malaysia ialah jalan raya dan landasan kereta api, yang menghubungkan kawasan bandar dan luar bandar."
+    },
+    {
+      "node": "t2_geografi_b05",
+      "diff": 1,
+      "key": 1,
+      "q": "Apakah kepentingan utama pelabuhan kepada ekonomi Malaysia?",
+      "opts": [
+        "Tempat menanam padi",
+        "Pusat perdagangan kargo dan kegiatan eksport import",
+        "Tempat menyimpan hasil hutan sahaja",
+        "Pusat latihan tentera"
+      ],
+      "exp": "Pelabuhan berfungsi sebagai pusat perdagangan kargo serta kegiatan eksport dan import, yang menyumbang kepada pertumbuhan ekonomi negara."
+    },
+    {
+      "node": "t2_geografi_b05",
+      "diff": 3,
+      "key": 2,
+      "q": "Apakah kesan negatif pembinaan lebuh raya yang terlalu banyak?",
+      "opts": [
+        "Mengurangkan pencemaran udara",
+        "Mengurangkan jumlah kenderaan",
+        "Pencemaran bunyi dan kesesakan di kawasan tertentu",
+        "Menghapuskan semua kegiatan ekonomi"
+      ],
+      "exp": "Pembinaan lebuh raya yang terlalu banyak boleh menyebabkan pencemaran bunyi, kesesakan di kawasan tertentu dan tekanan terhadap alam sekitar."
+    },
+    {
+      "node": "t2_geografi_b05",
+      "diff": 3,
+      "key": 3,
+      "q": "Mengapakah jaringan pengangkutan lebih maju di kawasan tanah pamah berbanding kawasan tanah tinggi?",
+      "opts": [
+        "Kerana tanah pamah mempunyai lebih banyak sungai",
+        "Kerana tanah tinggi tidak mempunyai penduduk",
+        "Kerana tanah tinggi lebih dekat dengan laut",
+        "Kerana pembinaan jalan lebih mudah dan murah di kawasan yang rata"
+      ],
+      "exp": "Pembinaan jalan raya dan landasan kereta api lebih mudah dan murah di kawasan tanah pamah yang rata, berbanding kawasan tanah tinggi yang memerlukan terowong, jambatan dan pemotongan cerun."
+    },
+    {
+      "node": "t2_geografi_b05",
+      "diff": 4,
+      "key": 0,
+      "q": "Sebuah kawasan luar bandar tidak mempunyai perkhidmatan bas. Apakah kesan paling langsung terhadap penduduknya?",
+      "opts": [
+        "Kesukaran bergerak ke tempat kerja, sekolah dan hospital",
+        "Penduduk tidak lagi memerlukan jalan raya",
+        "Kawasan itu menjadi lebih maju dengan segera",
+        "Penduduk berhenti menggunakan semua kenderaan"
+      ],
+      "exp": "Ketiadaan pengangkutan awam menyukarkan penduduk bergerak ke tempat kerja, sekolah dan hospital, sekali gus menjejaskan akses kepada perkhidmatan asas."
+    },
+    {
+      "node": "t2_geografi_b06",
+      "diff": 1,
+      "key": 0,
+      "q": "Apakah maksud telekomunikasi?",
+      "opts": [
+        "Pemindahan maklumat dari satu tempat ke tempat lain melalui medium elektronik",
+        "Pemindahan barangan dari pelabuhan ke kapal",
+        "Pembinaan jalan raya antara dua bandar",
+        "Pengangkutan penumpang melalui kereta api"
+      ],
+      "exp": "Telekomunikasi ialah pemindahan maklumat dari satu tempat ke tempat lain melalui medium elektronik seperti telefon, internet, radio dan televisyen."
+    },
+    {
+      "node": "t2_geografi_b06",
+      "diff": 1,
+      "key": 1,
+      "q": "Apakah infrastruktur yang membolehkan Internet berkelajuan tinggi disalurkan ke rumah?",
+      "opts": [
+        "Menara pemancar radio sahaja",
+        "Kabel gentian optik",
+        "Landasan kereta api",
+        "Tolok hujan"
+      ],
+      "exp": "Kabel gentian optik membolehkan data dihantar pada kelajuan tinggi dengan kehilangan isyarat yang rendah, dan menjadi tulang belakang perkhidmatan Internet berkelajuan tinggi."
+    },
+    {
+      "node": "t2_geografi_b06",
+      "diff": 2,
+      "key": 2,
+      "q": "Apakah kesan negatif penyebaran berita palsu melalui media sosial?",
+      "opts": [
+        "Meningkatkan kepercayaan masyarakat kepada kerajaan",
+        "Mengurangkan penggunaan telefon",
+        "Mengelirukan masyarakat dan menjejaskan keharmonian",
+        "Meningkatkan kelajuan Internet"
+      ],
+      "exp": "Berita palsu boleh mengelirukan masyarakat, menimbulkan panik dan menjejaskan keharmonian, terutamanya apabila disebarkan dengan cepat melalui media sosial."
+    },
+    {
+      "node": "t2_geografi_b06",
+      "diff": 3,
+      "key": 3,
+      "q": "Mengapakah jurang digital antara bandar dan luar bandar perlu dirapatkan?",
+      "opts": [
+        "Kerana penduduk luar bandar tidak memerlukan Internet",
+        "Kerana Internet hanya sesuai digunakan di bandar",
+        "Kerana infrastruktur telekomunikasi tidak boleh dibina di luar bandar",
+        "Kerana akses yang seimbang membolehkan semua murid mendapat pendidikan dan peluang ekonomi yang sama"
+      ],
+      "exp": "Jurang digital yang besar menyebabkan murid dan penduduk luar bandar ketinggalan dalam pendidikan dan peluang ekonomi, jadi akses yang seimbang penting untuk kesaksamaan."
+    },
+    {
+      "node": "t2_geografi_b06",
+      "diff": 5,
+      "key": 0,
+      "q": "Seorang murid menerima mesej yang mendakwa satu bencana besar akan berlaku esok. Apakah tindakan paling wajar?",
+      "opts": [
+        "Menyemak sumber rasmi sebelum menyebarkan mesej itu",
+        "Terus menyebarkan mesej kepada semua rakan",
+        "Mengabaikan semua maklumat dalam talian seumur hidup",
+        "Menghantar mesej itu kepada pihak berkuasa asing"
+      ],
+      "exp": "Menyemak sumber rasmi seperti agensi kerajaan sebelum menyebarkan sesuatu mesej dapat mengelakkan penyebaran berita palsu yang boleh mengelirukan masyarakat."
+    },
+    {
+      "node": "t2_geografi_b07",
+      "diff": 1,
+      "key": 0,
+      "q": "Apakah jenis iklim yang dialami oleh sebahagian besar Asia Tenggara?",
+      "opts": [
+        "Iklim khatulistiwa dan monsun tropika",
+        "Iklim tundra",
+        "Iklim gurun",
+        "Iklim mediterranean"
+      ],
+      "exp": "Sebahagian besar Asia Tenggara mengalami iklim khatulistiwa dan monsun tropika yang panas dan lembap sepanjang tahun."
+    },
+    {
+      "node": "t2_geografi_b07",
+      "diff": 1,
+      "key": 1,
+      "q": "Apakah ciri utama iklim gurun?",
+      "opts": [
+        "Hujan lebat sepanjang tahun",
+        "Sangat kering dengan perbezaan suhu siang dan malam yang besar",
+        "Musim sejuk yang panjang dan lembap",
+        "Suhu yang sentiasa sejuk sepanjang tahun"
+      ],
+      "exp": "Iklim gurun dicirikan oleh hujan yang sangat sedikit serta perbezaan suhu yang besar antara siang dan malam."
+    },
+    {
+      "node": "t2_geografi_b07",
+      "diff": 3,
+      "key": 2,
+      "q": "Tanaman manakah yang paling sesuai ditanam di kawasan beriklim monsun yang menerima hujan mencukupi?",
+      "opts": [
+        "Gandum",
+        "Kaktus",
+        "Padi",
+        "Pokok pain"
+      ],
+      "exp": "Padi memerlukan air yang banyak, jadi paling sesuai ditanam di kawasan beriklim monsun yang menerima hujan mencukupi."
+    },
+    {
+      "node": "t2_geografi_b07",
+      "diff": 3,
+      "key": 3,
+      "q": "Mengapakah petempatan di kawasan gurun Asia kurang padat berbanding kawasan monsun?",
+      "opts": [
+        "Kerana kawasan gurun terletak lebih tinggi",
+        "Kerana kawasan gurun mempunyai banyak sungai",
+        "Kerana kawasan gurun lebih dekat dengan laut",
+        "Kerana kekurangan air menyukarkan pertanian dan kehidupan harian"
+      ],
+      "exp": "Kekurangan air di kawasan gurun menyukarkan pertanian dan kehidupan harian, sehingga petempatan kurang padat berbanding kawasan monsun yang menerima hujan mencukupi."
+    },
+    {
+      "node": "t2_geografi_b07",
+      "diff": 5,
+      "key": 0,
+      "q": "Dua bandar di Asia mengalami masalah alam sekitar berbeza: bandar P sering dilanda banjir monsun, bandar Q sering kekurangan air. Apakah pendekatan paling sesuai?",
+      "opts": [
+        "Bandar P memperbaiki saliran dan rizab banjir; bandar Q membina kemudahan penakungan serta kitar semula air",
+        "Kedua-dua bandar memindahkan semua penduduk ke kawasan gurun",
+        "Bandar P mengurangkan hujan; bandar Q menambah hujan",
+        "Kedua-dua bandar membina jeti pelancongan sebagai penyelesaian"
+      ],
+      "exp": "Banjir dikawal melalui kapasiti saliran, pengekalan kawasan hijau dan rizab banjir. Kekurangan air diatasi dengan penakungan air hujan, pengurusan empangan dan kitar semula air. Setiap masalah memerlukan pendekatan berbeza."
+    },
+    {
+      "node": "t2_geografi_b08",
+      "diff": 1,
+      "key": 0,
+      "q": "Apakah nama laluan perdagangan darat bersejarah yang menghubungkan China dengan Asia Barat?",
+      "opts": [
+        "Laluan Sutera",
+        "Laluan Rempah",
+        "Laluan Timah",
+        "Laluan Monsun"
+      ],
+      "exp": "Laluan Sutera ialah laluan perdagangan bersejarah yang menghubungkan China dengan Asia Barat dan Eropah, dan turut mempunyai cabang laut."
+    },
+    {
+      "node": "t2_geografi_b08",
+      "diff": 1,
+      "key": 1,
+      "q": "Selat manakah yang menjadi laluan perkapalan tersibuk di Asia Tenggara?",
+      "opts": [
+        "Selat Inggeris",
+        "Selat Melaka",
+        "Selat Bering",
+        "Selat Gibraltar"
+      ],
+      "exp": "Selat Melaka terletak antara Semenanjung Malaysia dan Sumatera, dan menjadi salah satu laluan perkapalan tersibuk di dunia."
+    },
+    {
+      "node": "t2_geografi_b08",
+      "diff": 3,
+      "key": 2,
+      "q": "Apakah faktor utama yang mempengaruhi pembinaan jalan raya di kawasan pergunungan Asia?",
+      "opts": [
+        "Jumlah penduduk yang ramai",
+        "Kedudukan berhampiran laut",
+        "Bentuk muka bumi yang curam dan sukar",
+        "Kehadiran banyak lapangan terbang"
+      ],
+      "exp": "Bentuk muka bumi yang curam dan sukar di kawasan pergunungan menyukarkan dan menambah kos pembinaan jalan raya, sehingga jaringan pengangkutan di sana kurang maju."
+    },
+    {
+      "node": "t2_geografi_b08",
+      "diff": 3,
+      "key": 3,
+      "q": "Bagaimanakah pengangkutan moden menyumbang kepada pertumbuhan pelancongan di Asia?",
+      "opts": [
+        "Dengan menghalang pelancong masuk ke sesebuah negara",
+        "Dengan mengurangkan bilangan lapangan terbang",
+        "Dengan menaikkan kos perjalanan secara mendadak",
+        "Dengan memendekkan masa perjalanan dan menghubungkan lebih banyak destinasi"
+      ],
+      "exp": "Pengangkutan moden seperti penerbangan dan kereta api berkelajuan tinggi memendekkan masa perjalanan serta menghubungkan lebih banyak destinasi, sekali gus merancakkan industri pelancongan."
+    },
+    {
+      "node": "t2_geografi_b08",
+      "diff": 4,
+      "key": 0,
+      "q": "Sebuah negara Asia membina kereta api berkelajuan tinggi antara dua bandar utama. Apakah kesan ekonomi yang paling mungkin?",
+      "opts": [
+        "Perdagangan dan pergerakan pekerja antara kedua-dua bandar meningkat",
+        "Kedua-dua bandar terputus hubungan",
+        "Penduduk berhenti menggunakan semua pengangkutan lain",
+        "Kos barangan meningkat kerana pengangkutan menjadi lebih lambat"
+      ],
+      "exp": "Kereta api berkelajuan tinggi memendekkan masa perjalanan, sehingga meningkatkan pergerakan pekerja, pelancong dan barangan antara kedua-dua bandar."
+    },
+    {
+      "node": "t2_geografi_b09",
+      "diff": 1,
+      "key": 0,
+      "q": "Apakah maksud kesan rumah hijau?",
+      "opts": [
+        "Proses gas tertentu dalam atmosfera memerangkap haba dan mengekalkan suhu Bumi",
+        "Proses Bumi kehilangan semua habanya ke angkasa",
+        "Proses pembentukan hujan asid di atmosfera",
+        "Proses penipisan lapisan ozon oleh klorin"
+      ],
+      "exp": "Kesan rumah hijau ialah proses gas rumah hijau dalam atmosfera memerangkap haba dan mengekalkan suhu Bumi pada tahap yang sesuai untuk kehidupan."
+    },
+    {
+      "node": "t2_geografi_b09",
+      "diff": 1,
+      "key": 1,
+      "q": "Antara berikut, yang manakah gas rumah hijau utama?",
+      "opts": [
+        "Oksigen",
+        "Karbon dioksida",
+        "Nitrogen",
+        "Helium"
+      ],
+      "exp": "Karbon dioksida ialah gas rumah hijau utama yang dibebaskan melalui pembakaran bahan api fosil dan penyahhutanan."
+    },
+    {
+      "node": "t2_geografi_b09",
+      "diff": 3,
+      "key": 2,
+      "q": "Apakah punca utama peningkatan karbon dioksida dalam atmosfera?",
+      "opts": [
+        "Penanaman semula hutan",
+        "Penggunaan tenaga suria",
+        "Pembakaran bahan api fosil",
+        "Penggunaan basikal"
+      ],
+      "exp": "Pembakaran bahan api fosil dalam kenderaan, kilang dan jana kuasa membebaskan karbon dioksida dalam jumlah besar ke atmosfera."
+    },
+    {
+      "node": "t2_geografi_b09",
+      "diff": 3,
+      "key": 3,
+      "q": "Mengapakah penyahhutanan menyumbang kepada pemanasan global?",
+      "opts": [
+        "Kerana pokok menghasilkan karbon dioksida pada waktu malam",
+        "Kerana hutan menghalang cahaya matahari sampai ke Bumi",
+        "Kerana hutan menyejukkan udara terlalu banyak",
+        "Kerana bilangan pokok yang menyerap karbon dioksida berkurangan"
+      ],
+      "exp": "Pokok menyerap karbon dioksida melalui fotosintesis. Apabila hutan ditebang, bilangan pokok yang menyerap karbon dioksida berkurangan, dan karbon yang tersimpan dalam tanah turut terbebas."
+    },
+    {
+      "node": "t2_geografi_b09",
+      "diff": 5,
+      "key": 0,
+      "q": "Sebuah negara pulau mendapati aras laut meningkat dan mengancam kawasan pesisir. Apakah langkah paling wajar?",
+      "opts": [
+        "Mengurangkan pelepasan gas rumah hijau dan membina benteng serta perancangan guna tanah pesisir",
+        "Menambah pembakaran arang batu untuk menjana lebih banyak elektrik",
+        "Menebang lebih banyak hutan untuk membuka tanah",
+        "Mengabaikan masalah kerana aras laut tidak akan berubah"
+      ],
+      "exp": "Mengurangkan pelepasan gas rumah hijau menangani punca pemanasan global, manakala pembinaan benteng dan perancangan guna tanah pesisir membantu menyesuaikan diri dengan kenaikan aras laut."
+    },
+    {
+      "node": "t2_geografi_b10",
+      "diff": 1,
+      "key": 0,
+      "q": "Apakah maksud teknologi hijau?",
+      "opts": [
+        "Teknologi yang dibangunkan untuk mengurangkan kesan negatif terhadap alam sekitar",
+        "Teknologi yang hanya digunakan dalam pertanian",
+        "Teknologi yang menambah pencemaran alam",
+        "Teknologi yang menggunakan bahan api fosil sepenuhnya"
+      ],
+      "exp": "Teknologi hijau ialah teknologi yang dibangunkan untuk mengurangkan kesan negatif terhadap alam sekitar, contohnya melalui tenaga boleh baharu dan kitar semula."
+    },
+    {
+      "node": "t2_geografi_b10",
+      "diff": 1,
+      "key": 1,
+      "q": "Antara berikut, yang manakah sumber tenaga boleh baharu?",
+      "opts": [
+        "Arang batu",
+        "Tenaga suria",
+        "Petroleum",
+        "Gas asli"
+      ],
+      "exp": "Tenaga suria ialah sumber tenaga boleh baharu yang tidak akan habis, berbeza daripada arang batu, petroleum dan gas asli yang merupakan bahan api fosil."
+    },
+    {
+      "node": "t2_geografi_b10",
+      "diff": 2,
+      "key": 2,
+      "q": "Apakah maksud amalan 3R?",
+      "opts": [
+        "Reduce, Remove, Repair",
+        "Read, Reuse, Rewrite",
+        "Reduce, Reuse, Recycle",
+        "Recycle, Redo, Replace"
+      ],
+      "exp": "Amalan 3R merujuk kepada Reduce (kurangkan), Reuse (guna semula) dan Recycle (kitar semula) dalam pengurusan sisa."
+    },
+    {
+      "node": "t2_geografi_b10",
+      "diff": 3,
+      "key": 3,
+      "q": "Mengapakah tenaga hidro sesuai dibangunkan di kawasan tanah tinggi Malaysia?",
+      "opts": [
+        "Kerana kawasan itu tidak mempunyai penduduk",
+        "Kerana tanah tinggi tidak menerima hujan",
+        "Kerana tanah tinggi lebih panas daripada tanah pamah",
+        "Kerana aliran sungai yang deras sesuai untuk memutarkan turbin penjana elektrik"
+      ],
+      "exp": "Kawasan tanah tinggi mempunyai aliran sungai yang deras, dan aliran ini sesuai untuk memutarkan turbin penjana elektrik di empangan hidro."
+    },
+    {
+      "node": "t2_geografi_b10",
+      "diff": 4,
+      "key": 0,
+      "q": "Sebuah kilang beralih daripada arang batu kepada tenaga suria. Apakah kesan paling langsung?",
+      "opts": [
+        "Pelepasan karbon dioksida berkurang",
+        "Bilangan pekerja kilang bertambah secara automatik",
+        "Kilang berhenti beroperasi sepenuhnya",
+        "Pengeluaran kilang bertambah tanpa had"
+      ],
+      "exp": "Beralih daripada arang batu kepada tenaga suria mengurangkan pelepasan karbon dioksida, kerana penjanaan elektrik daripada tenaga suria tidak membebaskan gas rumah hijau."
+    },
+    {
+      "node": "t2_geografi_b11",
+      "diff": 1,
+      "key": 0,
+      "q": "Apakah langkah paling mudah yang boleh dilakukan oleh murid untuk mengurangkan pemanasan global?",
+      "opts": [
+        "Mengamalkan amalan 3R dan menjimatkan penggunaan elektrik",
+        "Menambah penggunaan penghawa dingin",
+        "Membakar sampah di halaman rumah",
+        "Menggunakan kenderaan sendiri untuk setiap perjalanan"
+      ],
+      "exp": "Amalan 3R dan penjimatan elektrik mengurangkan jumlah sampah yang dihantar ke tapak pelupusan serta pelepasan gas rumah hijau daripada penjanaan elektrik."
+    },
+    {
+      "node": "t2_geografi_b11",
+      "diff": 1,
+      "key": 1,
+      "q": "Apakah perbezaan antara langkah mitigasi dengan langkah adaptasi dalam menangani pemanasan global?",
+      "opts": [
+        "Mitigasi menambah pencemaran, adaptasi mengurangkannya",
+        "Mitigasi mengurangkan punca, adaptasi menyesuaikan diri dengan kesan",
+        "Mitigasi dilakukan oleh kerajaan sahaja, adaptasi oleh individu sahaja",
+        "Kedua-duanya mempunyai maksud yang sama"
+      ],
+      "exp": "Langkah mitigasi mengurangkan punca pemanasan global seperti pelepasan gas rumah hijau, manakala langkah adaptasi menyesuaikan diri dengan kesan yang sudah berlaku seperti kenaikan aras laut."
+    },
+    {
+      "node": "t2_geografi_b11",
+      "diff": 2,
+      "key": 2,
+      "q": "Antara berikut, yang manakah contoh bangunan hijau?",
+      "opts": [
+        "Bangunan yang dicat warna hijau sahaja",
+        "Bangunan yang menggunakan penghawa dingin pada suhu paling rendah",
+        "Bangunan yang menggunakan panel suria dan sistem pengumpulan air hujan",
+        "Bangunan yang dibina tanpa tingkap"
+      ],
+      "exp": "Bangunan hijau menggunakan ciri seperti panel suria, pengumpulan air hujan, pengudaraan semula jadi dan bahan binaan lestari untuk mengurangkan penggunaan tenaga."
+    },
+    {
+      "node": "t2_geografi_b11",
+      "diff": 3,
+      "key": 3,
+      "q": "Mengapakah kelestarian alam memerlukan perubahan tingkah laku dan bukan hanya teknologi?",
+      "opts": [
+        "Kerana teknologi hijau tidak boleh digunakan oleh individu",
+        "Kerana kerajaan sahaja yang bertanggungjawab ke atas alam sekitar",
+        "Kerana perubahan tingkah laku tidak memberi sebarang kesan",
+        "Kerana teknologi hanya berkesan jika disertai amalan harian seperti penjimatan tenaga dan pengurangan sisa"
+      ],
+      "exp": "Teknologi hijau hanya berkesan sepenuhnya jika disertai perubahan tingkah laku seperti penjimatan tenaga, pengurangan sisa dan penggunaan pengangkutan awam dalam kehidupan harian."
+    },
+    {
+      "node": "t2_geografi_b11",
+      "diff": 5,
+      "key": 0,
+      "q": "Sebuah bandar ingin mengurangkan pelepasan karbon dengan berkesan. Antara berikut, yang manakah gabungan langkah paling menyeluruh?",
+      "opts": [
+        "Pengangkutan awam, tenaga boleh baharu, penanaman semula hutan dan pengurusan sisa",
+        "Menambah bilangan kenderaan persendirian dan tapak pelupusan",
+        "Membakar lebih banyak arang batu untuk menjana elektrik",
+        "Menebang hutan untuk membina lebih banyak kilang"
+      ],
+      "exp": "Mengurangkan pelepasan karbon secara berkesan memerlukan gabungan langkah: memperbaiki pengangkutan awam, beralih kepada tenaga boleh baharu, menanam semula hutan dan menguruskan sisa dengan baik."
+    }
+  ]
+}

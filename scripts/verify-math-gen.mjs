@@ -131,14 +131,14 @@ console.log(`SAINS_GEN_VERIFIED: ${sGens.length} generators, ${sGenSkills.size} 
 console.log(`SAINS_POOL_VERIFIED: ${sStatic.length} static items, ${sStaticCounts.size} concept skills, ${sAll.length} total entries`);
 
 // ---------- D6 static variant pool verification helper ----------
-function verifyStaticPool(subj, label, minPerSkill) {
+function verifyStaticPool(subj, label, minPerSkill, gradeId = "d6") {
   const ctxPool = { console, Math, Date, Set, Map, Array, Number, String, Object, JSON, BigInt };
   ctxPool.window = ctxPool;
-  for (const f of [`js/data/curriculum/d6_${subj}.js`, `js/data/pools/d6_${subj}.js`]) {
+  for (const f of [`js/data/curriculum/${gradeId}_${subj}.js`, `js/data/pools/${gradeId}_${subj}.js`]) {
     vm.runInNewContext(fs.readFileSync(f, "utf8"), ctxPool, { filename: f });
   }
-  const curr = ctxPool.App.Curriculum.d6[subj];
-  const items = ctxPool.App.Pools.d6[subj];
+  const curr = ctxPool.App.Curriculum[gradeId][subj];
+  const items = ctxPool.App.Pools[gradeId][subj];
   const units = new Set(curr.units.map((u) => u.id));
   const skills = new Set(curr.units.flatMap((u) => u.skills.map((s) => s.id)));
   const errs = [];
@@ -182,6 +182,8 @@ verifyStaticPool("bi", "BI", 8);
 verifyStaticPool("rbt", "RBT", 10);
 verifyStaticPool("psv", "PSV", 10);
 verifyStaticPool("pjpk", "PJPK", 10);
+verifyStaticPool("sejarah", "T2_SEJARAH", 10, "t2");
+verifyStaticPool("geografi", "T2_GEOGRAFI", 10, "t2");
 
 // -------------------- Tingkatan 2 Matematik Generators (Wave 1) --------------------
 {

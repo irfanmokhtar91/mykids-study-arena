@@ -290,5 +290,46 @@ let finalSummary = null;
   ok("T2 math prioritizes unprobed prerequisite t2_math_koor_01 (>= 2 slots)", koor01Count >= 2, `got ${koor01Count}`);
 }
 
+// ======================= 6. TINGKATAN 2 WAVE 2 DIAGNOSTIC BANKS (SEJARAH + GEOGRAFI) =======================
+{
+  const t2SejarahBank = JSON.parse(fs.readFileSync(path.join(rootDir, "js", "data", "diagnostic_t2_sejarah.json"), "utf8"));
+  const t2GeografiBank = JSON.parse(fs.readFileSync(path.join(rootDir, "js", "data", "diagnostic_t2_geografi.json"), "utf8"));
+  const t2W2Map = { t2: { sejarah: t2SejarahBank, geografi: t2GeografiBank } };
+  const availW2 = Runner.getAvailableBanks(t2W2Map, "t2");
+  eq(
+    "getAvailableBanks lists both T2 Wave 2 subjects (Sejarah 11/55 + Geografi 11/55)",
+    availW2.map((b) => [b.subjectId, b.nodeCount, b.questionCount]),
+    [["sejarah", 11, 55], ["geografi", 11, 55]]
+  );
+
+  for (const [subj, bankW2, nodeCount] of [["sejarah", t2SejarahBank, 11], ["geografi", t2GeografiBank, 11]]) {
+    const picked = Runner.selectDiagnosticQuestions(bankW2, { count: 15, seed: 2027 });
+    eq(`T2 ${subj}: selects 15 unique questions`, [picked.length, new Set(picked.map((q) => q.id)).size], [15, 15]);
+    eq(`T2 ${subj}: covers all ${nodeCount} syllabus_nodes in 15 questions`, new Set(picked.map((q) => q.syllabus_node_id)).size, nodeCount);
+  }
+
+  const priSejarah = Runner.selectDiagnosticQuestions(t2SejarahBank, {
+    count: 15,
+    seed: 88,
+    priorAttempts: [
+      { syllabus_node_id: "t2_sejarah_b11", is_correct: 0 },
+      { syllabus_node_id: "t2_sejarah_b11", is_correct: 0 }
+    ]
+  });
+  const b10Count = priSejarah.filter((q) => q.syllabus_node_id === "t2_sejarah_b10").length;
+  ok("T2 sejarah prioritizes unprobed prerequisite t2_sejarah_b10 (>= 2 slots)", b10Count >= 2, `got ${b10Count}`);
+
+  const priGeografi = Runner.selectDiagnosticQuestions(t2GeografiBank, {
+    count: 15,
+    seed: 88,
+    priorAttempts: [
+      { syllabus_node_id: "t2_geografi_b11", is_correct: 0 },
+      { syllabus_node_id: "t2_geografi_b11", is_correct: 0 }
+    ]
+  });
+  const geoB10Count = priGeografi.filter((q) => q.syllabus_node_id === "t2_geografi_b10").length;
+  ok("T2 geografi prioritizes unprobed prerequisite t2_geografi_b10 (>= 2 slots)", geoB10Count >= 2, `got ${geoB10Count}`);
+}
+
 console.log(failed === 0 ? "DIAGNOSTIC_RUNNER_TESTS_PASSED" : `DIAGNOSTIC_RUNNER_TESTS_FAILED (${failed})`);
 process.exit(failed === 0 ? 0 : 1);

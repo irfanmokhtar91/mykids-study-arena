@@ -56,6 +56,10 @@
     "t2:math:k1:C": { pool: "t2_math", part: "C" },
     "t2:sains:k1:B": { pool: "t2_sains", part: "B" },
     "t2:sains:k1:C": { pool: "t2_sains", part: "C" },
+    "t2:sejarah:k1:B": { pool: "t2_sejarah", part: "B" },
+    "t2:sejarah:k1:C": { pool: "t2_sejarah", part: "C" },
+    "t2:geografi:k1:B": { pool: "t2_geografi", part: "B" },
+    "t2:geografi:k1:C": { pool: "t2_geografi", part: "C" },
     "t4:math:k2:A": { pool: "t4_math", part: "A" },
     "t4:math:k2:B": { pool: "t4_math", part: "B" },
     "t4:math:k2:C": { pool: "t4_math", part: "C" }

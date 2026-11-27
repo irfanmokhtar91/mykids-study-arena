@@ -167,8 +167,8 @@
         id: "k1", name: "Ujian Bertulis", minutes: 120, marks: 80,
         sections: [
           sec("A", "Objektif aneka pilihan", ["OAP"], 20, 20, "objective"),
-          sec("B", "Subjektif respons terhad", ["SRT"], 3, 40, "subjective"),
-          sec("C", "Subjektif respons terbuka", ["SRTb"], 4, 20, "subjective", { choose: 2, of: 4 })
+          sec("B", "Subjektif respons terhad", ["SRT"], 4, 40, "subjective", { countNote: "4 soalan x 10 markah (UASA Menengah Bahagian B)" }),
+          sec("C", "Subjektif respons terbuka", ["SRTb"], 4, 20, "subjective", { choose: 2, of: 4, countNote: "4 soalan ditawarkan x 10 markah; murid jawab 2 (20 markah)" })
         ]
       }]
     },
