@@ -1116,6 +1116,91 @@ test("14d. wrong answer on u7 generated question triggers same-skill retry with 
   assert.ok(rank(retry.q.diff) <= rank(missed.diff), `retry ${retry.q.diff} harder than ${missed.diff}`);
 });
 
+// 15. Real d6_bi (10 units, 30 skills, 300 MCQs) integration tests ------------
+function loadD6WithBi() {
+  const win = { localStorage: makeLocalStorage() };
+  const ctx = vm.createContext({ window: win, Date: FixedDate });
+  for (const rel of [
+    "js/data/pools/d6_sejarah.js",
+    "js/data/curriculum/d6_sejarah.js",
+    "js/data/curriculum/d6_math.js",
+    "js/data/pools/d6_math_gen.js",
+    "js/data/curriculum/d6_bm.js",
+    "js/data/pools/d6_bm.js",
+    "js/data/curriculum/d6_sains.js",
+    "js/data/pools/d6_sains.js",
+    "js/data/pools/d6_sains_gen.js",
+    "js/data/curriculum/d6_bi.js",
+    "js/data/pools/d6_bi.js",
+    "js/storage.js"
+  ]) {
+    vm.runInContext(readRel(rel), ctx, { filename: rel });
+  }
+  return win.App;
+}
+
+const D6_WITH_BI = loadD6WithBi();
+const BI_CURR = D6_WITH_BI.Curriculum.d6.bi;
+const BI_POOL = D6_WITH_BI.Pools.d6.bi;
+
+test("15a. real d6_bi (10 units, 30 skills, 300 items) auto-detects as 5th D6 pool", () => {
+  assert.equal(BI_CURR.units.length, 10);
+  const totalSkills = BI_CURR.units.reduce((n, u) => n + u.skills.length, 0);
+  assert.equal(totalSkills, 30);
+  assert.ok(BI_POOL.length >= 240 && BI_POOL.length <= 300, `unexpected BI pool size ${BI_POOL.length}`);
+  const found = V.getAvailablePools(
+    D6_WITH_BI.Pools,
+    D6_WITH_BI.Curriculum,
+    "d6",
+    D6_WITH_BI.Generators
+  );
+  assert.equal(found.length, 5);
+  const bi = found.find((p) => p.subjectId === "bi");
+  assert.ok(bi);
+  assert.equal(bi.isGenerator, false);
+  assert.equal(bi.pool.length, BI_POOL.length);
+});
+
+test("15b. real d6_bi 10-question session across mixed units draws unique valid items", () => {
+  const ticked = ["u1", "u5", "u8", "u10"];
+  const run = playSession({
+    pool: BI_POOL,
+    ticked,
+    state: V.createInitialState(),
+    seed: "bi-mix-1",
+    id: "bmix1"
+  });
+  assert.equal(run.draws.length, 10);
+  assert.equal(run.session.completed, true);
+  assert.equal(new Set(run.draws.map((d) => V.normalizePromptText(d.q.q))).size, 10);
+  for (const d of run.draws) {
+    assert.ok(ticked.includes(d.q.unit), `unexpected unit ${d.q.unit}`);
+    assert.equal(d.q.options.length, 4);
+    assert.equal(new Set(d.q.options.map((o) => String(o).toLowerCase().trim())).size, 4, `duplicate options in ${d.q.id}`);
+    assert.ok(d.q.correctIndex >= 0 && d.q.correctIndex <= 3);
+    assert.ok(typeof d.q.explanation === "string" && d.q.explanation.trim().length > 0);
+    assert.equal(/NaN|undefined/.test(`${d.q.q}|${d.q.options.join("|")}|${d.q.explanation}`), false);
+  }
+});
+
+test("15c. wrong answer on d6_bi triggers same-skill retry with different item at <= diff", () => {
+  const run = playSession({
+    pool: BI_POOL,
+    ticked: ["u2", "u6", "u9"],
+    state: V.createInitialState(),
+    seed: "bi-retry-1",
+    id: "bretry1",
+    answer: (q, i) => i !== 0
+  });
+  const missed = run.draws[0].q;
+  const retry = run.draws.find((d) => d.fromRetry && d.idx > 0);
+  assert.ok(retry, "no retry was drawn for real d6_bi");
+  assert.equal(retry.q.skill, missed.skill);
+  assert.notEqual(retry.q.id, missed.id);
+  assert.notEqual(V.normalizePromptText(retry.q.q), V.normalizePromptText(missed.q));
+  assert.ok(rank(retry.q.diff) <= rank(missed.diff), `retry ${retry.q.diff} harder than ${missed.diff}`);
+});
+
 const failed = results.filter((r) => !r.ok);
 console.log(
   failed.length === 0
