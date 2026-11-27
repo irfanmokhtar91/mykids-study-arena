@@ -5,10 +5,11 @@
  * `check` holds the final numeric answers, recomputed independently by scripts/verify-structured.mjs.
  * `status`: "draft" until scripts/verify-structured.mjs AND the blind second-model solve both agree; then "verified".
  *
- * VERIFICATION RECORD (24/Nov/2026), all 18 items:
+ * VERIFICATION RECORD (24/Nov/2026 & 27/Nov/2026), all 22 items (18 original + t2m-B11, B12, C09, C10):
  *   Gate 1: scripts/verify-structured.mjs recomputed every answer from the problem's own numbers: 266 checks passed.
  *   Gate 2: a separate model (Opus) solved all 43 parts blind (question text only): 43/43 final answers agree.
  *           It also judged every question suitable for Form 2 (KSSM). Notes applied: C06(c) key accepts -2.5 m/s2 as well.
+ *   27/Nov/2026: Added t2m-B11, t2m-B12 (graf_fungsi, transformasi) and t2m-C09, t2m-C10 — Gate 1 verify-structured.mjs + Gate 2 gemini-4-argon 8/8 exact agreement, 0 flags.
  *   Still recommended: a teacher or Irfan skims the questions for syllabus fit before wider release.
  */
 (function (root, factory) {
@@ -303,6 +304,292 @@
           M("(1/2) × 60"),
           A("30 kali")
         ], "30 kali", [30])
+      ]
+    },
+    {
+      "id": "t2m-B11",
+      "chapterId": "graf_fungsi",
+      "part": "B",
+      "level": "sederhana",
+      "status": "verified",
+      "stem": "Diberi fungsi kuadratik y = 2x² − 5x + 1. Jadual di bawah menunjukkan sebahagian nilai x dan y bagi fungsi itu.\n\nx: −1,  1,  2, 3,  4\ny:  8,  m, −1, n, 13",
+      "parts": [
+        {
+          "label": "",
+          "q": "(a) Cari nilai m dan nilai n.\n(b) Jika titik (−2, k) terletak pada graf fungsi itu, cari nilai k.",
+          "marks": 4,
+          "steps": [
+            {
+              "kind": "M",
+              "marks": 1,
+              "text": "Menggantikan x = 1 dan x = 3 ke dalam y = 2x² − 5x + 1"
+            },
+            {
+              "kind": "A",
+              "marks": 1,
+              "text": "m = −2 dan n = 4"
+            },
+            {
+              "kind": "M",
+              "marks": 1,
+              "text": "Menggantikan x = −2 ke dalam persamaan: 2(−2)² − 5(−2) + 1"
+            },
+            {
+              "kind": "A",
+              "marks": 1,
+              "text": "k = 19"
+            }
+          ],
+          "answer": "m = −2, n = 4; k = 19",
+          "check": [
+            -2,
+            4,
+            19
+          ]
+        }
+      ]
+    },
+    {
+      "id": "t2m-B12",
+      "chapterId": "transformasi",
+      "part": "B",
+      "level": "sederhana",
+      "status": "verified",
+      "stem": "Pada satah Cartes, titik P mempunyai koordinat (5, −2).",
+      "parts": [
+        {
+          "label": "",
+          "q": "Cari koordinat imej bagi titik P di bawah\n(a) translasi dengan vektor (−3, 4),\n(b) pantulan pada garis x = 1.",
+          "marks": 4,
+          "steps": [
+            {
+              "kind": "M",
+              "marks": 1,
+              "text": "(5 + (−3), −2 + 4)"
+            },
+            {
+              "kind": "A",
+              "marks": 1,
+              "text": "(2, 2)"
+            },
+            {
+              "kind": "M",
+              "marks": 1,
+              "text": "Jarak mengufuk dari garis x = 1 ialah 5 − 1 = 4 unit, maka koordinat-x imej = 1 − 4"
+            },
+            {
+              "kind": "A",
+              "marks": 1,
+              "text": "(−3, −2)"
+            }
+          ],
+          "answer": "(a) (2, 2); (b) (−3, −2)",
+          "check": [
+            2,
+            2,
+            -3,
+            -2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "t2m-C09",
+      "chapterId": "graf_fungsi",
+      "part": "C",
+      "level": "tinggi",
+      "status": "verified",
+      "stem": "",
+      "parts": [
+        {
+          "label": "(a)",
+          "q": "Jadual di bawah menunjukkan nilai-nilai bagi fungsi kuadratik y = x² − 2x − 8.\n\nx: −2, −1,  0,  1, 2,  3, 4\ny:  0,  p, −8, −9, q, −5, 0\n\nHitung nilai p dan nilai q.",
+          "marks": 3,
+          "steps": [
+            {
+              "kind": "M",
+              "marks": 1,
+              "text": "Menggantikan x = −1 dan x = 2 ke dalam y = x² − 2x − 8"
+            },
+            {
+              "kind": "A",
+              "marks": 1,
+              "text": "p = −5"
+            },
+            {
+              "kind": "A",
+              "marks": 1,
+              "text": "q = −8"
+            }
+          ],
+          "answer": "p = −5; q = −8",
+          "check": [
+            -5,
+            -8
+          ]
+        },
+        {
+          "label": "(b)",
+          "q": "Bagi graf fungsi y = x² − 2x − 8 dalam (a),\n(i) nyatakan dua nilai x apabila graf itu memotong paksi-x,\n(ii) cari nilai y apabila x = 5.",
+          "marks": 3,
+          "steps": [
+            {
+              "kind": "A",
+              "marks": 1,
+              "text": "Pintasan-x berlaku apabila y = 0, iaitu x = −2 dan x = 4"
+            },
+            {
+              "kind": "M",
+              "marks": 1,
+              "text": "Menggantikan x = 5: 5² − 2(5) − 8"
+            },
+            {
+              "kind": "A",
+              "marks": 1,
+              "text": "y = 7"
+            }
+          ],
+          "answer": "(i) x = −2 dan x = 4; (ii) y = 7",
+          "check": [
+            -2,
+            4,
+            7
+          ]
+        },
+        {
+          "label": "(c)",
+          "q": "Sebuah syarikat penghantaran mengenakan bayaran tetap RM10 dan tambahan RM2.50 bagi setiap kilometer jarak penghantaran. Jumlah bayaran, C (dalam RM), bagi jarak d km diwakili oleh fungsi linear C = md + c.\n(i) Nyatakan nilai m dan nilai c.\n(ii) Hitung jarak penghantaran, dalam km, jika jumlah bayaran ialah RM45.",
+          "marks": 4,
+          "steps": [
+            {
+              "kind": "A",
+              "marks": 1,
+              "text": "m = 2.5 (kadar bayaran per km)"
+            },
+            {
+              "kind": "A",
+              "marks": 1,
+              "text": "c = 10 (bayaran tetap apabila d = 0)"
+            },
+            {
+              "kind": "M",
+              "marks": 1,
+              "text": "2.5d + 10 = 45 atau d = (45 − 10) ÷ 2.5"
+            },
+            {
+              "kind": "A",
+              "marks": 1,
+              "text": "d = 14 km"
+            }
+          ],
+          "answer": "(i) m = 2.5, c = 10; (ii) 14 km",
+          "check": [
+            2.5,
+            10,
+            14
+          ]
+        }
+      ]
+    },
+    {
+      "id": "t2m-C10",
+      "chapterId": "transformasi",
+      "part": "C",
+      "level": "sederhana",
+      "status": "verified",
+      "stem": "Pada suatu satah Cartes, sebuah segi tiga ABC mempunyai bucu-bucu A(2, 1), B(6, 1) dan C(2, 4).",
+      "parts": [
+        {
+          "label": "(a)",
+          "q": "Di bawah suatu translasi T, imej bagi bucu A(2, 1) ialah A'(−1, 5).\n(i) Tentukan vektor translasi T.\n(ii) Cari koordinat imej bagi bucu B(6, 1) di bawah translasi T yang sama.",
+          "marks": 3,
+          "steps": [
+            {
+              "kind": "M",
+              "marks": 1,
+              "text": "Vektor translasi T = (−1 − 2, 5 − 1)"
+            },
+            {
+              "kind": "A",
+              "marks": 1,
+              "text": "T = (−3, 4)"
+            },
+            {
+              "kind": "A",
+              "marks": 1,
+              "text": "B' = (6 + (−3), 1 + 4) = (3, 5)"
+            }
+          ],
+          "answer": "(i) (−3, 4); (ii) (3, 5)",
+          "check": [
+            -3,
+            4,
+            3,
+            5
+          ]
+        },
+        {
+          "label": "(b)",
+          "q": "Cari koordinat imej bagi bucu B(6, 1) dan bucu C(2, 4) di bawah pantulan pada garis y = 3.",
+          "marks": 3,
+          "steps": [
+            {
+              "kind": "M",
+              "marks": 1,
+              "text": "Pantulan pada y = 3 mengekalkan koordinat-x dan memetakan y kepada 2(3) − y"
+            },
+            {
+              "kind": "A",
+              "marks": 1,
+              "text": "Imej B ialah (6, 5)"
+            },
+            {
+              "kind": "A",
+              "marks": 1,
+              "text": "Imej C ialah (2, 2)"
+            }
+          ],
+          "answer": "Imej B = (6, 5); imej C = (2, 2)",
+          "check": [
+            6,
+            5,
+            2,
+            2
+          ]
+        },
+        {
+          "label": "(c)",
+          "q": "Segi tiga PQR ialah imej bagi segi tiga ABC di bawah putaran 90° ikut arah jam pada asalan (0, 0).\n(i) Cari koordinat imej bagi bucu C(2, 4) di bawah putaran itu.\n(ii) Dengan menggunakan sifat kekongruenan transformasi isometri, hitung luas, dalam unit², bagi segi tiga PQR.",
+          "marks": 4,
+          "steps": [
+            {
+              "kind": "M",
+              "marks": 1,
+              "text": "Putaran 90° ikut arah jam pada asalan (0, 0) memetakan (x, y) → (y, −x)"
+            },
+            {
+              "kind": "A",
+              "marks": 1,
+              "text": "Imej bagi C(2, 4) ialah (4, −2)"
+            },
+            {
+              "kind": "M",
+              "marks": 1,
+              "text": "Transformasi isometri mengekalkan saiz dan bentuk (kongruen): luas PQR = luas ABC = (1/2) × (6 − 2) × (4 − 1)"
+            },
+            {
+              "kind": "A",
+              "marks": 1,
+              "text": "6 unit²"
+            }
+          ],
+          "answer": "(i) (4, −2); (ii) 6 unit²",
+          "check": [
+            4,
+            -2,
+            6
+          ]
+        }
       ]
     }
   ];

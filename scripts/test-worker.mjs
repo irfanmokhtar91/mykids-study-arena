@@ -163,10 +163,9 @@ ok("no new device token is issued for an existing child", r.data.linked === true
 
 // ---------------------------------------------------------------- diagnostic checkup logs
 const diagBank = JSON.parse(fs.readFileSync(new URL("../js/data/diagnostic_t2_math.json", import.meta.url), "utf8"));
-const diagQs = [
-  ...diagBank.syllabus_nodes.flatMap((n) => diagBank.questions.filter((q) => q.syllabus_node_id === n.id).slice(0, 2)),
-  diagBank.questions[2]
-];
+const diagQs = diagBank.syllabus_nodes
+  .slice(0, 15)
+  .map((n) => diagBank.questions.find((q) => q.syllabus_node_id === n.id));
 const diagAtts = diagQs.map((q, i) => ({
   id: `diag_test_a${i + 1}`,
   question_id: q.id,
@@ -194,7 +193,7 @@ ok("diagnostic upload with invalid session_type is refused", r.status === 400);
 r = await call("POST", "/api/child/diagnostics", { body: { childId, deviceToken, session: { id: "bad2", session_type: "INITIAL_DIAGNOSTIC", started_at: "2026-11-25T16:25:00+08:00" }, attempts: [{ ...diagAtts[0], time_spent_ms: -10 }] } });
 ok("diagnostic upload with negative time_spent_ms is refused", r.status === 400);
 r = await call("GET", `/api/parent/child/${childId}/diagnostics`, { token: mama2.session });
-ok("linked parent reads child diagnostic logs", r.status === 200 && r.data.sessions.length === 1 && r.data.attempts.length === 15 && r.data.syllabusNodes.length === 7);
+ok("linked parent reads child diagnostic logs", r.status === 200 && r.data.sessions.length === 1 && r.data.attempts.length === 15 && r.data.syllabusNodes.length === 15);
 const stranger = await login({ sub: "g-stranger", email: "stranger@example.com" });
 r = await call("GET", `/api/parent/child/${childId}/diagnostics`, { token: stranger.session });
 ok("unlinked parent cannot read diagnostic logs", r.status === 404);

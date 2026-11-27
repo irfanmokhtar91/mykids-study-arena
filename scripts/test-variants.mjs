@@ -1294,6 +1294,69 @@ test("16d. real d6_pjpk mixed session and wrong-answer retry", () => {
   assertPoolSessionAndRetry("pjpk", D6_ALL8.Pools.d6.pjpk, ["u1", "u6", "u11", "u13"], "pjpk-mix");
 });
 
+// ==================== SECTION 17: TINGKATAN 2 WAVE 1 STEM POOLS (MATH + SAINS) ====================
+function loadT2Wave1() {
+  const ctx = {
+    console,
+    Math,
+    Date,
+    Set,
+    Map,
+    Array,
+    Number,
+    String,
+    Object,
+    JSON,
+    BigInt
+  };
+  ctx.window = ctx;
+  ctx.globalThis = ctx;
+  for (const rel of [
+    "js/variants.js",
+    "js/syllabus.js",
+    "js/generators.js",
+    "js/data/curriculum/t2_math.js",
+    "js/data/pools/t2_math_gen.js",
+    "js/data/curriculum/t2_sains.js",
+    "js/data/pools/t2_sains.js",
+    "js/data/pools/t2_sains_gen.js",
+    "js/storage.js"
+  ]) {
+    vm.runInNewContext(readRel(rel), ctx, { filename: rel });
+  }
+  return ctx.App;
+}
+
+const T2_W1 = loadT2Wave1();
+
+test("17a. real t2_math (117 gens) and t2_sains (348 entries) auto-detect while keeping Generators.t2 intact", () => {
+  const found = V.getAvailablePools(T2_W1.Pools, T2_W1.Curriculum, "t2", T2_W1.Generators);
+  assert.equal(found.length, 2);
+  const m = found.find((p) => p.subjectId === "math");
+  const s = found.find((p) => p.subjectId === "sains");
+  assert.ok(m && s);
+  assert.equal(T2_W1.Curriculum.t2.math.units.length, 13);
+  assert.equal(T2_W1.Curriculum.t2.math.units.reduce((n, u) => n + u.skills.length, 0), 39);
+  assert.equal(m.isGenerator, true);
+  assert.equal(m.pool.length, 117);
+  assert.equal(T2_W1.Curriculum.t2.sains.units.length, 13);
+  assert.equal(T2_W1.Curriculum.t2.sains.units.reduce((n, u) => n + u.skills.length, 0), 39);
+  assert.equal(s.pool.length, 348);
+  assert.ok(T2_W1.Generators.t2 && Array.isArray(T2_W1.Generators.t2.pola_jujukan) && T2_W1.Generators.t2.pola_jujukan.length === 3);
+});
+
+test("17b. real t2_math_gen mixed session, retry, and seed determinism", () => {
+  assertPoolSessionAndRetry("t2_math", T2_W1.Pools.t2.math, ["b1", "b5", "b9", "b13"], "t2m-mix");
+  const a = playSession({ pool: T2_W1.Pools.t2.math, ticked: ["b1", "b5", "b9", "b13"], state: V.createInitialState(), seed: "t2m-det", id: "t2m-d1" });
+  const b = playSession({ pool: T2_W1.Pools.t2.math, ticked: ["b1", "b5", "b9", "b13"], state: V.createInitialState(), seed: "t2m-det", id: "t2m-d1" });
+  assert.deepEqual(a.draws.map((d) => ({ q: d.q.q, sig: d.q.sig, c: d.q.correctIndex })), b.draws.map((d) => ({ q: d.q.q, sig: d.q.sig, c: d.q.correctIndex })));
+});
+
+test("17c. real t2_sains mixed and numeric-only sessions pass with retry", () => {
+  assertPoolSessionAndRetry("t2_sains", T2_W1.Pools.t2.sains, ["b1", "b3", "b7", "b8", "b10", "b12"], "t2s-mix");
+  assertPoolSessionAndRetry("t2_sains_num", T2_W1.Pools.t2.sains, ["b8"], "t2s-b8");
+});
+
 const failed = results.filter((r) => !r.ok);
 console.log(
   failed.length === 0

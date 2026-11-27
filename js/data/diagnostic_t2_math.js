@@ -90,6 +90,116 @@
         "prerequisite_node_id": "t2_math_rumus_01",
         "expected_time_ms": 50000,
         "bloom_level": "Analyze"
+      },
+      {
+        "id": "t2_math_poligon_01",
+        "subject": "math",
+        "grade_level": "t2",
+        "chapter_id": "poligon",
+        "topic_name": "Bab 4: Poligon",
+        "subtopic_name": "Poligon Sekata, Sudut Pedalaman dan Sudut Peluaran",
+        "prerequisite_node_id": null,
+        "expected_time_ms": 40000,
+        "bloom_level": "Apply"
+      },
+      {
+        "id": "t2_math_bulatan_01",
+        "subject": "math",
+        "grade_level": "t2",
+        "chapter_id": "bulatan",
+        "topic_name": "Bab 5: Bulatan",
+        "subtopic_name": "Lilitan, Luas Bulatan, Panjang Lengkok dan Luas Sektor",
+        "prerequisite_node_id": "t2_math_rumus_01",
+        "expected_time_ms": 45000,
+        "bloom_level": "Apply"
+      },
+      {
+        "id": "t2_math_3d_01",
+        "subject": "math",
+        "grade_level": "t2",
+        "chapter_id": "bentuk_3d",
+        "topic_name": "Bab 6: Bentuk Geometri Tiga Dimensi",
+        "subtopic_name": "Luas Permukaan dan Isi Padu Bentuk Tiga Dimensi",
+        "prerequisite_node_id": "t2_math_bulatan_01",
+        "expected_time_ms": 50000,
+        "bloom_level": "Analyze"
+      },
+      {
+        "id": "t2_math_koor_01",
+        "subject": "math",
+        "grade_level": "t2",
+        "chapter_id": "koordinat",
+        "topic_name": "Bab 7: Koordinat",
+        "subtopic_name": "Jarak Antara Dua Titik dan Titik Tengah",
+        "prerequisite_node_id": null,
+        "expected_time_ms": 40000,
+        "bloom_level": "Apply"
+      },
+      {
+        "id": "t2_math_graf_01",
+        "subject": "math",
+        "grade_level": "t2",
+        "chapter_id": "graf_fungsi",
+        "topic_name": "Bab 8: Graf Fungsi",
+        "subtopic_name": "Fungsi, Jadual Nilai dan Graf Fungsi",
+        "prerequisite_node_id": "t2_math_koor_01",
+        "expected_time_ms": 45000,
+        "bloom_level": "Understand"
+      },
+      {
+        "id": "t2_math_laju_01",
+        "subject": "math",
+        "grade_level": "t2",
+        "chapter_id": "laju_pecutan",
+        "topic_name": "Bab 9: Laju dan Pecutan",
+        "subtopic_name": "Laju Purata, Penukaran Unit dan Pecutan",
+        "prerequisite_node_id": "t2_math_rumus_02",
+        "expected_time_ms": 45000,
+        "bloom_level": "Apply"
+      },
+      {
+        "id": "t2_math_kecer_01",
+        "subject": "math",
+        "grade_level": "t2",
+        "chapter_id": "kecerunan",
+        "topic_name": "Bab 10: Kecerunan Garis Lurus",
+        "subtopic_name": "Kecerunan dan Pintasan Garis Lurus",
+        "prerequisite_node_id": "t2_math_koor_01",
+        "expected_time_ms": 45000,
+        "bloom_level": "Apply"
+      },
+      {
+        "id": "t2_math_trans_01",
+        "subject": "math",
+        "grade_level": "t2",
+        "chapter_id": "transformasi",
+        "topic_name": "Bab 11: Transformasi Isometri",
+        "subtopic_name": "Translasi, Pantulan dan Putaran",
+        "prerequisite_node_id": "t2_math_koor_01",
+        "expected_time_ms": 40000,
+        "bloom_level": "Apply"
+      },
+      {
+        "id": "t2_math_stat_01",
+        "subject": "math",
+        "grade_level": "t2",
+        "chapter_id": "sukatan_kecenderungan",
+        "topic_name": "Bab 12: Sukatan Kecenderungan Memusat",
+        "subtopic_name": "Mod, Median dan Min bagi Data Tak Terkumpul",
+        "prerequisite_node_id": null,
+        "expected_time_ms": 45000,
+        "bloom_level": "Apply"
+      },
+      {
+        "id": "t2_math_kebar_01",
+        "subject": "math",
+        "grade_level": "t2",
+        "chapter_id": "kebarangkalian",
+        "topic_name": "Bab 13: Kebarangkalian Mudah",
+        "subtopic_name": "Kebarangkalian Peristiwa dan Peristiwa Pelengkap",
+        "prerequisite_node_id": null,
+        "expected_time_ms": 40000,
+        "bloom_level": "Apply"
       }
     ],
     "questions": [
@@ -971,6 +1081,1111 @@
           "mode": "exact",
           "code": "const W=5, y=4; return (y + 2*W) / (W - 3);",
           "ans": "7"
+        }
+      },
+      {
+        "id": "t2m_pol_01_q1",
+        "syllabus_node_id": "t2_math_poligon_01",
+        "difficulty_1_to_5": 1,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Hitung jumlah sudut pedalaman bagi sebuah pentagon.",
+        "options_json": {
+          "A": "360°",
+          "B": "540°",
+          "C": "720°",
+          "D": "900°"
+        },
+        "correct_option": "B",
+        "explanation_text": "Pentagon mempunyai n = 5 sisi. Jumlah sudut pedalaman = (n - 2) × 180° = (5 - 2) × 180° = 540°. Pilihan A (360°) ialah jumlah sudut pedalaman segi empat atau jumlah sudut peluaran poligon; pilihan C (720°) untuk heksagon (n = 6); pilihan D (900°) terlupa menolak 2 iaitu 5 × 180°.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const n = 5; return `${(n - 2) * 180}°`;",
+          "ans": "540°"
+        }
+      },
+      {
+        "id": "t2m_pol_01_q2",
+        "syllabus_node_id": "t2_math_poligon_01",
+        "difficulty_1_to_5": 2,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Cari nilai setiap sudut peluaran bagi sebuah oktagon sekata.",
+        "options_json": {
+          "A": "135°",
+          "B": "60°",
+          "C": "36°",
+          "D": "45°"
+        },
+        "correct_option": "D",
+        "explanation_text": "Oktagon mempunyai 8 sisi dan jumlah sudut peluaran mana-mana poligon ialah 360°, maka setiap sudut peluaran = 360° ÷ 8 = 45°. Pilihan A (135°) ialah nilai sudut pedalaman oktagon sekata; pilihan B (60°) menggunakan n = 6; pilihan C (36°) menggunakan n = 10.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const n = 8; return `${360 / n}°`;",
+          "ans": "45°"
+        }
+      },
+      {
+        "id": "t2m_pol_01_q3",
+        "syllabus_node_id": "t2_math_poligon_01",
+        "difficulty_1_to_5": 2,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Setiap sudut peluaran bagi sebuah poligon sekata ialah 40°. Berapakah bilangan sisi poligon itu?",
+        "options_json": {
+          "A": "9",
+          "B": "8",
+          "C": "10",
+          "D": "12"
+        },
+        "correct_option": "A",
+        "explanation_text": "Bilangan sisi poligon sekata = 360° ÷ sudut peluaran = 360° ÷ 40° = 9 sisi. Pilihan B (8) hasil daripada salah bahagi 360 ÷ 45; pilihan C (10) hasil daripada 360 ÷ 36; pilihan D (12) mengira 360 ÷ 30.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "return 360 / 40;",
+          "ans": "9"
+        }
+      },
+      {
+        "id": "t2m_pol_01_q4",
+        "syllabus_node_id": "t2_math_poligon_01",
+        "difficulty_1_to_5": 3,
+        "diff": "M",
+        "exam_part": "A",
+        "prompt_text": "Setiap sudut pedalaman bagi sebuah poligon sekata ialah 144°. Tentukan bilangan sisi poligon tersebut.",
+        "options_json": {
+          "A": "8",
+          "B": "9",
+          "C": "10",
+          "D": "12"
+        },
+        "correct_option": "C",
+        "explanation_text": "Sudut peluaran = 180° - 144° = 36°. Maka bilangan sisi = 360° ÷ 36° = 10. Pilihan A (8) menganggap sudut pedalaman 135°; pilihan B (9) menganggap sudut pedalaman 140°; pilihan D (12) tersilap menolak 180 - 150.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const interior = 144; return 360 / (180 - interior);",
+          "ans": "10"
+        }
+      },
+      {
+        "id": "t2m_pol_01_q5",
+        "syllabus_node_id": "t2_math_poligon_01",
+        "difficulty_1_to_5": 4,
+        "diff": "H",
+        "exam_part": "A",
+        "prompt_text": "Dalam sebuah pentagon tak sekata, empat daripada sudut peluarannya ialah 65°, 72°, 84° dan 58°. Hitung nilai sudut pedalaman yang bersebelahan dengan sudut peluaran kelima.",
+        "options_json": {
+          "A": "81°",
+          "B": "99°",
+          "C": "261°",
+          "D": "109°"
+        },
+        "correct_option": "B",
+        "explanation_text": "Jumlah sudut peluaran ialah 360°, jadi sudut peluaran kelima = 360° - (65° + 72° + 84° + 58°) = 360° - 279° = 81°. Sudut pedalaman yang bersebelahan = 180° - 81° = 99°. Pilihan A (81°) ialah sudut peluaran kelima, bukan sudut pedalaman; pilihan C (261°) ialah hasil tolak 540° - 279° secara terus; pilihan D (109°) berpunca daripada kesilapan tambah 269° bukannya 279°.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const ext5 = 360 - (65 + 72 + 84 + 58); return `${180 - ext5}°`;",
+          "ans": "99°"
+        }
+      },
+      {
+        "id": "t2m_bul_01_q1",
+        "syllabus_node_id": "t2_math_bulatan_01",
+        "difficulty_1_to_5": 1,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Hitung lilitan sebuah bulatan yang mempunyai jejari 14 cm. (Guna π = 22/7)",
+        "options_json": {
+          "A": "44 cm",
+          "B": "616 cm",
+          "C": "88 cm",
+          "D": "176 cm"
+        },
+        "correct_option": "C",
+        "explanation_text": "Lilitan bulatan = 2πj = 2 × (22/7) × 14 = 88 cm. Pilihan A (44 cm) terlupa mendarab dengan 2 atau menganggap 14 cm sebagai diameter; pilihan B (616 cm) mengira luas πj² tanpa unit luas; pilihan D (176 cm) menggantikan diameter dengan 2 × 14 lalu mendarab lagi dengan 2.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const r = 14; return `${2 * (22 / 7) * r} cm`;",
+          "ans": "88 cm"
+        }
+      },
+      {
+        "id": "t2m_bul_01_q2",
+        "syllabus_node_id": "t2_math_bulatan_01",
+        "difficulty_1_to_5": 2,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Cari luas sebuah bulatan yang berdiameter 14 cm. (Guna π = 22/7)",
+        "options_json": {
+          "A": "154 cm²",
+          "B": "44 cm²",
+          "C": "616 cm²",
+          "D": "308 cm²"
+        },
+        "correct_option": "A",
+        "explanation_text": "Jejari bulatan j = 14 ÷ 2 = 7 cm. Luas = πj² = (22/7) × 7² = 154 cm². Pilihan B (44 cm²) mengira lilitan πd bukannya luas; pilihan C (616 cm²) menggunakan diameter 14 cm terus sebagai jejari; pilihan D (308 cm²) mengira 2πj² atau π × 14 × 7.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const d = 14, r = d / 2; return `${(22 / 7) * r * r} cm²`;",
+          "ans": "154 cm²"
+        }
+      },
+      {
+        "id": "t2m_bul_01_q3",
+        "syllabus_node_id": "t2_math_bulatan_01",
+        "difficulty_1_to_5": 2,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Lilitan sebuah bulatan ialah 132 cm. Hitung jejari bulatan itu. (Guna π = 22/7)",
+        "options_json": {
+          "A": "42 cm",
+          "B": "14 cm",
+          "C": "7 cm",
+          "D": "21 cm"
+        },
+        "correct_option": "D",
+        "explanation_text": "Menggunakan lilitan = 2πj, 132 = 2 × (22/7) × j, maka j = (132 × 7) ÷ 44 = 21 cm. Pilihan A (42 cm) ialah diameter bulatan kerana terlupa membahagi 2; pilihan B (14 cm) dan C (7 cm) berpunca daripada salah pembahagian 132 dengan 44.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const c = 132; return `${c / (2 * (22 / 7))} cm`;",
+          "ans": "21 cm"
+        }
+      },
+      {
+        "id": "t2m_bul_01_q4",
+        "syllabus_node_id": "t2_math_bulatan_01",
+        "difficulty_1_to_5": 3,
+        "diff": "M",
+        "exam_part": "A",
+        "prompt_text": "Sebuah sektor bulatan berjejari 21 cm mencangkum sudut 60° pada pusat bulatan. Hitung panjang lengkok sektor itu. (Guna π = 22/7)",
+        "options_json": {
+          "A": "11 cm",
+          "B": "22 cm",
+          "C": "44 cm",
+          "D": "231 cm"
+        },
+        "correct_option": "B",
+        "explanation_text": "Panjang lengkok = (θ / 360°) × 2πj = (60° / 360°) × 2 × (22/7) × 21 = (1/6) × 132 = 22 cm. Pilihan A (11 cm) terlupa faktor 2 dalam rumus 2πj; pilihan C (44 cm) menggunakan sudut 120° atau terlupa membahagi dengan tepat; pilihan D (231 cm) mengira luas sektor (60/360) × πj².",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const r = 21, theta = 60; return `${Math.round((theta / 360) * 2 * (22 / 7) * r)} cm`;",
+          "ans": "22 cm"
+        }
+      },
+      {
+        "id": "t2m_bul_01_q5",
+        "syllabus_node_id": "t2_math_bulatan_01",
+        "difficulty_1_to_5": 4,
+        "diff": "H",
+        "exam_part": "A",
+        "prompt_text": "Luas sebuah sektor bulatan ialah 77 cm² dan sudut pada pusatnya ialah 45°. Tentukan jejari bulatan tersebut. (Guna π = 22/7)",
+        "options_json": {
+          "A": "7 cm",
+          "B": "28 cm",
+          "C": "14 cm",
+          "D": "196 cm"
+        },
+        "correct_option": "C",
+        "explanation_text": "Luas sektor = (45° / 360°) × (22/7) × j² = 77 -> (1/8) × (22/7) × j² = 77 -> j² = (77 × 8 × 7) ÷ 22 = 196 -> j = √196 = 14 cm. Pilihan A (7 cm) berpunca daripada salah guna rumus 2πj; pilihan B (28 cm) memberikan nilai diameter 2j; pilihan D (196 cm) terlupa mencari punca kuasa dua bagi j².",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const L = 77, theta = 45; return `${Math.sqrt((L * 360 * 7) / (theta * 22))} cm`;",
+          "ans": "14 cm"
+        }
+      },
+      {
+        "id": "t2m_3d_01_q1",
+        "syllabus_node_id": "t2_math_3d_01",
+        "difficulty_1_to_5": 1,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Hitung isi padu sebuah silinder tegak berjejari 7 cm dan tinggi 10 cm. (Guna π = 22/7)",
+        "options_json": {
+          "A": "1540 cm³",
+          "B": "440 cm³",
+          "C": "770 cm³",
+          "D": "220 cm³"
+        },
+        "correct_option": "A",
+        "explanation_text": "Isi padu silinder = πj²t = (22/7) × 7² × 10 = 154 × 10 = 1540 cm³. Pilihan B (440 cm³) mengira luas permukaan melengkung 2πjt; pilihan C (770 cm³) mendarab dengan 1/2 secara tidak perlu; pilihan D (220 cm³) terlupa mengkuasaduakan jejari j = 7.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const r = 7, h = 10; return `${(22 / 7) * r * r * h} cm³`;",
+          "ans": "1540 cm³"
+        }
+      },
+      {
+        "id": "t2m_3d_01_q2",
+        "syllabus_node_id": "t2_math_3d_01",
+        "difficulty_1_to_5": 2,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Sebuah piramid tegak mempunyai tapak berbentuk segi empat sama bersisi 6 cm dan tinggi tegak 10 cm. Cari isi padu piramid itu.",
+        "options_json": {
+          "A": "360 cm³",
+          "B": "60 cm³",
+          "C": "120 cm³",
+          "D": "180 cm³"
+        },
+        "correct_option": "C",
+        "explanation_text": "Isi padu piramid = (1/3) × luas tapak × tinggi = (1/3) × (6 × 6) × 10 = 120 cm³. Pilihan A (360 cm³) terlupa faktor 1/3; pilihan B (60 cm³) membahagi dengan 2 tanpa mengkuasaduakan sisi tapak (6 × 10); pilihan D (180 cm³) menggunakan faktor 1/2 bukannya 1/3.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const s = 6, h = 10; return `${(s * s * h) / 3} cm³`;",
+          "ans": "120 cm³"
+        }
+      },
+      {
+        "id": "t2m_3d_01_q3",
+        "syllabus_node_id": "t2_math_3d_01",
+        "difficulty_1_to_5": 3,
+        "diff": "M",
+        "exam_part": "A",
+        "prompt_text": "Hitung jumlah luas permukaan sebuah kon tertutup yang berjejari tapak 7 cm dan tinggi sendeng 13 cm. (Guna π = 22/7)",
+        "options_json": {
+          "A": "286 cm²",
+          "B": "440 cm²",
+          "C": "572 cm²",
+          "D": "154 cm²"
+        },
+        "correct_option": "B",
+        "explanation_text": "Jumlah luas permukaan kon tertutup = πj² + πjs = (22/7)(7²) + (22/7)(7)(13) = 154 + 286 = 440 cm². Pilihan A (286 cm²) hanya mengira luas permukaan melengkung πjs tanpa tapak; pilihan C (572 cm²) menggandakan πjs; pilihan D (154 cm²) hanya mengira luas tapak bulatan.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const r = 7, s = 13; return `${(22 / 7) * r * r + (22 / 7) * r * s} cm²`;",
+          "ans": "440 cm²"
+        }
+      },
+      {
+        "id": "t2m_3d_01_q4",
+        "syllabus_node_id": "t2_math_3d_01",
+        "difficulty_1_to_5": 3,
+        "diff": "M",
+        "exam_part": "A",
+        "prompt_text": "Cari luas permukaan sebuah sfera yang mempunyai jejari 7 cm. (Guna π = 22/7)",
+        "options_json": {
+          "A": "154 cm²",
+          "B": "308 cm²",
+          "C": "462 cm²",
+          "D": "616 cm²"
+        },
+        "correct_option": "D",
+        "explanation_text": "Luas permukaan sfera = 4πj² = 4 × (22/7) × 7² = 4 × 154 = 616 cm². Pilihan A (154 cm²) hanya mengira πj² tanpa faktor 4; pilihan B (308 cm²) mengira luas permukaan melengkung hemisfera 2πj²; pilihan C (462 cm²) ialah jumlah luas permukaan hemisfera padu 3πj².",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const r = 7; return `${4 * (22 / 7) * r * r} cm²`;",
+          "ans": "616 cm²"
+        }
+      },
+      {
+        "id": "t2m_3d_01_q5",
+        "syllabus_node_id": "t2_math_3d_01",
+        "difficulty_1_to_5": 5,
+        "diff": "H",
+        "exam_part": "A",
+        "prompt_text": "Sebuah bekas berbentuk silinder berjejari 7 cm dan tinggi 12 cm diisi penuh dengan air. Kesemua air itu dituang ke dalam sebuah kon tegak berjejari tapak 14 cm sehingga penuh tepat. Hitung tinggi kon itu. (Guna π = 22/7)",
+        "options_json": {
+          "A": "9 cm",
+          "B": "3 cm",
+          "C": "6 cm",
+          "D": "18 cm"
+        },
+        "correct_option": "A",
+        "explanation_text": "Isi padu air = π(7²)(12) = 1848 cm³. Disamakan dengan isi padu kon: (1/3) × (22/7) × 14² × t = 1848 -> (1/3) × 616 × t = 1848 -> t = (1848 × 3) ÷ 616 = 9 cm. Pilihan B (3 cm) terlupa faktor 3 daripada 1/3 rumus kon; pilihan C (6 cm) menggunakan nisbah jejari 7/14 terus; pilihan D (18 cm) tersilap membahagi dengan 2.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const V = (22 / 7) * 7 * 7 * 12; return `${(3 * V) / ((22 / 7) * 14 * 14)} cm`;",
+          "ans": "9 cm"
+        }
+      },
+      {
+        "id": "t2m_koor_01_q1",
+        "syllabus_node_id": "t2_math_koor_01",
+        "difficulty_1_to_5": 1,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Hitung jarak antara titik P(2, 5) dan titik Q(2, -4) pada satah Cartes.",
+        "options_json": {
+          "A": "1 unit",
+          "B": "4 unit",
+          "C": "7 unit",
+          "D": "9 unit"
+        },
+        "correct_option": "D",
+        "explanation_text": "Kedua-dua titik mempunyai koordinat-x yang sama iaitu 2, maka jarak mencancang = |5 - (-4)| = 5 + 4 = 9 unit. Pilihan A (1 unit) tersilap mengira 5 - 4; pilihan B (4 unit) hanya mengambil jarak ke paksi-x bagi Q; pilihan C (7 unit) mengira 5 + 2.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "return `${Math.abs(5 - -4)} unit`;",
+          "ans": "9 unit"
+        }
+      },
+      {
+        "id": "t2m_koor_01_q2",
+        "syllabus_node_id": "t2_math_koor_01",
+        "difficulty_1_to_5": 2,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Tentukan koordinat titik tengah bagi garis lurus yang menyambungkan titik A(-4, 7) dan titik B(8, -3).",
+        "options_json": {
+          "A": "(6, 5)",
+          "B": "(2, 2)",
+          "C": "(4, 4)",
+          "D": "(-6, 5)"
+        },
+        "correct_option": "B",
+        "explanation_text": "Titik tengah = ((-4 + 8) ÷ 2, (7 + (-3)) ÷ 2) = (4 ÷ 2, 4 ÷ 2) = (2, 2). Pilihan A (6, 5) mengambil separuh beza |(8 - (-4))/2| dan |(7 - (-3))/2|; pilihan C (4, 4) terlupa membahagi dengan 2; pilihan D (-6, 5) silap tanda semasa menjumlahkan koordinat-x.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "return `(${(-4 + 8) / 2}, ${(7 + -3) / 2})`;",
+          "ans": "(2, 2)"
+        }
+      },
+      {
+        "id": "t2m_koor_01_q3",
+        "syllabus_node_id": "t2_math_koor_01",
+        "difficulty_1_to_5": 2,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Cari jarak antara titik K(1, 2) dengan titik L(4, 6).",
+        "options_json": {
+          "A": "7 unit",
+          "B": "25 unit",
+          "C": "5 unit",
+          "D": "12 unit"
+        },
+        "correct_option": "C",
+        "explanation_text": "Jarak = √[(4 - 1)² + (6 - 2)²] = √(3² + 4²) = √(9 + 16) = √25 = 5 unit. Pilihan A (7 unit) sekadar menambah 3 + 4 tanpa teorem Pythagoras; pilihan B (25 unit) terlupa mengambil punca kuasa dua; pilihan D (12 unit) mendarab 3 × 4.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "return `${Math.hypot(4 - 1, 6 - 2)} unit`;",
+          "ans": "5 unit"
+        }
+      },
+      {
+        "id": "t2m_koor_01_q4",
+        "syllabus_node_id": "t2_math_koor_01",
+        "difficulty_1_to_5": 3,
+        "diff": "M",
+        "exam_part": "A",
+        "prompt_text": "Titik M(3, -1) ialah titik tengah bagi tembereng garis PQ. Jika koordinat P ialah (-2, 4), cari koordinat titik Q.",
+        "options_json": {
+          "A": "(8, -6)",
+          "B": "(0.5, 1.5)",
+          "C": "(4, -3)",
+          "D": "(5, -5)"
+        },
+        "correct_option": "A",
+        "explanation_text": "Menggunakan (-2 + x) / 2 = 3 -> x = 6 + 2 = 8, dan (4 + y) / 2 = -1 -> y = -2 - 4 = -6, jadi Q(8, -6). Pilihan B (0.5, 1.5) mengira titik tengah antara M dan P bukannya Q; pilihan C (4, -3) silap tanda atau terlupa menggandakan titik tengah; pilihan D (5, -5) ialah vektor M - P bukannya Q.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "return `(${2 * 3 - -2}, ${2 * -1 - 4})`;",
+          "ans": "(8, -6)"
+        }
+      },
+      {
+        "id": "t2m_koor_01_q5",
+        "syllabus_node_id": "t2_math_koor_01",
+        "difficulty_1_to_5": 4,
+        "diff": "H",
+        "exam_part": "A",
+        "prompt_text": "Jarak antara titik R(k, 3) dengan titik S(9, 11) ialah 10 unit, dengan keadaan k < 9. Tentukan nilai k.",
+        "options_json": {
+          "A": "15",
+          "B": "-3",
+          "C": "7",
+          "D": "3"
+        },
+        "correct_option": "D",
+        "explanation_text": "√[(9 - k)² + (11 - 3)²] = 10 -> (9 - k)² + 64 = 100 -> (9 - k)² = 36. Kerana k < 9, maka 9 - k = 6 -> k = 3. Pilihan A (15) mengambil 9 + 6 yang menyalahi syarat k < 9; pilihan B (-3) mengira 3 - 6; pilihan C (7) tersilap menolak 10 - 3.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "return 9 - Math.sqrt(10 * 10 - (11 - 3) * (11 - 3));",
+          "ans": "3"
+        }
+      },
+      {
+        "id": "t2m_graf_01_q1",
+        "syllabus_node_id": "t2_math_graf_01",
+        "difficulty_1_to_5": 1,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Diberi fungsi y = 3x - 5. Hitung nilai y apabila x = 4.",
+        "options_json": {
+          "A": "17",
+          "B": "7",
+          "C": "12",
+          "D": "-1"
+        },
+        "correct_option": "B",
+        "explanation_text": "Gantikan x = 4 ke dalam fungsi: y = 3(4) - 5 = 12 - 5 = 7. Pilihan A (17) tersilap menambah 12 + 5; pilihan C (12) terlupa menolak 5; pilihan D (-1) mengira 4 - 5 tanpa mendarab 3.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const x = 4; return 3 * x - 5;",
+          "ans": "7"
+        }
+      },
+      {
+        "id": "t2m_graf_01_q2",
+        "syllabus_node_id": "t2_math_graf_01",
+        "difficulty_1_to_5": 2,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Antara pasangan bertertib berikut, yang manakah terletak pada graf fungsi y = x² - 3?",
+        "options_json": {
+          "A": "(3, 6)",
+          "B": "(3, 3)",
+          "C": "(2, 4)",
+          "D": "(-2, -7)"
+        },
+        "correct_option": "A",
+        "explanation_text": "Bagi (3, 6), apabila x = 3, y = 3² - 3 = 9 - 3 = 6, maka titik itu terletak pada graf. Pilihan B (3, 3) tersilap mengira 2(3) - 3; pilihan C (2, 4) terlupa menolak 3; pilihan D (-2, -7) menganggap (-2)² = -4.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const x = 3; return `(${x}, ${x * x - 3})`;",
+          "ans": "(3, 6)"
+        }
+      },
+      {
+        "id": "t2m_graf_01_q3",
+        "syllabus_node_id": "t2_math_graf_01",
+        "difficulty_1_to_5": 2,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Diberi hubungan fungsi y = 12 - 2x. Cari nilai x apabila y = 4.",
+        "options_json": {
+          "A": "8",
+          "B": "-4",
+          "C": "2",
+          "D": "4"
+        },
+        "correct_option": "D",
+        "explanation_text": "Gantikan y = 4: 4 = 12 - 2x -> 2x = 12 - 4 = 8 -> x = 4. Pilihan A (8) terlupa membahagi dengan 2; pilihan B (-4) silap tanda semasa memindahkan sebutan; pilihan C (2) menggantikan x = 4 dan melakukan pembahagian songsang.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const y = 4; return (12 - y) / 2;",
+          "ans": "4"
+        }
+      },
+      {
+        "id": "t2m_graf_01_q4",
+        "syllabus_node_id": "t2_math_graf_01",
+        "difficulty_1_to_5": 3,
+        "diff": "M",
+        "exam_part": "A",
+        "prompt_text": "Bagi fungsi y = 2x² + x - 5, tentukan nilai y apabila x = -3.",
+        "options_json": {
+          "A": "-26",
+          "B": "28",
+          "C": "10",
+          "D": "16"
+        },
+        "correct_option": "C",
+        "explanation_text": "Gantikan x = -3: y = 2(-3)² + (-3) - 5 = 2(9) - 3 - 5 = 18 - 8 = 10. Pilihan A (-26) menganggap (-3)² = -9; pilihan B (28) mengira (2 × -3)² = 36 sebelum - 3 - 5; pilihan D (16) silap menggantikan +x menjadi +3.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const x = -3; return 2 * x * x + x - 5;",
+          "ans": "10"
+        }
+      },
+      {
+        "id": "t2m_graf_01_q5",
+        "syllabus_node_id": "t2_math_graf_01",
+        "difficulty_1_to_5": 4,
+        "diff": "H",
+        "exam_part": "A",
+        "prompt_text": "Sebuah tangki pada asalnya mengandungi 80 liter air dan mengalami kebocoran pada kadar tetap 4 liter setiap minit. Antara ungkapan berikut, yang manakah mewakili baki isi padu air (dalam liter) di dalam tangki selepas t minit?",
+        "options_json": {
+          "A": "80 - 4t",
+          "B": "80 + 4t",
+          "C": "4t - 80",
+          "D": "20 - t"
+        },
+        "correct_option": "A",
+        "explanation_text": "Isi padu awal ialah 80 liter dan berkurang sebanyak 4t liter selepas t minit, maka baki isi padu ialah 80 - 4t. Pilihan B (80 + 4t) menambah air bukannya menolak; pilihan C (4t - 80) menyongsangkan operasi tolak; pilihan D (20 - t) membahagikan ungkapan dengan 4 secara salah.",
+        "check": {
+          "type": "js",
+          "mode": "equiv",
+          "target": "80 - 4*t",
+          "options": {
+            "A": "80 - 4*t",
+            "B": "80 + 4*t",
+            "C": "4*t - 80",
+            "D": "20 - t"
+          }
+        }
+      },
+      {
+        "id": "t2m_laju_01_q1",
+        "syllabus_node_id": "t2_math_laju_01",
+        "difficulty_1_to_5": 1,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Sebuah kereta bergerak sejauh 180 km dalam masa 2.5 jam. Hitung laju purata kereta itu dalam km/j.",
+        "options_json": {
+          "A": "45 km/j",
+          "B": "90 km/j",
+          "C": "72 km/j",
+          "D": "450 km/j"
+        },
+        "correct_option": "C",
+        "explanation_text": "Laju purata = jumlah jarak ÷ jumlah masa = 180 ÷ 2.5 = 72 km/j. Pilihan A (45 km/j) membahagi 180 dengan 4; pilihan B (90 km/j) membahagi 180 dengan 2; pilihan D (450 km/j) mendarab 180 × 2.5 bukannya membahagi.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "return `${180 / 2.5} km/j`;",
+          "ans": "72 km/j"
+        }
+      },
+      {
+        "id": "t2m_laju_01_q2",
+        "syllabus_node_id": "t2_math_laju_01",
+        "difficulty_1_to_5": 2,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Tukarkan kelajuan 90 km/j kepada unit m/s.",
+        "options_json": {
+          "A": "324 m/s",
+          "B": "15 m/s",
+          "C": "1500 m/s",
+          "D": "25 m/s"
+        },
+        "correct_option": "D",
+        "explanation_text": "90 km/j = (90 × 1000 m) ÷ 3600 s = 90000 ÷ 3600 = 25 m/s. Pilihan A (324 m/s) mendarab 90 × 3.6 iaitu penukaran terbalik dari m/s ke km/j; pilihan B (15 m/s) tersilap membahagi dengan 6; pilihan C (1500 m/s) menukar jam kepada minit (÷ 60) bukannya saat.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "return `${(90 * 1000) / 3600} m/s`;",
+          "ans": "25 m/s"
+        }
+      },
+      {
+        "id": "t2m_laju_01_q3",
+        "syllabus_node_id": "t2_math_laju_01",
+        "difficulty_1_to_5": 3,
+        "diff": "M",
+        "exam_part": "A",
+        "prompt_text": "Sebuah bas bergerak dari bandar P ke bandar Q sejauh 120 km dalam masa 1.5 jam, berhenti rehat selama 0.5 jam, lalu meneruskan perjalanan ke bandar R sejauh 80 km dalam masa 2 jam. Hitung laju purata keseluruhan perjalanan itu.",
+        "options_json": {
+          "A": "50 km/j",
+          "B": "57.1 km/j",
+          "C": "60 km/j",
+          "D": "40 km/j"
+        },
+        "correct_option": "A",
+        "explanation_text": "Jumlah jarak = 120 + 80 = 200 km. Jumlah masa termasuk tempoh rehat = 1.5 + 0.5 + 2 = 4 jam. Laju purata = 200 ÷ 4 = 50 km/j. Pilihan B (57.1 km/j) mengabaikan masa rehat 0.5 jam (200 ÷ 3.5); pilihan C (60 km/j) mengambil purata laju dua segmen ((80 + 40) ÷ 2); pilihan D (40 km/j) hanya mengira laju segmen kedua.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "return `${(120 + 80) / (1.5 + 0.5 + 2)} km/j`;",
+          "ans": "50 km/j"
+        }
+      },
+      {
+        "id": "t2m_laju_01_q4",
+        "syllabus_node_id": "t2_math_laju_01",
+        "difficulty_1_to_5": 3,
+        "diff": "M",
+        "exam_part": "A",
+        "prompt_text": "Laju sebuah motosikal bertambah secara seragam daripada 12 m/s kepada 30 m/s dalam masa 6 saat. Hitung pecutan motosikal itu.",
+        "options_json": {
+          "A": "5 m/s²",
+          "B": "3 m/s²",
+          "C": "7 m/s²",
+          "D": "108 m/s²"
+        },
+        "correct_option": "B",
+        "explanation_text": "Pecutan = (laju akhir - laju awal) ÷ masa = (30 - 12) ÷ 6 = 18 ÷ 6 = 3 m/s². Pilihan A (5 m/s²) membahagi laju akhir 30 ÷ 6 tanpa menolak laju awal; pilihan C (7 m/s²) menjumlahkan 30 + 12 lalu membahagi 6; pilihan D (108 m/s²) mendarab 18 × 6.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "return `${(30 - 12) / 6} m/s²`;",
+          "ans": "3 m/s²"
+        }
+      },
+      {
+        "id": "t2m_laju_01_q5",
+        "syllabus_node_id": "t2_math_laju_01",
+        "difficulty_1_to_5": 4,
+        "diff": "H",
+        "exam_part": "A",
+        "prompt_text": "Sebuah kereta yang bergerak pada kelajuan 20 m/s menekan brek dan berhenti sepenuhnya dalam masa 8 saat. Hitung pecutan kereta itu.",
+        "options_json": {
+          "A": "2.5 m/s²",
+          "B": "-160 m/s²",
+          "C": "-0.4 m/s²",
+          "D": "-2.5 m/s²"
+        },
+        "correct_option": "D",
+        "explanation_text": "Kerana kereta berhenti, laju akhir v = 0 m/s dan laju awal u = 20 m/s. Pecutan = (v - u) ÷ t = (0 - 20) ÷ 8 = -2.5 m/s². Pilihan A (2.5 m/s²) mengira (u - v) ÷ t lalu tertinggal tanda negatif bagi nyahpecutan; pilihan B (-160 m/s²) mendarab -20 × 8; pilihan C (-0.4 m/s²) membahagi masa dengan laju (8 ÷ -20).",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "return `${(0 - 20) / 8} m/s²`;",
+          "ans": "-2.5 m/s²"
+        }
+      },
+      {
+        "id": "t2m_kecer_01_q1",
+        "syllabus_node_id": "t2_math_kecer_01",
+        "difficulty_1_to_5": 1,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Hitung kecerunan garis lurus yang melalui titik A(2, 1) dan titik B(6, 13).",
+        "options_json": {
+          "A": "3",
+          "B": "4",
+          "C": "-3",
+          "D": "12"
+        },
+        "correct_option": "A",
+        "explanation_text": "Kecerunan m = (y₂ - y₁) ÷ (x₂ - x₁) = (13 - 1) ÷ (6 - 2) = 12 ÷ 4 = 3. Pilihan B (4) hanya mengira beza koordinat-x; pilihan C (-3) menyongsangkan penolakkan pada pengangka sahaja (1 - 13) ÷ (6 - 2); pilihan D (12) terlupa membahagi dengan 4.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "return (13 - 1) / (6 - 2);",
+          "ans": "3"
+        }
+      },
+      {
+        "id": "t2m_kecer_01_q2",
+        "syllabus_node_id": "t2_math_kecer_01",
+        "difficulty_1_to_5": 2,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Suatu garis lurus mempunyai pintasan-x bernilai 4 dan pintasan-y bernilai 8. Tentukan kecerunan garis lurus tersebut.",
+        "options_json": {
+          "A": "2",
+          "B": "-2",
+          "C": "-1/2",
+          "D": "4"
+        },
+        "correct_option": "B",
+        "explanation_text": "Menggunakan rumus m = -(pintasan-y) ÷ (pintasan-x) = -8 ÷ 4 = -2 (atau melalui titik (4, 0) dan (0, 8)). Pilihan A (2) tertinggal tanda negatif; pilihan C (-1/2) menyongsangkan pintasan-x dengan pintasan-y; pilihan D (4) sekadar menolak 8 - 4.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "return -8 / 4;",
+          "ans": "-2"
+        }
+      },
+      {
+        "id": "t2m_kecer_01_q3",
+        "syllabus_node_id": "t2_math_kecer_01",
+        "difficulty_1_to_5": 3,
+        "diff": "M",
+        "exam_part": "A",
+        "prompt_text": "Satu garis lurus melalui titik (2, -5) dan (6, 3). Cari nilai pintasan-y bagi garis lurus itu.",
+        "options_json": {
+          "A": "9",
+          "B": "-1",
+          "C": "-9",
+          "D": "2"
+        },
+        "correct_option": "C",
+        "explanation_text": "Kecerunan m = (3 - (-5)) ÷ (6 - 2) = 8 ÷ 4 = 2. Gantikan titik (6, 3) ke dalam y = mx + c: 3 = 2(6) + c -> c = 3 - 12 = -9. Pilihan A (9) silap tanda 12 - 3; pilihan B (-1) menggunakan titik (2, -5) dengan 2(2) - 5; pilihan D (2) memberikan nilai kecerunan bukannya pintasan-y.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const m = (3 - -5) / (6 - 2); return 3 - m * 6;",
+          "ans": "-9"
+        }
+      },
+      {
+        "id": "t2m_kecer_01_q4",
+        "syllabus_node_id": "t2_math_kecer_01",
+        "difficulty_1_to_5": 3,
+        "diff": "M",
+        "exam_part": "A",
+        "prompt_text": "Kecerunan garis lurus yang menyambungkan titik P(-2, 9) dan titik Q(6, k) ialah -1/2. Cari nilai k.",
+        "options_json": {
+          "A": "13",
+          "B": "-5",
+          "C": "7",
+          "D": "5"
+        },
+        "correct_option": "D",
+        "explanation_text": "(k - 9) ÷ (6 - (-2)) = -1/2 -> (k - 9) ÷ 8 = -1/2 -> k - 9 = -4 -> k = 5. Pilihan A (13) mengabaikan tanda negatif pada kecerunan (9 + 4); pilihan B (-5) salah mengira 4 - 9; pilihan C (7) menggunakan 6 - 2 = 4 pada penyebut bukannya 6 - (-2) = 8.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "return 9 + (-0.5) * (6 - -2);",
+          "ans": "5"
+        }
+      },
+      {
+        "id": "t2m_kecer_01_q5",
+        "syllabus_node_id": "t2_math_kecer_01",
+        "difficulty_1_to_5": 4,
+        "diff": "H",
+        "exam_part": "A",
+        "prompt_text": "Sebatang tangga disandarkan pada dinding tegak. Hujung atas tangga berada pada ketinggian menegak 3.6 m dari lantai manakala kaki tangga berada pada jarak mengufuk 1.5 m dari dinding. Hitung kecerunan tangga tersebut.",
+        "options_json": {
+          "A": "0.42",
+          "B": "2.4",
+          "C": "5.4",
+          "D": "2.1"
+        },
+        "correct_option": "B",
+        "explanation_text": "Kecerunan = jarak mencancang ÷ jarak mengufuk = 3.6 ÷ 1.5 = 2.4. Pilihan A (0.42) menyongsangkan rumus menjadi jarak mengufuk ÷ jarak mencancang (1.5 ÷ 3.6); pilihan C (5.4) mendarab 3.6 × 1.5; pilihan D (2.1) menolak 3.6 - 1.5.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "return 3.6 / 1.5;",
+          "ans": "2.4"
+        }
+      },
+      {
+        "id": "t2m_trans_01_q1",
+        "syllabus_node_id": "t2_math_trans_01",
+        "difficulty_1_to_5": 1,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Titik P(3, -2) mengalami translasi 4 unit ke kiri dan 5 unit ke atas. Apakah koordinat imej bagi titik P?",
+        "options_json": {
+          "A": "(7, 3)",
+          "B": "(-1, -7)",
+          "C": "(7, -7)",
+          "D": "(-1, 3)"
+        },
+        "correct_option": "D",
+        "explanation_text": "Ke kiri bermaksud tolak 4 pada koordinat-x (3 - 4 = -1), dan ke atas bermaksud tambah 5 pada koordinat-y (-2 + 5 = 3), jadi imej ialah (-1, 3). Pilihan A (7, 3) menambah 4 pada koordinat-x; pilihan B (-1, -7) menolak 5 pada koordinat-y; pilihan C (7, -7) menyongsangkan kedua-dua arah.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "return `(${3 - 4}, ${-2 + 5})`;",
+          "ans": "(-1, 3)"
+        }
+      },
+      {
+        "id": "t2m_trans_01_q2",
+        "syllabus_node_id": "t2_math_trans_01",
+        "difficulty_1_to_5": 2,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Cari koordinat imej bagi titik A(-5, 4) di bawah pantulan pada paksi-x.",
+        "options_json": {
+          "A": "(5, 4)",
+          "B": "(5, -4)",
+          "C": "(-5, -4)",
+          "D": "(4, -5)"
+        },
+        "correct_option": "C",
+        "explanation_text": "Pantulan pada paksi-x mengekalkan koordinat-x dan menyongsangkan tanda koordinat-y: (x, y) -> (x, -y). Maka (-5, 4) menjadi (-5, -4). Pilihan A (5, 4) ialah pantulan pada paksi-y; pilihan B (5, -4) menyongsangkan kedua-dua koordinat (putaran 180°); pilihan D (4, -5) menukar posisi x dan y.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const x = -5, y = 4; return `(${x}, ${-y})`;",
+          "ans": "(-5, -4)"
+        }
+      },
+      {
+        "id": "t2m_trans_01_q3",
+        "syllabus_node_id": "t2_math_trans_01",
+        "difficulty_1_to_5": 2,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Tentukan koordinat imej bagi titik B(2, -7) di bawah pantulan pada paksi-y.",
+        "options_json": {
+          "A": "(2, 7)",
+          "B": "(-2, -7)",
+          "C": "(-2, 7)",
+          "D": "(-7, 2)"
+        },
+        "correct_option": "B",
+        "explanation_text": "Pantulan pada paksi-y menyongsangkan tanda koordinat-x dan mengekalkan koordinat-y: (x, y) -> (-x, y). Maka (2, -7) menjadi (-2, -7). Pilihan A (2, 7) ialah pantulan pada paksi-x; pilihan C (-2, 7) ialah putaran 180° pada asalan; pilihan D (-7, 2) menukar tempat x dan y.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const x = 2, y = -7; return `(${-x}, ${y})`;",
+          "ans": "(-2, -7)"
+        }
+      },
+      {
+        "id": "t2m_trans_01_q4",
+        "syllabus_node_id": "t2_math_trans_01",
+        "difficulty_1_to_5": 3,
+        "diff": "M",
+        "exam_part": "A",
+        "prompt_text": "Titik M(4, 1) diputarkan 90° ikut arah jam pada pusat asalan (0, 0). Nyatakan koordinat imej M'.",
+        "options_json": {
+          "A": "(1, -4)",
+          "B": "(-1, 4)",
+          "C": "(-4, -1)",
+          "D": "(-4, 1)"
+        },
+        "correct_option": "A",
+        "explanation_text": "Putaran 90° ikut arah jam pada asalan memetakan (x, y) kepada (y, -x). Maka (4, 1) dipetakan kepada (1, -4). Pilihan B (-1, 4) ialah putaran 90° lawan arah jam; pilihan C (-4, -1) ialah putaran 180°; pilihan D (-4, 1) ialah pantulan pada paksi-y.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const x = 4, y = 1; return `(${y}, ${-x})`;",
+          "ans": "(1, -4)"
+        }
+      },
+      {
+        "id": "t2m_trans_01_q5",
+        "syllabus_node_id": "t2_math_trans_01",
+        "difficulty_1_to_5": 4,
+        "diff": "H",
+        "exam_part": "A",
+        "prompt_text": "Imej bagi titik K di bawah suatu pantulan pada garis x = 3 ialah K'(8, -2). Tentukan koordinat asal titik K.",
+        "options_json": {
+          "A": "(-2, 8)",
+          "B": "(13, -2)",
+          "C": "(-2, -2)",
+          "D": "(8, 8)"
+        },
+        "correct_option": "C",
+        "explanation_text": "Garis pantulan x = 3 ialah titik tengah mengufuk antara objek K dan imej K', manakala koordinat-y kekal -2. Jarak K' dari x = 3 ialah 8 - 3 = 5 unit ke kanan, jadi K berada 5 unit ke kiri x = 3: x = 3 - 5 = -2. Maka K(-2, -2). Pilihan A (-2, 8) tersilap menyongsangkan koordinat-y; pilihan B (13, -2) menambah 5 kepada 8 bukannya menolak dari 3; pilihan D (8, 8) menyangka pantulan pada garis y = 3.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "return `(${2 * 3 - 8}, -2)`;",
+          "ans": "(-2, -2)"
+        }
+      },
+      {
+        "id": "t2m_stat_01_q1",
+        "syllabus_node_id": "t2_math_stat_01",
+        "difficulty_1_to_5": 1,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Tentukan mod bagi set data berikut: 4, 7, 5, 7, 9, 7, 6, 4.",
+        "options_json": {
+          "A": "4",
+          "B": "7",
+          "C": "6",
+          "D": "9"
+        },
+        "correct_option": "B",
+        "explanation_text": "Mod ialah nilai yang mempunyai kekerapan paling tinggi. Nombor 7 muncul sebanyak 3 kali berbanding 4 (2 kali) serta 5, 6, dan 9 (1 kali setiap satu), maka mod ialah 7. Pilihan A (4) hanya muncul 2 kali; pilihan C (6) ialah min kiraan kasar atau nilai tengah; pilihan D (9) ialah nilai terbesar.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const arr = [4, 7, 5, 7, 9, 7, 6, 4]; const c = {}; arr.forEach(v => c[v] = (c[v] || 0) + 1); return Object.keys(c).sort((a, b) => c[b] - c[a])[0];",
+          "ans": "7"
+        }
+      },
+      {
+        "id": "t2m_stat_01_q2",
+        "syllabus_node_id": "t2_math_stat_01",
+        "difficulty_1_to_5": 2,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Cari median bagi set data: 18, 11, 24, 15, 19, 13, 21.",
+        "options_json": {
+          "A": "15",
+          "B": "19",
+          "C": "17",
+          "D": "18"
+        },
+        "correct_option": "D",
+        "explanation_text": "Susun data secara menaik: 11, 13, 15, 18, 19, 21, 24. Terdapat 7 nombor, maka median ialah nombor ke-4 iaitu 18. Pilihan A (15) ialah nombor ke-4 dalam senarai asal sebelum disusun; pilihan B (19) memilih kedudukan ke-5; pilihan C (17) hasil tersilap mengira purata.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const arr = [18, 11, 24, 15, 19, 13, 21].sort((a, b) => a - b); return arr[3];",
+          "ans": "18"
+        }
+      },
+      {
+        "id": "t2m_stat_01_q3",
+        "syllabus_node_id": "t2_math_stat_01",
+        "difficulty_1_to_5": 3,
+        "diff": "M",
+        "exam_part": "A",
+        "prompt_text": "Hitung min bagi lima nombor yang berikut: 12, 16, 14, 20, 18.",
+        "options_json": {
+          "A": "16",
+          "B": "14",
+          "C": "18",
+          "D": "20"
+        },
+        "correct_option": "A",
+        "explanation_text": "Min = jumlah semua nilai ÷ bilangan data = (12 + 16 + 14 + 20 + 18) ÷ 5 = 80 ÷ 5 = 16. Pilihan B (14) mengambil nombor di tengah senarai tanpa menyusun; pilihan C (18) tersilap membahagi 80 dengan 4.5 atau salah kira jumlah; pilihan D (20) membahagi 80 dengan 4.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const arr = [12, 16, 14, 20, 18]; return arr.reduce((s, v) => s + v, 0) / arr.length;",
+          "ans": "16"
+        }
+      },
+      {
+        "id": "t2m_stat_01_q4",
+        "syllabus_node_id": "t2_math_stat_01",
+        "difficulty_1_to_5": 3,
+        "diff": "M",
+        "exam_part": "A",
+        "prompt_text": "Cari median bagi set data berikut: 8, 14, 6, 12, 10, 16, 18, 20.",
+        "options_json": {
+          "A": "12",
+          "B": "14",
+          "C": "13",
+          "D": "11"
+        },
+        "correct_option": "C",
+        "explanation_text": "Susun data secara menaik: 6, 8, 10, 12, 14, 16, 18, 20. Kerana ada 8 data (genap), median ialah min dua nilai di tengah: (12 + 14) ÷ 2 = 13. Pilihan A (12) dan B (14) hanya mengambil salah satu nilai tengah; pilihan D (11) mengambil purata (12 + 10) ÷ 2 daripada susunan asal.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const arr = [8, 14, 6, 12, 10, 16, 18, 20].sort((a, b) => a - b); return (arr[3] + arr[4]) / 2;",
+          "ans": "13"
+        }
+      },
+      {
+        "id": "t2m_stat_01_q5",
+        "syllabus_node_id": "t2_math_stat_01",
+        "difficulty_1_to_5": 5,
+        "diff": "H",
+        "exam_part": "A",
+        "prompt_text": "Min jisim bagi 6 biji tembikai ialah 2.8 kg. Apabila sebiji tembikai lagi ditambah, min jisim bagi semua tembikai itu menjadi 3.0 kg. Hitung jisim tembikai ketujuh tersebut.",
+        "options_json": {
+          "A": "4.2 kg",
+          "B": "3.2 kg",
+          "C": "2.9 kg",
+          "D": "3.8 kg"
+        },
+        "correct_option": "A",
+        "explanation_text": "Jumlah jisim 6 tembikai = 6 × 2.8 = 16.8 kg. Jumlah jisim 7 tembikai = 7 × 3.0 = 21.0 kg. Maka jisim tembikai ketujuh = 21.0 - 16.8 = 4.2 kg. Pilihan B (3.2 kg) mengira 3.0 + (3.0 - 2.8) tanpa darab bilangan; pilihan C (2.9 kg) mengambil purata 2.8 dan 3.0; pilihan D (3.8 kg) tersilap menggunakan 6 × 3.0 - 5 × 2.8.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "return `${(7 * 3.0 - 6 * 2.8).toFixed(1)} kg`;",
+          "ans": "4.2 kg"
+        }
+      },
+      {
+        "id": "t2m_kebar_01_q1",
+        "syllabus_node_id": "t2_math_kebar_01",
+        "difficulty_1_to_5": 1,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Sebiji dadu adil dilambung sekali. Cari kebarangkalian mendapat satu nombor genap.",
+        "options_json": {
+          "A": "1/3",
+          "B": "1/6",
+          "C": "1/2",
+          "D": "2/3"
+        },
+        "correct_option": "C",
+        "explanation_text": "Ruang sampel S = {1, 2, 3, 4, 5, 6}, maka n(S) = 6. Nombor genap ialah {2, 4, 6}, jadi n(A) = 3. Kebarangkalian = 3/6 = 1/2. Pilihan A (1/3) hanya mengira dua nombor genap; pilihan B (1/6) menganggap hanya satu kesudahan; pilihan D (2/3) tersilap menghitung 4 daripada 6.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const gcd = (a, b) => b ? gcd(b, a % b) : a; const n = 3, d = 6, g = gcd(n, d); return `${n / g}/${d / g}`;",
+          "ans": "1/2"
+        }
+      },
+      {
+        "id": "t2m_kebar_01_q2",
+        "syllabus_node_id": "t2_math_kebar_01",
+        "difficulty_1_to_5": 2,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Sebuah kotak mengandungi 5 biji guli biru, 3 biji guli merah dan 4 biji guli hijau. Sebiji guli dipilih secara rawak. Apakah kebarangkalian memilih sebiji guli merah?",
+        "options_json": {
+          "A": "1/4",
+          "B": "1/3",
+          "C": "5/12",
+          "D": "1/5"
+        },
+        "correct_option": "A",
+        "explanation_text": "Jumlah guli = 5 + 3 + 4 = 12 biji. Bilangan guli merah = 3, maka kebarangkalian = 3/12 = 1/4. Pilihan B (1/3) mengira nisbah guli merah kepada baki guli bukan merah (3/9) atau kebarangkalian guli hijau (4/12); pilihan C (5/12) ialah kebarangkalian guli biru; pilihan D (1/5) membahagi dengan bilangan guli biru.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const gcd = (a, b) => b ? gcd(b, a % b) : a; const n = 3, d = 5 + 3 + 4, g = gcd(n, d); return `${n / g}/${d / g}`;",
+          "ans": "1/4"
+        }
+      },
+      {
+        "id": "t2m_kebar_01_q3",
+        "syllabus_node_id": "t2_math_kebar_01",
+        "difficulty_1_to_5": 3,
+        "diff": "M",
+        "exam_part": "A",
+        "prompt_text": "Satu huruf dipilih secara rawak daripada perkataan \"MATEMATIK\". Hitung kebarangkalian memilih huruf 'M'.",
+        "options_json": {
+          "A": "1/9",
+          "B": "2/7",
+          "C": "1/3",
+          "D": "2/9"
+        },
+        "correct_option": "D",
+        "explanation_text": "Perkataan \"MATEMATIK\" mempunyai 9 huruf kesemuanya dan huruf 'M' muncul sebanyak 2 kali. Maka kebarangkalian = 2/9. Pilihan A (1/9) mengira hanya satu huruf 'M'; pilihan B (2/7) menggunakan baki huruf bukan 'M' sebagai penyebut; pilihan C (1/3) tersilap membilang 3 huruf 'M'.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "const w = 'MATEMATIK'; const m = [...w].filter(c => c === 'M').length; return `${m}/${w.length}`;",
+          "ans": "2/9"
+        }
+      },
+      {
+        "id": "t2m_kebar_01_q4",
+        "syllabus_node_id": "t2_math_kebar_01",
+        "difficulty_1_to_5": 3,
+        "diff": "M",
+        "exam_part": "A",
+        "prompt_text": "Kebarangkalian seorang murid lulus dalam ujian memanah ialah 3/8. Jika seramai 64 orang murid menyertai ujian tersebut, anggarkan bilangan murid yang gagal.",
+        "options_json": {
+          "A": "24",
+          "B": "40",
+          "C": "16",
+          "D": "48"
+        },
+        "correct_option": "B",
+        "explanation_text": "Kebarangkalian gagal = 1 - 3/8 = 5/8. Bilangan murid yang dijangka gagal = (5/8) × 64 = 40 orang. Pilihan A (24) ialah bilangan murid yang lulus ((3/8) × 64); pilihan C (16) tersilap mengira (2/8) × 64; pilihan D (48) mengira (6/8) × 64.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "return 64 * (1 - 3 / 8);",
+          "ans": "40"
+        }
+      },
+      {
+        "id": "t2m_kebar_01_q5",
+        "syllabus_node_id": "t2_math_kebar_01",
+        "difficulty_1_to_5": 4,
+        "diff": "H",
+        "exam_part": "A",
+        "prompt_text": "Sebuah bekas mengandungi 12 batang pen biru dan beberapa batang pen hitam. Apabila sebatang pen dipilih secara rawak, kebarangkalian mendapat pen biru ialah 3/7. Hitung bilangan pen hitam di dalam bekas itu.",
+        "options_json": {
+          "A": "28",
+          "B": "9",
+          "C": "21",
+          "D": "16"
+        },
+        "correct_option": "D",
+        "explanation_text": "Katakan jumlah pen ialah J. Maka 12 / J = 3 / 7 -> J = (12 × 7) ÷ 3 = 28 batang. Bilangan pen hitam = 28 - 12 = 16 batang. Pilihan A (28) ialah jumlah keseluruhan pen, bukan pen hitam sahaja; pilihan B (9) mengira (3/4) × 12; pilihan C (21) tersilap mengira (7/4) × 12.",
+        "check": {
+          "type": "js",
+          "mode": "exact",
+          "code": "return (12 * 7) / 3 - 12;",
+          "ans": "16"
         }
       }
     ]

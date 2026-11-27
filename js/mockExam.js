@@ -54,6 +54,8 @@
     "d6:bi:k1:7": { pool: "d6_bi", part: "7" },
     "t2:math:k1:B": { pool: "t2_math", part: "B" },
     "t2:math:k1:C": { pool: "t2_math", part: "C" },
+    "t2:sains:k1:B": { pool: "t2_sains", part: "B" },
+    "t2:sains:k1:C": { pool: "t2_sains", part: "C" },
     "t4:math:k2:A": { pool: "t4_math", part: "A" },
     "t4:math:k2:B": { pool: "t4_math", part: "B" },
     "t4:math:k2:C": { pool: "t4_math", part: "C" }

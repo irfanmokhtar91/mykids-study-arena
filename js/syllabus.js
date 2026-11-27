@@ -244,7 +244,7 @@
             { id: "haba", title: "Bab 9: Haba", titleEn: "Ch 9: Heat" },
             { id: "gelombang_bunyi", title: "Bab 10: Gelombang Bunyi", titleEn: "Ch 10: Sound Waves" },
             { id: "bintang_galaksi", title: "Bab 11: Bintang & Galaksi", titleEn: "Ch 11: Stars & Galaxies" },
-            { id: "sistem_suria", title: "Bab 12: Sistem Suria & Meteoroid", titleEn: "Ch 12: Solar System & Meteoroids" }
+            { id: "sistem_suria", title: "Bab 12–13: Sistem Suria, Meteoroid, Asteroid & Komet", titleEn: "Ch 12–13: Solar System, Meteoroids, Asteroids & Comets" }
           ]
         },
         {
@@ -257,6 +257,7 @@
             { id: "alam_melayu", title: "Bab 1–4: Kerajaan Alam Melayu", titleEn: "Ch 1–4: Malay World Kingdoms" },
             { id: "kesultanan_melaka", title: "Bab 5: Kesultanan Melayu Melaka", titleEn: "Ch 5: Malacca Sultanate" },
             { id: "johor_riau", title: "Bab 6: Kesultanan Johor Riau", titleEn: "Ch 6: Johor-Riau Sultanate" },
+            { id: "pahang_perak_terengganu_selangor", title: "Bab 7: Kesultanan Pahang, Perak, Terengganu & Selangor", titleEn: "Ch 7: Pahang, Perak, Terengganu & Selangor Sultanates" },
             { id: "kedah_kelantan_perlis", title: "Bab 8–9: Kerajaan Kedah, Kelantan, Negeri Sembilan, Perlis & Warisan", titleEn: "Ch 8–9: Kedah, Kelantan, Negeri Sembilan, Perlis & Heritage" },
             { id: "sarawak_sabah", title: "Bab 10: Warisan Sarawak & Sabah", titleEn: "Ch 10: Sarawak & Sabah Heritage" }
           ]

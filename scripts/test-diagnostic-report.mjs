@@ -60,7 +60,7 @@ eq("null date returns dash", Report.formatDateDdMonYyyy(null), "-");
   });
   eq("dedupes sessions newest-first", merged.sessions.map((s) => s.id), ["s2", "s1"]);
   eq("dedupes attempts newest-first", merged.attempts.map((a) => a.id), ["a2", "a1"]);
-  eq("collects all 7 syllabus nodes from local bank", merged.syllabusNodes.length, 7);
+  eq("collects all 17 syllabus nodes from local bank", merged.syllabusNodes.length, 17);
 }
 
 // ======================= 3. EMPTY REPORT SAFETY =======================
@@ -220,6 +220,41 @@ eq("null date returns dash", Report.formatDateDdMonYyyy(null), "-");
   eq("D6 report date formatted dd/Mon/yyyy", d6Rep.lastCheckupDate, "27/Nov/2026");
   const d6Html = Report.renderCardHtml(d6Rep);
   ok("D6 report HTML shows Semak asas dahulu & WhatsApp includes Darjah 6 and 27/Nov/2026", d6Html.includes("Semak asas dahulu") && d6Rep.whatsappText.includes("Darjah 6") && d6Rep.whatsappText.includes("27/Nov/2026") && d6Rep.whatsappText.includes("Cadangan Tuisyen:"));
+
+  // ---- Tingkatan 2 Wave 1 (Math 17 + Sains 13 = 30 nodes) ----
+  const t2Nodes = pCtx.App.DiagnosticReport.collectSyllabusNodes("t2", pCtx.App.DiagnosticBanks);
+  eq("parent/index.html loads all 30 Tingkatan 2 diagnostic syllabus nodes", t2Nodes.length, 30);
+
+  const attT2 = (id, nodeId, okBool, ms, at) => ({ ...att(id, nodeId, okBool, ms, at), student_id: "kid_t2" });
+  const t2Attempts = [
+    attT2("t1", "t2_math_pola_01", true, 14000, "2026-11-27T16:01:00+08:00"),
+    attT2("t2", "t2_math_pola_01", true, 15000, "2026-11-27T16:02:00+08:00"),
+    attT2("t3", "t2_math_pola_01", true, 16000, "2026-11-27T16:03:00+08:00"),
+    attT2("t4", "t2_math_koor_01", true, 18000, "2026-11-27T16:04:00+08:00"),
+    attT2("t5", "t2_sains_b01", true, 14000, "2026-11-27T16:05:00+08:00"),
+    attT2("t6", "t2_sains_b03", true, 15000, "2026-11-27T16:06:00+08:00"),
+    attT2("t7", "t2_sains_b10", false, 35000, "2026-11-27T16:07:00+08:00"),
+    attT2("t8", "t2_sains_b10", false, 38000, "2026-11-27T16:08:00+08:00"),
+    attT2("t9", "t2_math_stat_01", false, 24000, "2026-11-27T16:09:00+08:00"),
+    attT2("t10", "t2_sains_b11", false, 22000, "2026-11-27T16:10:00+08:00")
+  ];
+  const t2Rep = Report.buildReportData({
+    studentId: "kid_t2",
+    studentName: "Angah",
+    gradeId: "t2",
+    sessions: [{ id: "s_t2", started_at: "2026-11-27T16:00:00+08:00", completed_at: "2026-11-27T16:10:00+08:00" }],
+    attempts: t2Attempts,
+    syllabusNodes: t2Nodes
+  });
+  eq("T2 multi-subject report computes 60% UASA C Baik", [t2Rep.summary.overallGrade.scale, t2Rep.summary.overallGrade.pct, t2Rep.summary.overallGrade.grade], ["UASA", 60, "C"]);
+  eq("T2 report traces unprobed prerequisite from Bab 10 Bunyi to Bab 8 Daya/Gerakan", [t2Rep.summary.topStrength.nodeId, t2Rep.summary.topRootCauseWeakness.needsPrerequisiteProbe, t2Rep.summary.topRootCauseWeakness.probeNode && t2Rep.summary.topRootCauseWeakness.probeNode.id], [
+    "t2_math_pola_01",
+    true,
+    "t2_sains_b08"
+  ]);
+  eq("T2 report date formatted dd/Mon/yyyy", t2Rep.lastCheckupDate, "27/Nov/2026");
+  const t2Html = Report.renderCardHtml(t2Rep);
+  ok("T2 report HTML shows Semak asas dahulu & WhatsApp includes Tingkatan 2 and 27/Nov/2026", t2Html.includes("Semak asas dahulu") && t2Rep.whatsappText.includes("Tingkatan 2") && t2Rep.whatsappText.includes("27/Nov/2026"));
 }
 
 console.log(failed === 0 ? "DIAGNOSTIC_REPORT_TESTS_PASSED" : `DIAGNOSTIC_REPORT_TESTS_FAILED (${failed})`);

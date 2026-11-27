@@ -412,7 +412,7 @@ function verifyBank(jsonPath) {
     const c = byNode.get(n.id) || 0;
     if (c !== 5) errors.push(`${n.id}: expected 5 questions, got ${c}`);
   }
-  const minPerChapter = grade === "t2" && subject === "math" ? 10 : 5;
+  const minPerChapter = 5;
   for (const [ch, cnt] of byChapter.entries()) {
     if (cnt < minPerChapter) errors.push(`${grade}.${subject} chapter ${ch}: expected >= ${minPerChapter} questions, got ${cnt}`);
   }

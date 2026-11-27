@@ -298,5 +298,45 @@ for (const match of parentHtml.matchAll(/<script[^>]+src="\.\.\/(js\/[^"?]+)/g))
 const sampleD6Ids = ["d6m-A01", "d6s-B01", "d6sj-B01", "d6bm-B01", "d6bi-P6-01"];
 eq("Parent MarkingUI.findItem resolves all 5 D6 UASA subjects", sampleD6Ids.map((id) => Boolean(parentCtx.App.MarkingUI.findItem(id))), [true, true, true, true, true]);
 
+// ======================= TINGKATAN 2 WAVE 1 STEM (MATH & SAINS 100-MARK UASA PAPERS) =======================
+const T2_MATH = require("../js/data/structured_t2_math.js");
+const T2_SAINS = require("../js/data/structured_t2_sains.js");
+const sylCtx = { console, window: {}, globalThis: {} };
+sylCtx.window = sylCtx; sylCtx.globalThis = sylCtx;
+vm.runInNewContext(fs.readFileSync(path.join(rootDir, "js", "syllabus.js"), "utf8"), sylCtx, { filename: "js/syllabus.js" });
+const t2Subjects = sylCtx.App.GRADES.t2.subjects;
+const t2AllChapterIds = [
+  ...t2Subjects.find((s) => s.id === "math").chapters.map((c) => c.id),
+  ...t2Subjects.find((s) => s.id === "sains").chapters.map((c) => c.id)
+];
+const t2FullBank = {
+  chapterIds: t2AllChapterIds,
+  getQuestions: (cid) => Array.from({ length: 4 }, (_, i) => mkQ(cid, i)),
+  getStructured: (pool) => (pool === "t2_math" ? T2_MATH.ITEMS : pool === "t2_sains" ? T2_SAINS.ITEMS : [])
+};
+
+for (const subjId of ["math", "sains"]) {
+  const bp = B.find("t2", subjId);
+  const paper = M.buildPaper(bp, "k1", t2FullBank, `t2-seed-${subjId}`);
+  eq(`T2 ${subjId}: all sections sedia`, paper.sections.every((s) => s.state === "sedia" && s.supported), true);
+  eq(`T2 ${subjId}: section item counts`, paper.sections.map((s) => s.items.length), [20, 5, 6]);
+  eq(`T2 ${subjId}: section mark totals`, paper.sections.map((s) => s.marks), [20, 20, 60]);
+  const ans = {};
+  const pm = {};
+  paper.sections.forEach((sec) => {
+    sec.items.forEach((it) => {
+      if (it.type === "structured") pm[it.id] = mark(it, allSteps);
+      else ans[it.id] = it.correctIndex;
+    });
+  });
+  const waitSc = M.scorePaper(paper, ans, {});
+  eq(`T2 ${subjId}: unmarked B/C block grade`, [waitSc.complete, waitSc.grade], [false, null]);
+  const fullSc = M.scorePaper(paper, ans, pm);
+  eq(`T2 ${subjId}: full 100/100 marks -> 100% grade A`, [fullSc.complete, fullSc.markedEarned, fullSc.pct, fullSc.grade && fullSc.grade.grade], [true, 100, 100, "A"]);
+}
+
+const sampleT2Ids = ["t2m-B01", "t2m-B11", "t2m-C09", "t2s-B01", "t2s-C01", "t2s-C12"];
+eq("Parent MarkingUI.findItem resolves all T2 Wave 1 structured items", sampleT2Ids.map((id) => Boolean(parentCtx.App.MarkingUI.findItem(id))), [true, true, true, true, true, true]);
+
 console.log(failed === 0 ? "MOCK_TESTS_PASSED" : `MOCK_TESTS_FAILED (${failed})`);
 process.exit(failed === 0 ? 0 : 1);

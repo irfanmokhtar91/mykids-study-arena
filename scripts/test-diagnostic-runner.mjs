@@ -31,13 +31,13 @@ const ok = (name, cond, detail = "") => {
 // ======================= 1. QUESTION SELECTION & PRIORITIZATION =======================
 {
   const banks = Runner.getAvailableBanks({ t2: { math: bank } }, "t2");
-  eq("getAvailableBanks finds t2 math bank", [banks.length, banks[0].nodeCount, banks[0].questionCount], [1, 7, 35]);
+  eq("getAvailableBanks finds t2 math bank", [banks.length, banks[0].nodeCount, banks[0].questionCount], [1, 17, 85]);
   eq("getAvailableBanks empty for grade without bank", Runner.getAvailableBanks({ t2: { math: bank } }, "d6"), []);
 
   const picked = Runner.selectDiagnosticQuestions(bank, { count: 15, seed: 123 });
   eq("selects exactly 15 questions", picked.length, 15);
   eq("all 15 questions have unique IDs", new Set(picked.map((q) => q.id)).size, 15);
-  eq("covers all 7 syllabus_nodes", new Set(picked.map((q) => q.syllabus_node_id)).size, 7);
+  eq("covers 15 distinct syllabus_nodes in 15 questions", new Set(picked.map((q) => q.syllabus_node_id)).size, 15);
 
   const rawById = new Map(bank.questions.map((q) => [q.id, q]));
   let optMatch = true;
@@ -198,7 +198,7 @@ let finalSummary = null;
   eq("D1Store persists 1 session and 15 attempt_logs idempotently", [stored.sessions.length, stored.attempts.length, stored.syllabusNodes.length], [
     1,
     15,
-    7
+    16
   ]);
 
   const report = Diagnostics.generateParentDiagnosticSummary("ch_d1", stored.attempts, stored.syllabusNodes, { gradeLevel: "t2" });
@@ -250,6 +250,44 @@ let finalSummary = null;
   });
   const pec02Count = prioritizedD6.filter((q) => q.syllabus_node_id === "d6_math_pec_02").length;
   ok("D6 math prioritizes unprobed prerequisite d6_math_pec_02 (>= 2 slots)", pec02Count >= 2, `got ${pec02Count}`);
+}
+
+// ======================= 5. TINGKATAN 2 WAVE 1 DIAGNOSTIC BANKS (MATH + SAINS) =======================
+{
+  const t2SainsBank = JSON.parse(fs.readFileSync(path.join(rootDir, "js", "data", "diagnostic_t2_sains.json"), "utf8"));
+  const t2BanksMap = { t2: { math: bank, sains: t2SainsBank } };
+  const availT2 = Runner.getAvailableBanks(t2BanksMap, "t2");
+  eq(
+    "getAvailableBanks lists both T2 Wave 1 subjects (Math 17/85 + Sains 13/65)",
+    availT2.map((b) => [b.subjectId, b.nodeCount, b.questionCount]),
+    [["math", 17, 85], ["sains", 13, 65]]
+  );
+
+  const pickedSains = Runner.selectDiagnosticQuestions(t2SainsBank, { count: 15, seed: 2027 });
+  eq("T2 sains: selects 15 unique questions", [pickedSains.length, new Set(pickedSains.map((q) => q.id)).size], [15, 15]);
+  eq("T2 sains: covers all 13 syllabus_nodes in 15 questions", new Set(pickedSains.map((q) => q.syllabus_node_id)).size, 13);
+
+  const priSains = Runner.selectDiagnosticQuestions(t2SainsBank, {
+    count: 15,
+    seed: 88,
+    priorAttempts: [
+      { syllabus_node_id: "t2_sains_b10", is_correct: 0 },
+      { syllabus_node_id: "t2_sains_b10", is_correct: 0 }
+    ]
+  });
+  const b08Count = priSains.filter((q) => q.syllabus_node_id === "t2_sains_b08").length;
+  ok("T2 sains prioritizes unprobed prerequisite t2_sains_b08 (>= 2 slots)", b08Count >= 2, `got ${b08Count}`);
+
+  const priMath = Runner.selectDiagnosticQuestions(bank, {
+    count: 15,
+    seed: 88,
+    priorAttempts: [
+      { syllabus_node_id: "t2_math_kecer_01", is_correct: 0 },
+      { syllabus_node_id: "t2_math_kecer_01", is_correct: 0 }
+    ]
+  });
+  const koor01Count = priMath.filter((q) => q.syllabus_node_id === "t2_math_koor_01").length;
+  ok("T2 math prioritizes unprobed prerequisite t2_math_koor_01 (>= 2 slots)", koor01Count >= 2, `got ${koor01Count}`);
 }
 
 console.log(failed === 0 ? "DIAGNOSTIC_RUNNER_TESTS_PASSED" : `DIAGNOSTIC_RUNNER_TESTS_FAILED (${failed})`);

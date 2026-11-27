@@ -74,7 +74,11 @@ const EXPECTED = {
     const isPrime = (k) => { if (k < 2) return false; for (let i = 2; i * i <= k; i++) if (k % i === 0) return false; return true; };
     const nums = Array.from({ length: 20 }, (_, i) => i + 1);
     return [[nums.filter((k) => k % 5 === 0).length / 20, nums.filter(isPrime).length / 20], [(1 - 3 / 5) * 30], [0.5 * 60]];
-  }
+  },
+  "t2m-B11": () => { const f = (x) => 2 * x * x - 5 * x + 1; return [[f(1), f(3), f(-2)]]; },
+  "t2m-B12": () => { const p = [5, -2], t = [-3, 4], k = 1; return [[p[0] + t[0], p[1] + t[1], 2 * k - p[0], p[1]]]; },
+  "t2m-C09": () => { const f = (x) => x * x - 2 * x - 8; const roots = []; for (let x = -10; x <= 10; x++) if (f(x) === 0) roots.push(x); const m = 2.5, c = 10; return [[f(-1), f(2)], [roots[0], roots[1], f(5)], [m, c, (45 - c) / m]]; },
+  "t2m-C10": () => { const A = [2, 1], B = [6, 1], C = [2, 4], Ap = [-1, 5]; const T = [Ap[0] - A[0], Ap[1] - A[1]]; const Bp = [B[0] + T[0], B[1] + T[1]]; const yLine = 3; const area = 0.5 * Math.abs(B[0] - A[0]) * Math.abs(C[1] - A[1]); return [[T[0], T[1], Bp[0], Bp[1]], [B[0], 2 * yLine - B[1], C[0], 2 * yLine - C[1]], [C[1], -C[0], area]]; }
 };
 
 let failed = 0;
