@@ -221,10 +221,10 @@ eq("null date returns dash", Report.formatDateDdMonYyyy(null), "-");
   const d6Html = Report.renderCardHtml(d6Rep);
   ok("D6 report HTML shows Semak asas dahulu & WhatsApp includes Darjah 6 and 27/Nov/2026", d6Html.includes("Semak asas dahulu") && d6Rep.whatsappText.includes("Darjah 6") && d6Rep.whatsappText.includes("27/Nov/2026") && d6Rep.whatsappText.includes("Cadangan Tuisyen:"));
 
-  // ---- Tingkatan 2 Waves 1-2 (Math 17 + Sains 13 + Sejarah 11 + Geografi 11 = 52 nodes) ----
+  // Tingkatan 2 parent reports combine all three waves.
   const t2Nodes = pCtx.App.DiagnosticReport.collectSyllabusNodes("t2", pCtx.App.DiagnosticBanks);
-  eq("parent/index.html loads all 52 Tingkatan 2 diagnostic syllabus nodes", t2Nodes.length, 52);
-  eq("T2 node set covers all four active subjects", new Set(t2Nodes.map((n) => n.subject)).size, 4);
+  eq("parent/index.html loads all 63 Tingkatan 2 diagnostic syllabus nodes", t2Nodes.length, 63);
+  eq("T2 parent report covers each active subject", [...new Set(t2Nodes.map(n => n.subject))].sort(), ["bi", "bm", "geografi", "math", "sains", "sejarah"]);
 
   const attT2 = (id, nodeId, okBool, ms, at) => ({ ...att(id, nodeId, okBool, ms, at), student_id: "kid_t2" });
   const t2Attempts = [

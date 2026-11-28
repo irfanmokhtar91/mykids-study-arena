@@ -61,7 +61,7 @@ function verifyBank({ relPath, key, validChapters, minB, minC, requireNumericChe
   }
 
   const seenIds = new Set();
-  const countByPart = { B: 0, C: 0 };
+  const countByPart = Object.fromEntries(Object.keys(marksByPart).map(part => [part, 0]));
   const chaptersOverall = new Set();
   const chaptersC = new Set();
 
@@ -79,16 +79,16 @@ function verifyBank({ relPath, key, validChapters, minB, minC, requireNumericChe
     if (!validChapters.has(it.chapterId)) errors.push(`${it.id}: invalid chapterId "${it.chapterId}"`);
     chaptersOverall.add(it.chapterId);
 
-    if (it.part !== "B" && it.part !== "C") {
+    if (!Object.hasOwn(marksByPart, it.part)) {
       errors.push(`${it.id}: invalid part "${it.part}"`);
       continue;
     }
     countByPart[it.part]++;
     if (it.part === "C") chaptersC.add(it.chapterId);
 
-    const partMarks = (marksByPart && marksByPart[it.part]) || (it.part === "B" ? 4 : 10);
+    const partMarks = marksByPart[it.part];
     const total = mod.marksOf(it);
-    if (total !== partMarks) errors.push(`${it.id}: expected ${partMarks} marks for Part ${it.part}, got ${total}`);
+    if (![partMarks].flat().includes(total)) errors.push(`${it.id}: expected ${partMarks} marks for Part ${it.part}, got ${total}`);
 
     if (!Array.isArray(it.parts) || it.parts.length === 0) {
       errors.push(`${it.id}: missing parts`);
@@ -141,12 +141,20 @@ function verifyBank({ relPath, key, validChapters, minB, minC, requireNumericChe
 
   return {
     errors,
-    summary: `${key}: ${mod.ITEMS.length} items (B:${countByPart.B}, C:${countByPart.C}), chapters=${chaptersOverall.size}/${validChapters.size}, C_chapters=${chaptersC.size}`
+    summary: `${key}: ${mod.ITEMS.length} items (${Object.entries(countByPart).map(([part, n]) => part + ":" + n).join(", ")}), chapters=${chaptersOverall.size}/${validChapters.size}, C_chapters=${chaptersC.size}`
   };
 }
 
 const chaptersMap = loadSyllabusChapters();
 const BANK_CONFIGS = [
+  {
+    relPath: "js/data/structured_t2_bm.js", key: "t2_bm", validChapters: chaptersMap.bm,
+    marksByPart: { k1_B: [2, 4, 10], k1_C: 15, k2_A: 10, k2_B: 30 }
+  },
+  {
+    relPath: "js/data/structured_t2_bi.js", key: "t2_bi", validChapters: chaptersMap.bi,
+    marksByPart: { reading_4: 1, writing_1: 20, writing_2: 20 }
+  },
   {
     relPath: "js/data/structured_t2_math.js",
     key: "t2_math",

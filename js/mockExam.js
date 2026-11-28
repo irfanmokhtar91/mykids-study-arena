@@ -41,6 +41,13 @@
    * Only items with status "verified" are ever drawn.
    */
   const STRUCTURED_MAP = {
+    "t2:bm:k1:B": { pool: "t2_bm", part: "k1_B" },
+    "t2:bm:k1:C": { pool: "t2_bm", part: "k1_C" },
+    "t2:bm:k2:A": { pool: "t2_bm", part: "k2_A" },
+    "t2:bm:k2:B": { pool: "t2_bm", part: "k2_B" },
+    "t2:bi:reading:4": { pool: "t2_bi", part: "reading_4" },
+    "t2:bi:writing:1": { pool: "t2_bi", part: "writing_1" },
+    "t2:bi:writing:2": { pool: "t2_bi", part: "writing_2" },
     "d6:math:k1:A": { pool: "d6_math", part: "A" },
     "d6:math:k1:B": { pool: "d6_math", part: "B" },
     "d6:sains:k1:B": { pool: "d6_sains", part: "B" },
@@ -70,6 +77,11 @@
    * Only sets with status "verified" are ever drawn.
    */
   const OBJECTIVE_SET_MAP = {
+    "t2:bm:k1:A": { pool: "t2_bm", part: "A" },
+    "t2:bi:reading:1": { pool: "t2_bi", part: "1" },
+    "t2:bi:reading:2": { pool: "t2_bi", part: "2" },
+    "t2:bi:reading:3": { pool: "t2_bi", part: "3" },
+    "t2:bi:reading:5": { pool: "t2_bi", part: "5" },
     "d6:bm:k1:A": { pool: "d6_bm", part: "A" },
     "d6:bi:k1:1": { pool: "d6_bi", part: "1" },
     "d6:bi:k1:2": { pool: "d6_bi", part: "2" },
@@ -194,6 +206,11 @@
             }
           }
           if (!took) break;
+        }
+        // Keep the grammar, comprehension and novel groups in blueprint order.
+        if (spec.pool === "t2_bm" && spec.part === "k1_B") {
+          const order = ["sintaksis", "pemahaman", "komsas"];
+          base.items.sort((a, b) => order.indexOf(a.chapterId) - order.indexOf(b.chapterId));
         }
         base.state = base.items.length === s.count ? "sedia" : base.items.length > 0 ? "separa" : "kosong";
         return base;

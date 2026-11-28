@@ -1,0 +1,1929 @@
+(function (global) {
+  const ITEMS = [
+  {
+    "id": "t2_bi_grammar_tenses_s1_1",
+    "unit": "grammar_tenses",
+    "skill": "grammar_tenses_s1",
+    "diff": "L",
+    "q": "The kampung bus ___ at 7.00 a.m. every morning.",
+    "options": [
+      "has stopped",
+      "stops",
+      "is stopping",
+      "stopped"
+    ],
+    "correctIndex": 1,
+    "explanation": "The Present Simple ('stops') is used for habits and routines, especially with markers like 'every morning'.",
+    "ref": "Grammar"
+  },
+  {
+    "id": "t2_bi_grammar_tenses_s1_2",
+    "unit": "grammar_tenses",
+    "skill": "grammar_tenses_s1",
+    "diff": "L",
+    "q": "While my mother ___ in the kitchen, the telephone rang.",
+    "options": [
+      "has cooked",
+      "is cooking",
+      "cooks",
+      "was cooking"
+    ],
+    "correctIndex": 3,
+    "explanation": "The Past Continuous ('was cooking') describes the longer action that was in progress when the shorter Past Simple action ('rang') happened.",
+    "ref": "Grammar"
+  },
+  {
+    "id": "t2_bi_grammar_tenses_s1_3",
+    "unit": "grammar_tenses",
+    "skill": "grammar_tenses_s1",
+    "diff": "L",
+    "q": "I ___ this film three times, and I still enjoy it.",
+    "options": [
+      "have seen",
+      "am seeing",
+      "see",
+      "saw"
+    ],
+    "correctIndex": 0,
+    "explanation": "The Present Perfect ('have seen') is used for life experiences when the exact time is not stated.",
+    "ref": "Grammar"
+  },
+  {
+    "id": "t2_bi_grammar_tenses_s1_4",
+    "unit": "grammar_tenses",
+    "skill": "grammar_tenses_s1",
+    "diff": "L",
+    "q": "Look at those dark clouds! It ___ soon.",
+    "options": [
+      "rained",
+      "has rained",
+      "is going to rain",
+      "rains"
+    ],
+    "correctIndex": 2,
+    "explanation": "We use 'be going to' for a prediction based on present evidence that we can see, such as dark clouds.",
+    "ref": "Grammar"
+  },
+  {
+    "id": "t2_bi_grammar_tenses_s1_5",
+    "unit": "grammar_tenses",
+    "skill": "grammar_tenses_s1",
+    "diff": "L",
+    "q": "We ___ to Pulau Langkawi last December.",
+    "options": [
+      "gone",
+      "went",
+      "have gone",
+      "go"
+    ],
+    "correctIndex": 1,
+    "explanation": "A finished action with a definite past time expression ('last December') takes the Past Simple ('went').",
+    "ref": "Grammar"
+  },
+  {
+    "id": "t2_bi_grammar_tenses_s1_6",
+    "unit": "grammar_tenses",
+    "skill": "grammar_tenses_s1",
+    "diff": "M",
+    "q": "By the time we reached the station, the train ___.",
+    "options": [
+      "had left",
+      "leaves",
+      "has left",
+      "was leaving"
+    ],
+    "correctIndex": 0,
+    "explanation": "The Past Perfect ('had left') makes clear which of the two past events happened first.",
+    "ref": "Grammar"
+  },
+  {
+    "id": "t2_bi_grammar_tenses_s1_7",
+    "unit": "grammar_tenses",
+    "skill": "grammar_tenses_s1",
+    "diff": "M",
+    "q": "She ___ in Kuala Terengganu since 2021.",
+    "options": [
+      "lives",
+      "lived",
+      "is living",
+      "has lived"
+    ],
+    "correctIndex": 3,
+    "explanation": "'Since' plus a starting point in the past takes the Present Perfect ('has lived') because the situation still continues now.",
+    "ref": "Grammar"
+  },
+  {
+    "id": "t2_bi_grammar_tenses_s1_8",
+    "unit": "grammar_tenses",
+    "skill": "grammar_tenses_s1",
+    "diff": "M",
+    "q": "This time next week, we ___ at the school camp in Cameron Highlands.",
+    "options": [
+      "have stayed",
+      "stay",
+      "will be staying",
+      "stayed"
+    ],
+    "correctIndex": 2,
+    "explanation": "The Future Continuous ('will be staying') describes an action that will be in progress at a stated future time.",
+    "ref": "Grammar"
+  },
+  {
+    "id": "t2_bi_grammar_tenses_s1_9",
+    "unit": "grammar_tenses",
+    "skill": "grammar_tenses_s1",
+    "diff": "H",
+    "q": "Hardly ___ the hall when the lights went out.",
+    "options": [
+      "had we entered",
+      "we had entered",
+      "did we enter",
+      "we have entered"
+    ],
+    "correctIndex": 0,
+    "explanation": "After the negative adverbial 'Hardly' at the start of a sentence, the auxiliary moves before the subject: 'had we entered'.",
+    "ref": "Grammar"
+  },
+  {
+    "id": "t2_bi_grammar_tenses_s1_10",
+    "unit": "grammar_tenses",
+    "skill": "grammar_tenses_s1",
+    "diff": "H",
+    "q": "The rain ___ for two hours before the match was called off.",
+    "options": [
+      "fell",
+      "had been falling",
+      "has fallen",
+      "falls"
+    ],
+    "correctIndex": 1,
+    "explanation": "The Past Perfect Continuous ('had been falling') stresses how long an action had been going on up to a later past moment.",
+    "ref": "Grammar"
+  },
+  {
+    "id": "t2_bi_grammar_tenses_s2_1",
+    "unit": "grammar_tenses",
+    "skill": "grammar_tenses_s2",
+    "diff": "L",
+    "q": "You ___ wear a helmet when you ride a motorcycle; it is the law.",
+    "options": [
+      "would",
+      "must",
+      "might",
+      "could"
+    ],
+    "correctIndex": 1,
+    "explanation": "'Must' expresses strong obligation, which fits a legal requirement.",
+    "ref": "Grammar"
+  },
+  {
+    "id": "t2_bi_grammar_tenses_s2_2",
+    "unit": "grammar_tenses",
+    "skill": "grammar_tenses_s2",
+    "diff": "L",
+    "q": "___ you help me carry these books to the library, please?",
+    "options": [
+      "Should",
+      "May",
+      "Must",
+      "Could"
+    ],
+    "correctIndex": 3,
+    "explanation": "'Could you ...?' is the natural polite request here; 'Should you' would mean 'if you'.",
+    "ref": "Grammar"
+  },
+  {
+    "id": "t2_bi_grammar_tenses_s2_3",
+    "unit": "grammar_tenses",
+    "skill": "grammar_tenses_s2",
+    "diff": "L",
+    "q": "If it rains tomorrow, the futsal match ___ cancelled.",
+    "options": [
+      "will be",
+      "would be",
+      "is",
+      "was"
+    ],
+    "correctIndex": 0,
+    "explanation": "The first conditional uses the Present Simple in the if-clause and 'will' in the main clause.",
+    "ref": "Grammar"
+  },
+  {
+    "id": "t2_bi_grammar_tenses_s2_4",
+    "unit": "grammar_tenses",
+    "skill": "grammar_tenses_s2",
+    "diff": "L",
+    "q": "Students ___ bring their phones into the exam hall. It is strictly forbidden.",
+    "options": [
+      "needn't",
+      "shouldn't",
+      "mustn't",
+      "don't have to"
+    ],
+    "correctIndex": 2,
+    "explanation": "'Mustn't' expresses prohibition; 'don't have to' and 'needn't' would only mean it is not necessary.",
+    "ref": "Grammar"
+  },
+  {
+    "id": "t2_bi_grammar_tenses_s2_5",
+    "unit": "grammar_tenses",
+    "skill": "grammar_tenses_s2",
+    "diff": "L",
+    "q": "She ___ swim when she was only five years old.",
+    "options": [
+      "may",
+      "could",
+      "must",
+      "can"
+    ],
+    "correctIndex": 1,
+    "explanation": "Past ability is expressed with 'could'.",
+    "ref": "Grammar"
+  },
+  {
+    "id": "t2_bi_grammar_tenses_s2_6",
+    "unit": "grammar_tenses",
+    "skill": "grammar_tenses_s2",
+    "diff": "M",
+    "q": "You ___ have told me earlier; I would have helped you.",
+    "options": [
+      "should",
+      "can",
+      "would",
+      "might"
+    ],
+    "correctIndex": 0,
+    "explanation": "'Should have' plus a past participle expresses criticism or regret about something that was not done.",
+    "ref": "Grammar"
+  },
+  {
+    "id": "t2_bi_grammar_tenses_s2_7",
+    "unit": "grammar_tenses",
+    "skill": "grammar_tenses_s2",
+    "diff": "M",
+    "q": "You ___ to bring your own racket; the school provides them.",
+    "options": [
+      "mustn't",
+      "shouldn't",
+      "can't",
+      "don't have"
+    ],
+    "correctIndex": 3,
+    "explanation": "'Don't have to' means it is not necessary; 'mustn't' would wrongly suggest that bringing a racket is forbidden.",
+    "ref": "Grammar"
+  },
+  {
+    "id": "t2_bi_grammar_tenses_s2_8",
+    "unit": "grammar_tenses",
+    "skill": "grammar_tenses_s2",
+    "diff": "M",
+    "q": "The lights are on, so someone ___ be at home.",
+    "options": [
+      "might",
+      "can",
+      "must",
+      "would"
+    ],
+    "correctIndex": 2,
+    "explanation": "'Must' shows a strong logical deduction drawn from evidence.",
+    "ref": "Grammar"
+  },
+  {
+    "id": "t2_bi_grammar_tenses_s2_9",
+    "unit": "grammar_tenses",
+    "skill": "grammar_tenses_s2",
+    "diff": "H",
+    "q": "___ you have any questions, please see me after class.",
+    "options": [
+      "Should",
+      "Would",
+      "Must",
+      "Could"
+    ],
+    "correctIndex": 0,
+    "explanation": "'Should you have any questions' is a formal conditional that uses inversion instead of 'If you have'.",
+    "ref": "Grammar"
+  },
+  {
+    "id": "t2_bi_grammar_tenses_s2_10",
+    "unit": "grammar_tenses",
+    "skill": "grammar_tenses_s2",
+    "diff": "H",
+    "q": "Had I known about the closure, I ___ the trip.",
+    "options": [
+      "would postpone",
+      "would have postponed",
+      "had postponed",
+      "will postpone"
+    ],
+    "correctIndex": 1,
+    "explanation": "The inverted third conditional ('Had I known ... I would have postponed') describes an unreal past situation.",
+    "ref": "Grammar"
+  },
+  {
+    "id": "t2_bi_reported_passive_s1_1",
+    "unit": "reported_passive",
+    "skill": "reported_passive_s1",
+    "diff": "L",
+    "q": "\"I am tired,\" said Aiman. Aiman said that he ___ tired.",
+    "options": [
+      "is",
+      "was",
+      "were",
+      "has been"
+    ],
+    "correctIndex": 1,
+    "explanation": "When the reporting verb is in the past ('said'), the present simple 'am' shifts back to the past simple 'was'.",
+    "ref": "Speech and voice"
+  },
+  {
+    "id": "t2_bi_reported_passive_s1_2",
+    "unit": "reported_passive",
+    "skill": "reported_passive_s1",
+    "diff": "L",
+    "q": "\"We will arrive at noon,\" the boys told the teacher. The boys told the teacher that they ___ at noon.",
+    "options": [
+      "arrived",
+      "have arrived",
+      "will arrive",
+      "would arrive"
+    ],
+    "correctIndex": 3,
+    "explanation": "'Will' shifts back to 'would' in reported speech, and the pronoun 'we' changes to 'they'.",
+    "ref": "Speech and voice"
+  },
+  {
+    "id": "t2_bi_reported_passive_s1_3",
+    "unit": "reported_passive",
+    "skill": "reported_passive_s1",
+    "diff": "L",
+    "q": "\"Can you close the window?\" Mei Ling asked. Mei Ling asked me ___ I could close the window.",
+    "options": [
+      "if",
+      "what",
+      "whether or not",
+      "that"
+    ],
+    "correctIndex": 0,
+    "explanation": "Yes/no questions in reported speech are joined with 'if' or 'whether', not 'that'.",
+    "ref": "Speech and voice"
+  },
+  {
+    "id": "t2_bi_reported_passive_s1_4",
+    "unit": "reported_passive",
+    "skill": "reported_passive_s1",
+    "diff": "L",
+    "q": "\"I have finished my project,\" said Farid. Farid said that he ___ his project.",
+    "options": [
+      "was finishing",
+      "has finished",
+      "had finished",
+      "finishes"
+    ],
+    "correctIndex": 2,
+    "explanation": "The present perfect 'have finished' shifts back to the past perfect 'had finished'.",
+    "ref": "Speech and voice"
+  },
+  {
+    "id": "t2_bi_reported_passive_s1_5",
+    "unit": "reported_passive",
+    "skill": "reported_passive_s1",
+    "diff": "L",
+    "q": "\"Where do you live?\" the clerk asked. The clerk asked where I ___.",
+    "options": [
+      "live",
+      "lived",
+      "am living",
+      "will live"
+    ],
+    "correctIndex": 1,
+    "explanation": "In reported questions, the word order becomes statement order and the tense shifts back: 'lived'.",
+    "ref": "Speech and voice"
+  },
+  {
+    "id": "t2_bi_reported_passive_s1_6",
+    "unit": "reported_passive",
+    "skill": "reported_passive_s1",
+    "diff": "M",
+    "q": "\"I will meet you here tomorrow,\" she said. She said she would meet me ___ the next day.",
+    "options": [
+      "there",
+      "this",
+      "these",
+      "here"
+    ],
+    "correctIndex": 0,
+    "explanation": "Place references shift too: 'here' becomes 'there' and 'tomorrow' becomes 'the next day' after a past reporting verb.",
+    "ref": "Speech and voice"
+  },
+  {
+    "id": "t2_bi_reported_passive_s1_7",
+    "unit": "reported_passive",
+    "skill": "reported_passive_s1",
+    "diff": "M",
+    "q": "\"Please sit down,\" the nurse told the visitors. The nurse ___ the visitors to sit down.",
+    "options": [
+      "said",
+      "told that",
+      "said me",
+      "asked"
+    ],
+    "correctIndex": 3,
+    "explanation": "Requests are reported with 'ask/tell + object + to-infinitive'; 'said' cannot take an object in this way.",
+    "ref": "Speech and voice"
+  },
+  {
+    "id": "t2_bi_reported_passive_s1_8",
+    "unit": "reported_passive",
+    "skill": "reported_passive_s1",
+    "diff": "M",
+    "q": "\"Do not run in the corridor,\" said the prefect. The prefect told us ___ in the corridor.",
+    "options": [
+      "not running",
+      "do not run",
+      "not to run",
+      "to not running"
+    ],
+    "correctIndex": 2,
+    "explanation": "Negative commands in reported speech use 'not to' plus the base verb.",
+    "ref": "Speech and voice"
+  },
+  {
+    "id": "t2_bi_reported_passive_s1_9",
+    "unit": "reported_passive",
+    "skill": "reported_passive_s1",
+    "diff": "H",
+    "q": "\"If I had known, I would have come earlier,\" he said. He said that if he had known, he ___ earlier.",
+    "options": [
+      "would have come",
+      "had come",
+      "will come",
+      "would come"
+    ],
+    "correctIndex": 0,
+    "explanation": "When the original sentence is already in the past perfect, no further backshift occurs, so 'would have come' stays.",
+    "ref": "Speech and voice"
+  },
+  {
+    "id": "t2_bi_reported_passive_s1_10",
+    "unit": "reported_passive",
+    "skill": "reported_passive_s1",
+    "diff": "H",
+    "q": "\"Why did you leave the gate open?\" the warden asked Kamil. The warden asked Kamil why he ___ the gate open.",
+    "options": [
+      "did leave",
+      "had left",
+      "leaves",
+      "has left"
+    ],
+    "correctIndex": 1,
+    "explanation": "In reported 'why' questions the auxiliary 'did' disappears and the past simple shifts to the past perfect: 'why he had left'.",
+    "ref": "Speech and voice"
+  },
+  {
+    "id": "t2_bi_reported_passive_s2_1",
+    "unit": "reported_passive",
+    "skill": "reported_passive_s2",
+    "diff": "L",
+    "q": "The canteen ___ cleaned every afternoon.",
+    "options": [
+      "has",
+      "is",
+      "are",
+      "does"
+    ],
+    "correctIndex": 1,
+    "explanation": "The present simple passive is formed with 'is/are' plus a past participle; 'the canteen' is singular.",
+    "ref": "Speech and voice"
+  },
+  {
+    "id": "t2_bi_reported_passive_s2_2",
+    "unit": "reported_passive",
+    "skill": "reported_passive_s2",
+    "diff": "L",
+    "q": "The new bridge ___ built by a local company last year.",
+    "options": [
+      "were",
+      "has",
+      "is",
+      "was"
+    ],
+    "correctIndex": 3,
+    "explanation": "The past simple passive uses 'was/were' plus a past participle for a completed past action.",
+    "ref": "Speech and voice"
+  },
+  {
+    "id": "t2_bi_reported_passive_s2_3",
+    "unit": "reported_passive",
+    "skill": "reported_passive_s2",
+    "diff": "L",
+    "q": "The results ___ announced tomorrow morning.",
+    "options": [
+      "will be",
+      "are",
+      "be",
+      "will"
+    ],
+    "correctIndex": 0,
+    "explanation": "The future passive is 'will be' plus the past participle.",
+    "ref": "Speech and voice"
+  },
+  {
+    "id": "t2_bi_reported_passive_s2_4",
+    "unit": "reported_passive",
+    "skill": "reported_passive_s2",
+    "diff": "L",
+    "q": "The stolen bicycle ___ by the police near the market.",
+    "options": [
+      "has find",
+      "found",
+      "was found",
+      "was finding"
+    ],
+    "correctIndex": 2,
+    "explanation": "The object of the action becomes the subject of a passive sentence: 'the bicycle was found'.",
+    "ref": "Speech and voice"
+  },
+  {
+    "id": "t2_bi_reported_passive_s2_5",
+    "unit": "reported_passive",
+    "skill": "reported_passive_s2",
+    "diff": "L",
+    "q": "This song ___ by many students at the concert.",
+    "options": [
+      "sung",
+      "was sung",
+      "was singing",
+      "sang"
+    ],
+    "correctIndex": 1,
+    "explanation": "The past simple passive of 'sing' is 'was sung'.",
+    "ref": "Speech and voice"
+  },
+  {
+    "id": "t2_bi_reported_passive_s2_6",
+    "unit": "reported_passive",
+    "skill": "reported_passive_s2",
+    "diff": "M",
+    "q": "The old school hall ___ repainted at the moment.",
+    "options": [
+      "is being",
+      "is",
+      "has been",
+      "was being"
+    ],
+    "correctIndex": 0,
+    "explanation": "The present continuous passive is 'is being' plus the past participle for an action in progress now.",
+    "ref": "Speech and voice"
+  },
+  {
+    "id": "t2_bi_reported_passive_s2_7",
+    "unit": "reported_passive",
+    "skill": "reported_passive_s2",
+    "diff": "M",
+    "q": "All the forms ___ before the deadline.",
+    "options": [
+      "must submitting",
+      "must been submitted",
+      "must submit",
+      "must be submitted"
+    ],
+    "correctIndex": 3,
+    "explanation": "After a modal, the passive is 'be' plus the past participle: 'must be submitted'.",
+    "ref": "Speech and voice"
+  },
+  {
+    "id": "t2_bi_reported_passive_s2_8",
+    "unit": "reported_passive",
+    "skill": "reported_passive_s2",
+    "diff": "M",
+    "q": "Nobody told me about the change, so I ___.",
+    "options": [
+      "was not informing",
+      "not informed",
+      "was not informed",
+      "did not inform"
+    ],
+    "correctIndex": 2,
+    "explanation": "'Inform' needs an object, so with no agent the passive 'I was not informed' is required.",
+    "ref": "Speech and voice"
+  },
+  {
+    "id": "t2_bi_reported_passive_s2_9",
+    "unit": "reported_passive",
+    "skill": "reported_passive_s2",
+    "diff": "H",
+    "q": "The report ___ by the time the principal arrived.",
+    "options": [
+      "had been completed",
+      "has completed",
+      "was completing",
+      "had completed"
+    ],
+    "correctIndex": 0,
+    "explanation": "The past perfect passive is 'had been' plus the past participle for an action finished before another past event.",
+    "ref": "Speech and voice"
+  },
+  {
+    "id": "t2_bi_reported_passive_s2_10",
+    "unit": "reported_passive",
+    "skill": "reported_passive_s2",
+    "diff": "H",
+    "q": "The parcel ___ delivered yesterday, but nobody was at home to receive it.",
+    "options": [
+      "should been",
+      "should have been",
+      "should be",
+      "should have"
+    ],
+    "correctIndex": 1,
+    "explanation": "A modal perfect passive is 'should have been' plus a past participle: 'should have been delivered'.",
+    "ref": "Speech and voice"
+  },
+  {
+    "id": "t2_bi_vocab_phrasal_s1_1",
+    "unit": "vocab_phrasal",
+    "skill": "vocab_phrasal_s1",
+    "diff": "L",
+    "q": "The hikers were told to ___ the path because heavy rain had made it slippery.",
+    "options": [
+      "follow",
+      "avoid",
+      "destroy",
+      "design"
+    ],
+    "correctIndex": 1,
+    "explanation": "The reason given (a slippery path) calls for the meaning 'keep away from', so 'avoid' fits the context.",
+    "ref": "Vocabulary"
+  },
+  {
+    "id": "t2_bi_vocab_phrasal_s1_2",
+    "unit": "vocab_phrasal",
+    "skill": "vocab_phrasal_s1",
+    "diff": "L",
+    "q": "The old fisherman was known for his ___ stories about the sea.",
+    "options": [
+      "costly",
+      "narrow",
+      "boring",
+      "fascinating"
+    ],
+    "correctIndex": 3,
+    "explanation": "Only 'fascinating' describes stories that people find interesting, which matches the admiring tone.",
+    "ref": "Vocabulary"
+  },
+  {
+    "id": "t2_bi_vocab_phrasal_s1_3",
+    "unit": "vocab_phrasal",
+    "skill": "vocab_phrasal_s1",
+    "diff": "L",
+    "q": "The librarian asked the pupils to ___ their names clearly on the borrowing card.",
+    "options": [
+      "write",
+      "writes",
+      "wrote",
+      "written"
+    ],
+    "correctIndex": 0,
+    "explanation": "After 'to' in an infinitive of purpose the base verb is needed, so 'to write' is correct.",
+    "ref": "Vocabulary"
+  },
+  {
+    "id": "t2_bi_vocab_phrasal_s1_4",
+    "unit": "vocab_phrasal",
+    "skill": "vocab_phrasal_s1",
+    "diff": "L",
+    "q": "The soup was so ___ that I had to wait ten minutes before eating it.",
+    "options": [
+      "salty",
+      "spicy",
+      "hot",
+      "sweet"
+    ],
+    "correctIndex": 2,
+    "explanation": "Having to wait before eating points to the soup being very hot; the other options describe flavour, not temperature.",
+    "ref": "Vocabulary"
+  },
+  {
+    "id": "t2_bi_vocab_phrasal_s1_5",
+    "unit": "vocab_phrasal",
+    "skill": "vocab_phrasal_s1",
+    "diff": "L",
+    "q": "The library has a ___ rule: no food or drinks inside.",
+    "options": [
+      "careful",
+      "strict",
+      "helpful",
+      "final"
+    ],
+    "correctIndex": 1,
+    "explanation": "A rule that is firmly enforced with no exceptions is best described as 'strict'.",
+    "ref": "Vocabulary"
+  },
+  {
+    "id": "t2_bi_vocab_phrasal_s1_6",
+    "unit": "vocab_phrasal",
+    "skill": "vocab_phrasal_s1",
+    "diff": "M",
+    "q": "The heavy rain caused a ___ in the main road, so we had to take a longer route.",
+    "options": [
+      "blockage",
+      "distance",
+      "delay",
+      "traffic"
+    ],
+    "correctIndex": 0,
+    "explanation": "A physical obstruction that stops traffic from passing is a 'blockage'; 'delay' is the result, not the object on the road.",
+    "ref": "Vocabulary"
+  },
+  {
+    "id": "t2_bi_vocab_phrasal_s1_7",
+    "unit": "vocab_phrasal",
+    "skill": "vocab_phrasal_s1",
+    "diff": "M",
+    "q": "Although the two brothers looked alike, their personalities were ___ different.",
+    "options": [
+      "rarely",
+      "slightly",
+      "hardly",
+      "completely"
+    ],
+    "correctIndex": 3,
+    "explanation": "'Although ... alike' sets up a contrast, so the personalities should be 'completely' different.",
+    "ref": "Vocabulary"
+  },
+  {
+    "id": "t2_bi_vocab_phrasal_s1_8",
+    "unit": "vocab_phrasal",
+    "skill": "vocab_phrasal_s1",
+    "diff": "M",
+    "q": "The village head asked the villagers to ___ their rubbish instead of burning it.",
+    "options": [
+      "take over",
+      "look after",
+      "dispose of",
+      "put off"
+    ],
+    "correctIndex": 2,
+    "explanation": "'Dispose of' means to get rid of something, which fits rubbish; 'look after' would mean to care for it.",
+    "ref": "Vocabulary"
+  },
+  {
+    "id": "t2_bi_vocab_phrasal_s1_9",
+    "unit": "vocab_phrasal",
+    "skill": "vocab_phrasal_s1",
+    "diff": "H",
+    "q": "After waiting three weeks, Salmah realised her friend's promises had been ___ words.",
+    "options": [
+      "empty",
+      "heavy",
+      "wordy",
+      "useful"
+    ],
+    "correctIndex": 0,
+    "explanation": "'Empty words' is the fixed expression for promises that are not kept, which fits her disappointment after three weeks.",
+    "ref": "Vocabulary"
+  },
+  {
+    "id": "t2_bi_vocab_phrasal_s1_10",
+    "unit": "vocab_phrasal",
+    "skill": "vocab_phrasal_s1",
+    "diff": "H",
+    "q": "The committee's decision was met with ___ applause; most parents simply sat in silence.",
+    "options": [
+      "thunderous",
+      "polite",
+      "enthusiastic",
+      "constant"
+    ],
+    "correctIndex": 1,
+    "explanation": "The parents' silence contradicts strong reaction, so the applause was merely 'polite' rather than genuine.",
+    "ref": "Vocabulary"
+  },
+  {
+    "id": "t2_bi_vocab_phrasal_s2_1",
+    "unit": "vocab_phrasal",
+    "skill": "vocab_phrasal_s2",
+    "diff": "L",
+    "q": "Could you ___ the lights when you leave the room?",
+    "options": [
+      "turn over",
+      "turn off",
+      "turn up",
+      "turn down"
+    ],
+    "correctIndex": 1,
+    "explanation": "'Turn off' means to switch something off, which is what you do to lights when leaving.",
+    "ref": "Vocabulary"
+  },
+  {
+    "id": "t2_bi_vocab_phrasal_s2_2",
+    "unit": "vocab_phrasal",
+    "skill": "vocab_phrasal_s2",
+    "diff": "L",
+    "q": "The meeting was ___ until next Monday because the principal was unwell.",
+    "options": [
+      "put out",
+      "put away",
+      "put on",
+      "put off"
+    ],
+    "correctIndex": 3,
+    "explanation": "'Put off' means to postpone to a later time.",
+    "ref": "Vocabulary"
+  },
+  {
+    "id": "t2_bi_vocab_phrasal_s2_3",
+    "unit": "vocab_phrasal",
+    "skill": "vocab_phrasal_s2",
+    "diff": "L",
+    "q": "I bumped ___ my old classmate at the night market last week.",
+    "options": [
+      "into",
+      "across",
+      "out",
+      "over"
+    ],
+    "correctIndex": 0,
+    "explanation": "'Run into' means to meet someone by chance.",
+    "ref": "Vocabulary"
+  },
+  {
+    "id": "t2_bi_vocab_phrasal_s2_4",
+    "unit": "vocab_phrasal",
+    "skill": "vocab_phrasal_s2",
+    "diff": "L",
+    "q": "Please ___ the form and hand it to the clerk at the counter.",
+    "options": [
+      "fill out of",
+      "fill with",
+      "fill in",
+      "fill up"
+    ],
+    "correctIndex": 2,
+    "explanation": "'Fill in' a form means to complete the spaces; 'fill up' is used for containers.",
+    "ref": "Vocabulary"
+  },
+  {
+    "id": "t2_bi_vocab_phrasal_s2_5",
+    "unit": "vocab_phrasal",
+    "skill": "vocab_phrasal_s2",
+    "diff": "L",
+    "q": "The children were told to ___ their toys before bedtime.",
+    "options": [
+      "put across",
+      "put away",
+      "put down",
+      "put up with"
+    ],
+    "correctIndex": 1,
+    "explanation": "'Put away' means to tidy things into their proper place.",
+    "ref": "Vocabulary"
+  },
+  {
+    "id": "t2_bi_vocab_phrasal_s2_6",
+    "unit": "vocab_phrasal",
+    "skill": "vocab_phrasal_s2",
+    "diff": "M",
+    "q": "Nadia had to ___ her younger brother while their parents were at work.",
+    "options": [
+      "look after",
+      "look forward to",
+      "look up to",
+      "look into"
+    ],
+    "correctIndex": 0,
+    "explanation": "'Look after' someone means to take care of them.",
+    "ref": "Vocabulary"
+  },
+  {
+    "id": "t2_bi_vocab_phrasal_s2_7",
+    "unit": "vocab_phrasal",
+    "skill": "vocab_phrasal_s2",
+    "diff": "M",
+    "q": "The teacher asked the class to ___ the meaning of the unfamiliar word in the dictionary.",
+    "options": [
+      "look out",
+      "look into",
+      "look after",
+      "look up"
+    ],
+    "correctIndex": 3,
+    "explanation": "'Look up' a word means to search for its meaning in a reference source.",
+    "ref": "Vocabulary"
+  },
+  {
+    "id": "t2_bi_vocab_phrasal_s2_8",
+    "unit": "vocab_phrasal",
+    "skill": "vocab_phrasal_s2",
+    "diff": "M",
+    "q": "He is always showing ___ in front of his friends, which annoys his sister.",
+    "options": [
+      "out",
+      "in",
+      "off",
+      "up"
+    ],
+    "correctIndex": 2,
+    "explanation": "'Show off' means to behave in a way that draws attention in order to impress others.",
+    "ref": "Vocabulary"
+  },
+  {
+    "id": "t2_bi_vocab_phrasal_s2_9",
+    "unit": "vocab_phrasal",
+    "skill": "vocab_phrasal_s2",
+    "diff": "H",
+    "q": "The plan fell ___ because the transport costs were much higher than expected.",
+    "options": [
+      "through",
+      "out",
+      "over",
+      "in"
+    ],
+    "correctIndex": 0,
+    "explanation": "'Fall through' means a plan fails to happen, which matches the unexpected costs.",
+    "ref": "Vocabulary"
+  },
+  {
+    "id": "t2_bi_vocab_phrasal_s2_10",
+    "unit": "vocab_phrasal",
+    "skill": "vocab_phrasal_s2",
+    "diff": "H",
+    "q": "I cannot ___ with this noise any longer; please lower the radio.",
+    "options": [
+      "put down",
+      "put up",
+      "put on",
+      "put off"
+    ],
+    "correctIndex": 1,
+    "explanation": "'Put up with' means to tolerate something annoying; the object 'with this noise' shows the particle needed.",
+    "ref": "Vocabulary"
+  },
+  {
+    "id": "t2_bi_error_editing_s1_1",
+    "unit": "error_editing",
+    "skill": "error_editing_s1",
+    "diff": "L",
+    "q": "Choose the sentence with correct subject-verb agreement.",
+    "options": [
+      "The list of names were pinned on the board.",
+      "The list of names was pinned on the board.",
+      "The list of names were pin on the board.",
+      "The list of name were pinned on the board."
+    ],
+    "correctIndex": 1,
+    "explanation": "The subject is 'the list', which is singular, so the verb must be 'was'; 'of names' is only a modifier.",
+    "ref": "Editing"
+  },
+  {
+    "id": "t2_bi_error_editing_s1_2",
+    "unit": "error_editing",
+    "skill": "error_editing_s1",
+    "diff": "L",
+    "q": "Which sentence about \"each of the students\" is correct?",
+    "options": [
+      "Each of the students are finishing the test.",
+      "Each of the students were finished the test.",
+      "Each of the students have finished the test.",
+      "Each of the students has finished the test."
+    ],
+    "correctIndex": 3,
+    "explanation": "'Each' is always singular, so it takes 'has' even when followed by 'of the students'.",
+    "ref": "Editing"
+  },
+  {
+    "id": "t2_bi_error_editing_s1_3",
+    "unit": "error_editing",
+    "skill": "error_editing_s1",
+    "diff": "L",
+    "q": "Which \"There is / There are\" sentence is correct?",
+    "options": [
+      "There are many reasons to join the club.",
+      "There are many reason to join the club.",
+      "There is many reason to join the club.",
+      "There is many reasons to join the club."
+    ],
+    "correctIndex": 0,
+    "explanation": "The true subject after 'There' is 'many reasons', which is plural, so the verb is 'are'.",
+    "ref": "Editing"
+  },
+  {
+    "id": "t2_bi_error_editing_s1_4",
+    "unit": "error_editing",
+    "skill": "error_editing_s1",
+    "diff": "L",
+    "q": "Which sentence has no error?",
+    "options": [
+      "My brother and I is going to the same school.",
+      "My brother and I goes to the same school.",
+      "My brother and I go to the same school.",
+      "My brother and I going to the same school."
+    ],
+    "correctIndex": 2,
+    "explanation": "Two subjects joined by 'and' form a plural subject, so the verb is 'go'.",
+    "ref": "Editing"
+  },
+  {
+    "id": "t2_bi_error_editing_s1_5",
+    "unit": "error_editing",
+    "skill": "error_editing_s1",
+    "diff": "L",
+    "q": "Choose the correct sentence.",
+    "options": [
+      "The news on the radio were worrying.",
+      "The news on the radio was worrying.",
+      "The news on the radio are worrying.",
+      "The news on the radio been worrying."
+    ],
+    "correctIndex": 1,
+    "explanation": "'News' is an uncountable noun that takes a singular verb: 'the news ... was'.",
+    "ref": "Editing"
+  },
+  {
+    "id": "t2_bi_error_editing_s1_6",
+    "unit": "error_editing",
+    "skill": "error_editing_s1",
+    "diff": "M",
+    "q": "Which \"neither ... nor\" sentence has the correct verb?",
+    "options": [
+      "Neither the teacher nor the students were ready.",
+      "Neither the teacher or the students were ready.",
+      "Neither the teacher and the students were ready.",
+      "Neither the teacher nor the students was ready."
+    ],
+    "correctIndex": 0,
+    "explanation": "With 'neither ... nor', the verb agrees with the nearer subject 'students', which is plural.",
+    "ref": "Editing"
+  },
+  {
+    "id": "t2_bi_error_editing_s1_7",
+    "unit": "error_editing",
+    "skill": "error_editing_s1",
+    "diff": "M",
+    "q": "Which sentence about \"everyone in the Science Club\" is correct?",
+    "options": [
+      "Everyone in the Science Club have brought their permission slip.",
+      "Everyone in the Science Club has bring their permission slip.",
+      "Everyone in the Science Club have bring their permission slip.",
+      "Everyone in the Science Club has brought their permission slip."
+    ],
+    "correctIndex": 3,
+    "explanation": "'Everyone' is singular and takes 'has'; 'their' is acceptable, and the other options break agreement or use the wrong verb form.",
+    "ref": "Editing"
+  },
+  {
+    "id": "t2_bi_error_editing_s1_8",
+    "unit": "error_editing",
+    "skill": "error_editing_s1",
+    "diff": "M",
+    "q": "Which sentence contains an error in agreement?",
+    "options": [
+      "The scissors are in the drawer.",
+      "The pair of scissors is in the drawer.",
+      "The scissors was in the drawer.",
+      "The scissors were in the drawer."
+    ],
+    "correctIndex": 2,
+    "explanation": "'Scissors' is a plural-only noun, so 'was' is wrong; 'the scissors were' or 'the pair of scissors was' would both work.",
+    "ref": "Editing"
+  },
+  {
+    "id": "t2_bi_error_editing_s1_9",
+    "unit": "error_editing",
+    "skill": "error_editing_s1",
+    "diff": "H",
+    "q": "Which sentence is correct?",
+    "options": [
+      "The number of pupils who take the bus has increased.",
+      "The number of pupils who take the bus are increasing.",
+      "The number of pupils who take the bus have increased.",
+      "A number of pupils who take the bus has increased."
+    ],
+    "correctIndex": 0,
+    "explanation": "'The number of' is singular and takes 'has'; 'a number of' would be plural and take 'have'.",
+    "ref": "Editing"
+  },
+  {
+    "id": "t2_bi_error_editing_s1_10",
+    "unit": "error_editing",
+    "skill": "error_editing_s1",
+    "diff": "H",
+    "q": "Which sentence states the distance correctly?",
+    "options": [
+      "Ten kilometres are a long way to walk in the heat.",
+      "Ten kilometres is a long way to walk in the heat.",
+      "Ten kilometres were a long way to walk in the heat.",
+      "Ten kilometres have been a long way to walk in the heat."
+    ],
+    "correctIndex": 1,
+    "explanation": "A distance is treated as a single quantity, so it takes a singular verb: 'ten kilometres is'.",
+    "ref": "Editing"
+  },
+  {
+    "id": "t2_bi_error_editing_s2_1",
+    "unit": "error_editing",
+    "skill": "error_editing_s2",
+    "diff": "L",
+    "q": "Read the text: 'The players warmed up at 4 p.m. ___, the coach gave a short team talk.' Which connector best fills the gap?",
+    "options": [
+      "Although",
+      "Afterwards",
+      "Unless",
+      "Despite"
+    ],
+    "correctIndex": 1,
+    "explanation": "'Afterwards' marks the next step in time order; 'Unless', 'Despite' and 'Although' cannot join two sequential actions.",
+    "ref": "Editing"
+  },
+  {
+    "id": "t2_bi_error_editing_s2_2",
+    "unit": "error_editing",
+    "skill": "error_editing_s2",
+    "diff": "L",
+    "q": "Read the text: 'The museum was closed for repairs. ___, we visited the art gallery instead.' Which connector fits?",
+    "options": [
+      "Although",
+      "Because",
+      "However",
+      "So"
+    ],
+    "correctIndex": 3,
+    "explanation": "'So' introduces the result that follows from finding the museum closed.",
+    "ref": "Editing"
+  },
+  {
+    "id": "t2_bi_error_editing_s2_3",
+    "unit": "error_editing",
+    "skill": "error_editing_s2",
+    "diff": "L",
+    "q": "Read the text: '___ the heavy traffic, we reached the school on time.' Which word fits?",
+    "options": [
+      "Despite",
+      "Since",
+      "Unless",
+      "Because"
+    ],
+    "correctIndex": 0,
+    "explanation": "'Despite' + noun phrase introduces contrast with the positive outcome.",
+    "ref": "Editing"
+  },
+  {
+    "id": "t2_bi_error_editing_s2_4",
+    "unit": "error_editing",
+    "skill": "error_editing_s2",
+    "diff": "L",
+    "q": "Read the text: 'Please bring your own water. ___, bring a hat and sunscreen.' Which connector fits?",
+    "options": [
+      "Yet",
+      "Although",
+      "Also",
+      "Otherwise"
+    ],
+    "correctIndex": 2,
+    "explanation": "'Also' adds another item to the same instruction; 'otherwise' would suggest a consequence.",
+    "ref": "Editing"
+  },
+  {
+    "id": "t2_bi_error_editing_s2_5",
+    "unit": "error_editing",
+    "skill": "error_editing_s2",
+    "diff": "L",
+    "q": "Read the text: 'Study the topics carefully. ___, you may repeat a mistake from your last test.' Which connector fits?",
+    "options": [
+      "Therefore",
+      "Otherwise",
+      "Moreover",
+      "Instead"
+    ],
+    "correctIndex": 1,
+    "explanation": "'Otherwise' introduces what may happen if the instruction is not followed.",
+    "ref": "Editing"
+  },
+  {
+    "id": "t2_bi_error_editing_s2_6",
+    "unit": "error_editing",
+    "skill": "error_editing_s2",
+    "diff": "M",
+    "q": "Read the text: 'The hall was packed. ___, there was still space near the back.' Which connector fits best?",
+    "options": [
+      "However",
+      "Because",
+      "Therefore",
+      "Since"
+    ],
+    "correctIndex": 0,
+    "explanation": "'However' signals contrast between a packed hall and remaining space.",
+    "ref": "Editing"
+  },
+  {
+    "id": "t2_bi_error_editing_s2_7",
+    "unit": "error_editing",
+    "skill": "error_editing_s2",
+    "diff": "M",
+    "q": "Read the text: 'First, wash the vegetables. Next, slice them finely. ___, heat the oil in a pan.' Which connector fits?",
+    "options": [
+      "However",
+      "Although",
+      "Unless",
+      "Finally"
+    ],
+    "correctIndex": 3,
+    "explanation": "'Finally' marks the last step in a clear sequence.",
+    "ref": "Editing"
+  },
+  {
+    "id": "t2_bi_error_editing_s2_8",
+    "unit": "error_editing",
+    "skill": "error_editing_s2",
+    "diff": "M",
+    "q": "The pupils spent the morning painting the hall. ___, in another room, their teacher was sorting costumes. Which connector shows that the activities took place at the same time?",
+    "options": [
+      "Therefore",
+      "Afterwards",
+      "Meanwhile",
+      "For example"
+    ],
+    "correctIndex": 2,
+    "explanation": "Meanwhile introduces a second activity taking place during the first.",
+    "ref": "Editing"
+  },
+  {
+    "id": "t2_bi_error_editing_s2_9",
+    "unit": "error_editing",
+    "skill": "error_editing_s2",
+    "diff": "H",
+    "q": "Read the text: 'The school will be closed on Friday ___ the repair work. All classes are cancelled.' Which phrase fits best?",
+    "options": [
+      "due to",
+      "so that",
+      "even though",
+      "according to"
+    ],
+    "correctIndex": 0,
+    "explanation": "'Due to' gives the reason for the closure as a noun phrase, matching 'the repair work'.",
+    "ref": "Editing"
+  },
+  {
+    "id": "t2_bi_error_editing_s2_10",
+    "unit": "error_editing",
+    "skill": "error_editing_s2",
+    "diff": "H",
+    "q": "Read the text: 'The team practised every day. ___, they lost the final by one goal.' Which connector fits best?",
+    "options": [
+      "Consequently",
+      "Nevertheless",
+      "Similarly",
+      "Furthermore"
+    ],
+    "correctIndex": 1,
+    "explanation": "'Nevertheless' introduces a result that goes against expectation, which suits losing after hard practice.",
+    "ref": "Editing"
+  },
+  {
+    "id": "t2_bi_reading_s1_1",
+    "unit": "reading",
+    "skill": "reading_s1",
+    "diff": "L",
+    "q": "Read the notice:\n\"SMK BUKIT MUTIARA — YEARBOOK ORDERS\nPlace your order AND pay RM35 at the office counter. Orders and payment close on 12 March. Yearbooks will be ready by 30 April.\"\nWhen and where must students pay?",
+    "options": [
+      "By 30 April, at the library",
+      "By 12 March, at the office counter",
+      "On collection day, in class",
+      "After 30 April, at the office counter"
+    ],
+    "correctIndex": 1,
+    "explanation": "The notice states that orders and payment close on 12 March and that payment is made at the office counter.",
+    "ref": "Reading"
+  },
+  {
+    "id": "t2_bi_reading_s1_2",
+    "unit": "reading",
+    "skill": "reading_s1",
+    "diff": "L",
+    "q": "Read the message:\n\"Hi Ravi, I have taken your badminton racket by mistake — mine is the blue one. I will return yours at the court tomorrow at 4 p.m. Sorry! — Amir\"\nWhat did Amir do wrong?",
+    "options": [
+      "He left his racket at the court.",
+      "He missed the badminton practice.",
+      "He broke Ravi's racket.",
+      "He took Ravi's racket instead of his own."
+    ],
+    "correctIndex": 3,
+    "explanation": "Amir states he 'took your badminton racket by mistake', meaning he picked up the wrong one.",
+    "ref": "Reading"
+  },
+  {
+    "id": "t2_bi_reading_s1_3",
+    "unit": "reading",
+    "skill": "reading_s1",
+    "diff": "L",
+    "q": "Read the text:\n\"The night market in Taman Seri begins at 5.30 p.m. and ends at 10 p.m. It is open every Wednesday and Saturday. Parking is available behind the community hall.\"\nWhere should shoppers park?",
+    "options": [
+      "Behind the community hall",
+      "Inside the night market",
+      "Along the main road",
+      "At the school gate"
+    ],
+    "correctIndex": 0,
+    "explanation": "The last sentence gives the parking location as behind the community hall.",
+    "ref": "Reading"
+  },
+  {
+    "id": "t2_bi_reading_s1_4",
+    "unit": "reading",
+    "skill": "reading_s1",
+    "diff": "L",
+    "q": "Read the email:\n\"Dear parents, the Parent-Teacher Meeting has been moved from Saturday 14 June to Saturday 21 June. The time remains 9 a.m. to noon in the school hall. Please sign the reply slip by 10 June.\"\nWhat has changed about the meeting?",
+    "options": [
+      "The venue",
+      "The time",
+      "The date",
+      "The reply slip"
+    ],
+    "correctIndex": 2,
+    "explanation": "Only the date moved, from 14 June to 21 June; the venue and time are unchanged.",
+    "ref": "Reading"
+  },
+  {
+    "id": "t2_bi_reading_s1_5",
+    "unit": "reading",
+    "skill": "reading_s1",
+    "diff": "L",
+    "q": "Read the paragraph:\n\"Encik Rahim keeps three hives behind his house in Tanjung Malim. He collects honey twice a year and sells it at the Sunday market. He never uses smoke near the hives because it upsets the bees.\"\nHow often does Encik Rahim collect honey?",
+    "options": [
+      "Once a month",
+      "Twice a year",
+      "Every Sunday",
+      "Three times a year"
+    ],
+    "correctIndex": 1,
+    "explanation": "The text states he 'collects honey twice a year'.",
+    "ref": "Reading"
+  },
+  {
+    "id": "t2_bi_reading_s1_6",
+    "unit": "reading",
+    "skill": "reading_s1",
+    "diff": "M",
+    "q": "Read the text:\n\"The school's recycling programme began in January. By March, the amount of paper collected had doubled. However, the amount of plastic collected fell because the bins near the canteen were often full and pupils stopped using them.\"\nWhat caused the drop in plastic collected?",
+    "options": [
+      "The plastic bins were frequently full.",
+      "The programme started too late.",
+      "The canteen stopped selling plastic items.",
+      "Pupils preferred to recycle paper."
+    ],
+    "correctIndex": 0,
+    "explanation": "The passage directly links the fall in plastic to bins near the canteen being 'often full'.",
+    "ref": "Reading"
+  },
+  {
+    "id": "t2_bi_reading_s1_7",
+    "unit": "reading",
+    "skill": "reading_s1",
+    "diff": "M",
+    "q": "Read the notice:\n\"Bus 12A will not stop at Taman Indah from 3 to 7 July due to road works. Passengers should use Bus 12B, which stops at the junction of Jalan Indah. Normal service resumes on 8 July.\"\nWhat should Taman Indah passengers do between 3 and 7 July?",
+    "options": [
+      "Travel only after 8 July",
+      "Walk to the next town",
+      "Wait at the usual stop for Bus 12A",
+      "Take Bus 12B to the junction of Jalan Indah"
+    ],
+    "correctIndex": 3,
+    "explanation": "The notice tells passengers to use Bus 12B, which stops at the junction of Jalan Indah during the road works.",
+    "ref": "Reading"
+  },
+  {
+    "id": "t2_bi_reading_s1_8",
+    "unit": "reading",
+    "skill": "reading_s1",
+    "diff": "M",
+    "q": "Read the paragraph:\n\"The library's reading corner was painted last month. New cushions were bought with money raised by the Book Club. The number of pupils borrowing books rose from 40 to 95 per week after the corner reopened.\"\nHow was the reading corner improved?",
+    "options": [
+      "Books were donated by pupils.",
+      "A new librarian was hired.",
+      "It was painted and given new cushions.",
+      "It was moved to a larger room."
+    ],
+    "correctIndex": 2,
+    "explanation": "The text mentions painting and new cushions bought with Book Club funds.",
+    "ref": "Reading"
+  },
+  {
+    "id": "t2_bi_reading_s1_9",
+    "unit": "reading",
+    "skill": "reading_s1",
+    "diff": "H",
+    "q": "Read the text:\n\"The canteen raised prices by 20 sen in April. By June, daily sales of fried noodles had fallen by a third, but sales of rice dishes were unchanged. The canteen owner believes pupils simply switched to cheaper items.\"\nWhich statement is supported by the text?",
+    "options": [
+      "Noodle sales fell while rice sales stayed steady.",
+      "The canteen owner raised prices again in June.",
+      "Pupils stopped buying food at the canteen.",
+      "Rice dishes became more expensive than noodles."
+    ],
+    "correctIndex": 0,
+    "explanation": "The text reports noodle sales falling by a third while rice dish sales were unchanged; it never says pupils stopped buying altogether.",
+    "ref": "Reading"
+  },
+  {
+    "id": "t2_bi_reading_s1_10",
+    "unit": "reading",
+    "skill": "reading_s1",
+    "diff": "H",
+    "q": "Read the passage:\n\"When SMK Sri Damai introduced a 15-minute reading period before lessons, teachers expected better comprehension scores. Instead, scores stayed the same, but pupils reported feeling calmer in the morning. The head teacher decided to keep the period for that reason.\"\nWhy did the head teacher keep the reading period?",
+    "options": [
+      "Comprehension scores improved.",
+      "Pupils said they felt calmer.",
+      "Teachers requested more reading time.",
+      "It replaced morning assembly."
+    ],
+    "correctIndex": 1,
+    "explanation": "The passage states scores did not change, but pupils felt calmer, and the head teacher kept the period 'for that reason'.",
+    "ref": "Reading"
+  },
+  {
+    "id": "t2_bi_reading_s2_1",
+    "unit": "reading",
+    "skill": "reading_s2",
+    "diff": "L",
+    "q": "Read the message:\n\"Aina, I waited at the library until 4.30 but did not see you. I hope everything is fine at home. Let me know if you still want to study together. — Mei\"\nWhat can we infer about Mei?",
+    "options": [
+      "She is angry with Aina.",
+      "She is worried about Aina.",
+      "She has stopped studying.",
+      "She forgot the appointment."
+    ],
+    "correctIndex": 1,
+    "explanation": "Mei says she hopes everything is fine at home and offers to study again, showing concern rather than anger.",
+    "ref": "Reading"
+  },
+  {
+    "id": "t2_bi_reading_s2_2",
+    "unit": "reading",
+    "skill": "reading_s2",
+    "diff": "L",
+    "q": "Read the text:\n\"Hafiz checked his watch for the third time and looked at the empty stage. The judges were whispering to each other. He wiped his palms on his trousers.\"\nHow does Hafiz most likely feel?",
+    "options": [
+      "Sleepy",
+      "Angry",
+      "Bored",
+      "Nervous"
+    ],
+    "correctIndex": 3,
+    "explanation": "Repeated watch-checking, whispering judges and wiping sweaty palms are signs of nervousness.",
+    "ref": "Reading"
+  },
+  {
+    "id": "t2_bi_reading_s2_3",
+    "unit": "reading",
+    "skill": "reading_s2",
+    "diff": "L",
+    "q": "Read the text:\n\"The shop assistant looked at the torn receipt, then at the shoes, and finally called the manager. 'We can exchange them,' she said, 'but not refund the money.'\"\nWhat does this tell us about the shop's policy?",
+    "options": [
+      "It allows exchanges but not refunds.",
+      "It gives refunds only with a receipt.",
+      "It replaces damaged shoes for free.",
+      "It refuses all returns."
+    ],
+    "correctIndex": 0,
+    "explanation": "The assistant offers an exchange and explicitly says the money cannot be refunded.",
+    "ref": "Reading"
+  },
+  {
+    "id": "t2_bi_reading_s2_4",
+    "unit": "reading",
+    "skill": "reading_s2",
+    "diff": "L",
+    "q": "Read the paragraph:\n\"Every morning, Puan Lim opens the stall at 6 a.m. even though few customers come before seven. She says the early hour lets her arrange the vegetables slowly.\"\nWhat does this suggest about Puan Lim?",
+    "options": [
+      "She sells only fruit.",
+      "She dislikes serving customers.",
+      "She values preparation over early sales.",
+      "She opens late on most days."
+    ],
+    "correctIndex": 2,
+    "explanation": "She opens early despite few customers, saying it lets her arrange vegetables slowly — preparation matters to her.",
+    "ref": "Reading"
+  },
+  {
+    "id": "t2_bi_reading_s2_5",
+    "unit": "reading",
+    "skill": "reading_s2",
+    "diff": "L",
+    "q": "Read the note:\n\"To whoever borrowed my calculator from the lab: please return it to the cupboard before Friday. I have a test on Friday and cannot buy a new one in time.\"\nWhat is the writer most concerned about?",
+    "options": [
+      "Losing a friend",
+      "Getting the calculator back before the test",
+      "Buying a newer calculator",
+      "The lab cupboard being locked"
+    ],
+    "correctIndex": 1,
+    "explanation": "The writer explains the Friday test and inability to buy a replacement, so the main concern is having the calculator returned in time.",
+    "ref": "Reading"
+  },
+  {
+    "id": "t2_bi_reading_s2_6",
+    "unit": "reading",
+    "skill": "reading_s2",
+    "diff": "M",
+    "q": "Read the text:\n\"The team captain said the players had trained hard, but he kept glancing at the empty bench where their goalkeeper usually sat. When asked about Saturday's match, he answered only in short sentences.\"\nWhat does the captain's behaviour suggest?",
+    "options": [
+      "He is uneasy about the missing goalkeeper.",
+      "He has stopped training the team.",
+      "He wants to cancel all matches.",
+      "He is confident about the match."
+    ],
+    "correctIndex": 0,
+    "explanation": "Glancing at the empty bench and answering briefly imply worry, not confidence.",
+    "ref": "Reading"
+  },
+  {
+    "id": "t2_bi_reading_s2_7",
+    "unit": "reading",
+    "skill": "reading_s2",
+    "diff": "M",
+    "q": "Read the passage:\n\"Although the new bike lane was welcomed by cyclists, several shop owners complained that delivery vans could no longer park outside their shops. The council has promised to review the layout next month.\"\nWhat is the council likely to do?",
+    "options": [
+      "Ban delivery vans from the area",
+      "Ask shop owners to close early",
+      "Remove the bike lane immediately",
+      "Consider changing the lane's layout"
+    ],
+    "correctIndex": 3,
+    "explanation": "Promising to 'review the layout' suggests they will consider adjustments rather than remove it outright.",
+    "ref": "Reading"
+  },
+  {
+    "id": "t2_bi_reading_s2_8",
+    "unit": "reading",
+    "skill": "reading_s2",
+    "diff": "M",
+    "q": "Read the paragraph:\n\"Siti's essay was neat and free of spelling mistakes, yet the teacher wrote 'Where is your opinion?' at the bottom. Siti read the comment twice and reached for her pen.\"\nWhy did Siti reach for her pen?",
+    "options": [
+      "She planned to ask for a new topic.",
+      "She wanted to hand in her essay.",
+      "She intended to revise her essay.",
+      "She was going to copy the comment."
+    ],
+    "correctIndex": 2,
+    "explanation": "Reading the comment twice and reaching for a pen implies she is about to make changes to her essay.",
+    "ref": "Reading"
+  },
+  {
+    "id": "t2_bi_reading_s2_9",
+    "unit": "reading",
+    "skill": "reading_s2",
+    "diff": "H",
+    "q": "Read the text:\n\"The head prefect announced that the recycling competition would continue, but the prizes would now be books instead of cash. The hall fell silent, then a few pupils began clapping.\"\nWhat can best be inferred from the pupils' reaction?",
+    "options": [
+      "They were surprised but not wholly disappointed.",
+      "They had expected books all along.",
+      "They did not hear the announcement.",
+      "They were completely against the change."
+    ],
+    "correctIndex": 0,
+    "explanation": "Silence followed by some clapping suggests initial surprise followed by partial acceptance, not total rejection.",
+    "ref": "Reading"
+  },
+  {
+    "id": "t2_bi_reading_s2_10",
+    "unit": "reading",
+    "skill": "reading_s2",
+    "diff": "H",
+    "q": "Read the passage:\n\"Encik Danial's tuition centre advertises 'guaranteed A grades'. When asked how many students had achieved an A last year, he replied that 'many parents were satisfied'. He then changed the subject to his new air-conditioned rooms.\"\nWhat does the writer imply about Encik Danial?",
+    "options": [
+      "He has strong evidence for his claim.",
+      "He avoids answering questions that could challenge his claim.",
+      "He has too many students to count.",
+      "He is more interested in teaching than advertising."
+    ],
+    "correctIndex": 1,
+    "explanation": "Deflecting a direct question about results towards satisfied parents and air-conditioning implies avoidance, so the claim is not supported.",
+    "ref": "Reading"
+  },
+  {
+    "id": "t2_bi_writing_s1_1",
+    "unit": "writing",
+    "skill": "writing_s1",
+    "diff": "L",
+    "q": "You want to ask your teacher for permission to leave early for a dental appointment. Which message is most suitable?",
+    "options": [
+      "Hey teacher, I'm off at 2 today, ok?",
+      "Dear Mr Tan, I have a dental appointment at 2 p.m. today. May I be excused from the last period? Thank you.",
+      "Mr Tan! Dental! Bye!",
+      "To Mr Tan, I will leave early because I want to, sorry."
+    ],
+    "correctIndex": 1,
+    "explanation": "A formal request to a teacher needs a polite greeting, a clear reason, a request, and thanks.",
+    "ref": "Writing"
+  },
+  {
+    "id": "t2_bi_writing_s1_2",
+    "unit": "writing",
+    "skill": "writing_s1",
+    "diff": "L",
+    "q": "You are messaging a close friend to cancel a plan. Which opening is most appropriate?",
+    "options": [
+      "Attention: cancellation of appointment.",
+      "To whom it may concern, I hereby cancel.",
+      "Dear Sir, I regret to inform you...",
+      "Hi Sara, sorry but I can't make it to the mall today. My grandmother needs help."
+    ],
+    "correctIndex": 3,
+    "explanation": "A message to a friend should be friendly and informal, with a simple apology and reason.",
+    "ref": "Writing"
+  },
+  {
+    "id": "t2_bi_writing_s1_3",
+    "unit": "writing",
+    "skill": "writing_s1",
+    "diff": "L",
+    "q": "Which message has the clearest purpose?",
+    "options": [
+      "Please bring RM20 for the trip by Friday so we can book the bus.",
+      "The trip is a thing that is happening, you know.",
+      "Trip. Money. Soon. Thanks.",
+      "I was thinking about things and maybe some stuff about the trip."
+    ],
+    "correctIndex": 0,
+    "explanation": "It states exactly what is needed (RM20), by when (Friday) and why (to book the bus).",
+    "ref": "Writing"
+  },
+  {
+    "id": "t2_bi_writing_s1_4",
+    "unit": "writing",
+    "skill": "writing_s1",
+    "diff": "L",
+    "q": "You are writing to the canteen operator to suggest healthier food. Which closing is most suitable?",
+    "options": [
+      "See ya, don't ignore me.",
+      "Whatever, bye.",
+      "I hope you will consider my suggestion. Thank you.",
+      "That's all, do it."
+    ],
+    "correctIndex": 2,
+    "explanation": "A polite formal suggestion ends with a courteous hope and thanks.",
+    "ref": "Writing"
+  },
+  {
+    "id": "t2_bi_writing_s1_5",
+    "unit": "writing",
+    "skill": "writing_s1",
+    "diff": "L",
+    "q": "Which subject line best fits an email telling parents about a school trip?",
+    "options": [
+      "Important!!!",
+      "Permission slip for the Form 2 Science Trip on 15 July",
+      "Read this now",
+      "About the thing next month"
+    ],
+    "correctIndex": 1,
+    "explanation": "A good subject line names the topic and the date clearly.",
+    "ref": "Writing"
+  },
+  {
+    "id": "t2_bi_writing_s1_6",
+    "unit": "writing",
+    "skill": "writing_s1",
+    "diff": "M",
+    "q": "You are a pupil writing to the principal about a broken water cooler. Which tone is best?",
+    "options": [
+      "Polite and factual, describing the problem and asking for repair",
+      "Angry and blaming the school staff",
+      "Joking and informal with emojis",
+      "Very long and emotional, with no clear request"
+    ],
+    "correctIndex": 0,
+    "explanation": "A formal complaint to the principal should stay polite, state facts and make a clear request.",
+    "ref": "Writing"
+  },
+  {
+    "id": "t2_bi_writing_s1_7",
+    "unit": "writing",
+    "skill": "writing_s1",
+    "diff": "M",
+    "q": "Which sentence keeps a consistent formal register?",
+    "options": [
+      "I wanna know about the workshop, so reply fast.",
+      "Workshop info please, thanks mate.",
+      "I am writing to enquire about the workshop, and it'd be cool if you could reply.",
+      "I am writing to enquire about the workshop. I would appreciate a reply at your convenience."
+    ],
+    "correctIndex": 3,
+    "explanation": "Both sentences stay formal; the others mix formal and casual language.",
+    "ref": "Writing"
+  },
+  {
+    "id": "t2_bi_writing_s1_8",
+    "unit": "writing",
+    "skill": "writing_s1",
+    "diff": "M",
+    "q": "You need to invite a guest speaker. Which message states purpose, details and request clearly?",
+    "options": [
+      "Dr Ng, we need a speaker. Reply.",
+      "Come to our school.",
+      "Dear Dr Ng, our club would like to invite you to speak about river conservation on 20 August at 10 a.m. in the school hall. Please let us know if you are available.",
+      "You should come and talk, it will be fun."
+    ],
+    "correctIndex": 2,
+    "explanation": "It gives the purpose, date, time, venue and a polite request for confirmation.",
+    "ref": "Writing"
+  },
+  {
+    "id": "t2_bi_writing_s1_9",
+    "unit": "writing",
+    "skill": "writing_s1",
+    "diff": "H",
+    "q": "A pupil must apologise to a teacher for missing a deadline. Which message is most appropriate?",
+    "options": [
+      "Dear Miss Lee, I am sorry that I did not submit my project by Friday. I was unwell and have attached a note from my mother. May I submit it on Monday?",
+      "Miss Lee, my project is late because of reasons. Sorry okay.",
+      "I couldn't finish it. Everyone else was late too.",
+      "Sorry I didn't do it. I was busy."
+    ],
+    "correctIndex": 0,
+    "explanation": "It apologises specifically, explains the reason, provides evidence and asks permission for a new date.",
+    "ref": "Writing"
+  },
+  {
+    "id": "t2_bi_writing_s1_10",
+    "unit": "writing",
+    "skill": "writing_s1",
+    "diff": "H",
+    "q": "Which single sentence best matches the purpose 'request information politely'?",
+    "options": [
+      "Tell me the price. I want it now.",
+      "Could you please let me know the price of the workshop and whether lunch is included?",
+      "Price? Lunch? Answer.",
+      "I demand to know the price and the food."
+    ],
+    "correctIndex": 1,
+    "explanation": "Polite requests use 'Could you please' and combine the questions clearly in one sentence.",
+    "ref": "Writing"
+  },
+  {
+    "id": "t2_bi_writing_s2_1",
+    "unit": "writing",
+    "skill": "writing_s2",
+    "diff": "L",
+    "q": "Which is the best order for a short message?\n(a) Please bring your own lunch. (b) Hi Kumar, we are meeting at the park at 8 a.m. tomorrow. (c) See you there!",
+    "options": [
+      "(a), (b), (c)",
+      "(b), (a), (c)",
+      "(c), (b), (a)",
+      "(a), (c), (b)"
+    ],
+    "correctIndex": 1,
+    "explanation": "A message opens with a greeting and main point, then adds details, then closes.",
+    "ref": "Writing"
+  },
+  {
+    "id": "t2_bi_writing_s2_2",
+    "unit": "writing",
+    "skill": "writing_s2",
+    "diff": "L",
+    "q": "Which sentence belongs in the opening of a formal letter?",
+    "options": [
+      "Yours faithfully,",
+      "I look forward to your reply.",
+      "Thank you for your consideration.",
+      "I am writing to apply for the position of class monitor."
+    ],
+    "correctIndex": 3,
+    "explanation": "'I am writing to apply...' states the purpose and belongs in the opening paragraph.",
+    "ref": "Writing"
+  },
+  {
+    "id": "t2_bi_writing_s2_3",
+    "unit": "writing",
+    "skill": "writing_s2",
+    "diff": "L",
+    "q": "A paragraph about a school event should begin with which kind of sentence?",
+    "options": [
+      "A topic sentence stating the main idea",
+      "A quotation from a friend",
+      "A final conclusion",
+      "A detailed example"
+    ],
+    "correctIndex": 0,
+    "explanation": "A topic sentence introduces the paragraph's main idea; details follow.",
+    "ref": "Writing"
+  },
+  {
+    "id": "t2_bi_writing_s2_4",
+    "unit": "writing",
+    "skill": "writing_s2",
+    "diff": "L",
+    "q": "Which connector best starts a paragraph that adds a second reason?",
+    "options": [
+      "However,",
+      "For example,",
+      "Secondly,",
+      "Finally,"
+    ],
+    "correctIndex": 2,
+    "explanation": "'Secondly' signals the second point in a list of reasons.",
+    "ref": "Writing"
+  },
+  {
+    "id": "t2_bi_writing_s2_5",
+    "unit": "writing",
+    "skill": "writing_s2",
+    "diff": "L",
+    "q": "Which closing is suitable for an informal message to a friend?",
+    "options": [
+      "Yours faithfully,",
+      "See you soon!",
+      "I remain yours truly,",
+      "Kind regards to your family and staff."
+    ],
+    "correctIndex": 1,
+    "explanation": "An informal message ends with a friendly, casual closing.",
+    "ref": "Writing"
+  },
+  {
+    "id": "t2_bi_writing_s2_6",
+    "unit": "writing",
+    "skill": "writing_s2",
+    "diff": "M",
+    "q": "Which sentence best links two ideas into one well-organised sentence?",
+    "options": [
+      "The trip was cancelled because the rain was heavy, so we were disappointed.",
+      "The trip was cancelled. So, rain. Disappointed we were.",
+      "Rain heavy, trip cancelled, disappointed.",
+      "The trip was cancelled. The rain was heavy. We were disappointed."
+    ],
+    "correctIndex": 0,
+    "explanation": "It joins the cause and result with clear connectors into one coherent sentence.",
+    "ref": "Writing"
+  },
+  {
+    "id": "t2_bi_writing_s2_7",
+    "unit": "writing",
+    "skill": "writing_s2",
+    "diff": "M",
+    "q": "Which paragraph is best organised?",
+    "options": [
+      "Books. Quiet. Librarian. Projects. Good place.",
+      "The library is nice but also football is fun and books are heavy and sometimes I read.",
+      "I like the library. My friend likes football. The library has many books. Football is played outside. Books are good.",
+      "The library is my favourite place in school. It has a quiet reading corner where I can focus. The librarian also helps me find books for projects."
+    ],
+    "correctIndex": 3,
+    "explanation": "It opens with a topic sentence, then supports it with two relevant details.",
+    "ref": "Writing"
+  },
+  {
+    "id": "t2_bi_writing_s2_8",
+    "unit": "writing",
+    "skill": "writing_s2",
+    "diff": "M",
+    "q": "In a formal letter, where should the writer's address appear?",
+    "options": [
+      "Inside the closing sentence",
+      "At the end, after the signature",
+      "At the top, before the date and recipient's address",
+      "In the middle of the first paragraph"
+    ],
+    "correctIndex": 2,
+    "explanation": "A formal letter places the sender's address at the top, followed by the date and the recipient's details.",
+    "ref": "Writing"
+  },
+  {
+    "id": "t2_bi_writing_s2_9",
+    "unit": "writing",
+    "skill": "writing_s2",
+    "diff": "H",
+    "q": "Which revision best improves cohesion in this paragraph?\n\"The club planted trees. The soil was poor. Many saplings died. The club asked for help from a gardener.\"",
+    "options": [
+      "The club planted trees, but because the soil was poor, many saplings died. The club then asked a gardener for help.",
+      "The club planted trees and the soil was poor and many saplings died and the club asked for help.",
+      "Trees planted. Soil poor. Saplings died. Gardener help.",
+      "The club planted trees. The soil was poor. Many saplings died. The club asked for help from a gardener."
+    ],
+    "correctIndex": 0,
+    "explanation": "It uses 'but because' and 'then' to show contrast, cause and sequence within the paragraph.",
+    "ref": "Writing"
+  },
+  {
+    "id": "t2_bi_writing_s2_10",
+    "unit": "writing",
+    "skill": "writing_s2",
+    "diff": "H",
+    "q": "A report needs an introduction, findings and a recommendation. Which sentence best fits the recommendation section?",
+    "options": [
+      "The survey was carried out on 5 May among 40 pupils.",
+      "Therefore, the canteen should offer at least two vegetarian dishes daily.",
+      "Most pupils said they would buy vegetarian food.",
+      "This report describes the eating habits of pupils."
+    ],
+    "correctIndex": 1,
+    "explanation": "'Therefore, the canteen should...' is a recommendation drawn from the findings.",
+    "ref": "Writing"
+  }
+];
+  if (typeof module === "object" && module.exports) module.exports = ITEMS;
+  const App = (global.App = global.App || {});
+  App.Pools = App.Pools || {};
+  App.Pools.t2 = App.Pools.t2 || {};
+  App.Pools.t2.bi = (App.Pools.t2.bi || []).concat(ITEMS);
+})(typeof window !== "undefined" ? window : globalThis);

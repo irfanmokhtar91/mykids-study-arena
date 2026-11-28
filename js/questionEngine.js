@@ -61,11 +61,10 @@
   }
 
   function getStaticPool(gradeId, subjectId, chapterId) {
-    const gradeData = App.Data && App.Data[gradeId];
-    if (!gradeData) return [];
-    const subjData = gradeData[subjectId];
-    if (!subjData) return [];
-    return Array.isArray(subjData[chapterId]) ? subjData[chapterId] : [];
+    const existing = App.Data?.[gradeId]?.[subjectId]?.[chapterId];
+    if (Array.isArray(existing) && existing.length) return existing;
+    const tagged = App.Pools?.[gradeId]?.[subjectId];
+    return Array.isArray(tagged) ? tagged.filter(item => item.unit === chapterId) : [];
   }
 
   function getFactTablePool(gradeId, subjectId, chapterId) {

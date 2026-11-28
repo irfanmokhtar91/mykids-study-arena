@@ -1,0 +1,567 @@
+/**
+ * Generated from js/data/diagnostic_t2_bi.json via scripts/verify-diagnostic-bank.mjs --sync-js.
+ * Do not edit manually; update the JSON source and re-run --sync-js.
+ */
+(function (root, factory) {
+  if (typeof module === "object" && module.exports) {
+    module.exports = factory();
+  } else {
+    const App = (root.App = root.App || {});
+    App.DiagnosticBanks = App.DiagnosticBanks || {};
+    App.DiagnosticBanks.t2 = App.DiagnosticBanks.t2 || {};
+    App.DiagnosticBanks.t2.bi = factory();
+  }
+})(typeof window !== "undefined" ? window : globalThis, function () {
+  return {
+    "syllabus_nodes": [
+      {
+        "id": "t2_bi_grammar_tenses",
+        "subject": "bi",
+        "grade_level": "t2",
+        "chapter_id": "grammar_tenses",
+        "topic_name": "Grammar",
+        "subtopic_name": "Tenses / Modals and conditional practice (extension)",
+        "prerequisite_node_id": null,
+        "expected_time_ms": 45000,
+        "bloom_level": "Apply"
+      },
+      {
+        "id": "t2_bi_reported_passive",
+        "subject": "bi",
+        "grade_level": "t2",
+        "chapter_id": "reported_passive",
+        "topic_name": "Speech and voice",
+        "subtopic_name": "Reported speech (extension) / Passive voice",
+        "prerequisite_node_id": "t2_bi_grammar_tenses",
+        "expected_time_ms": 45000,
+        "bloom_level": "Apply"
+      },
+      {
+        "id": "t2_bi_vocab_phrasal",
+        "subject": "bi",
+        "grade_level": "t2",
+        "chapter_id": "vocab_phrasal",
+        "topic_name": "Vocabulary",
+        "subtopic_name": "Context clues / Phrasal verbs (extension)",
+        "prerequisite_node_id": null,
+        "expected_time_ms": 45000,
+        "bloom_level": "Apply"
+      },
+      {
+        "id": "t2_bi_error_editing",
+        "subject": "bi",
+        "grade_level": "t2",
+        "chapter_id": "error_editing",
+        "topic_name": "Editing",
+        "subtopic_name": "Agreement / Text completion",
+        "prerequisite_node_id": "t2_bi_grammar_tenses",
+        "expected_time_ms": 45000,
+        "bloom_level": "Apply"
+      },
+      {
+        "id": "t2_bi_reading",
+        "subject": "bi",
+        "grade_level": "t2",
+        "chapter_id": "reading",
+        "topic_name": "Reading",
+        "subtopic_name": "Detail / Inference",
+        "prerequisite_node_id": null,
+        "expected_time_ms": 45000,
+        "bloom_level": "Apply"
+      },
+      {
+        "id": "t2_bi_writing",
+        "subject": "bi",
+        "grade_level": "t2",
+        "chapter_id": "writing",
+        "topic_name": "Writing",
+        "subtopic_name": "Purpose and register / Organisation",
+        "prerequisite_node_id": "t2_bi_reading",
+        "expected_time_ms": 45000,
+        "bloom_level": "Apply"
+      }
+    ],
+    "questions": [
+      {
+        "id": "t2_bi_grammar_tenses_q1",
+        "syllabus_node_id": "t2_bi_grammar_tenses",
+        "difficulty_1_to_5": 1,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "My younger sister ___ her teeth twice a day.",
+        "options_json": {
+          "A": "brushes",
+          "B": "brushed",
+          "C": "is brushing",
+          "D": "brush"
+        },
+        "correct_option": "A",
+        "explanation_text": "A daily routine with a singular subject takes the Present Simple with '-s': 'brushes'."
+      },
+      {
+        "id": "t2_bi_grammar_tenses_q2",
+        "syllabus_node_id": "t2_bi_grammar_tenses",
+        "difficulty_1_to_5": 2,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "If you finish your homework early, you ___ watch television.",
+        "options_json": {
+          "A": "could",
+          "B": "can",
+          "C": "would",
+          "D": "must"
+        },
+        "correct_option": "B",
+        "explanation_text": "The first conditional allows 'can' in the main clause to show a permitted result."
+      },
+      {
+        "id": "t2_bi_grammar_tenses_q3",
+        "syllabus_node_id": "t2_bi_grammar_tenses",
+        "difficulty_1_to_5": 2,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "They ___ football when the thunderstorm began.",
+        "options_json": {
+          "A": "have played",
+          "B": "play",
+          "C": "were playing",
+          "D": "played"
+        },
+        "correct_option": "C",
+        "explanation_text": "The Past Continuous ('were playing') shows the activity in progress when the storm started."
+      },
+      {
+        "id": "t2_bi_grammar_tenses_q4",
+        "syllabus_node_id": "t2_bi_grammar_tenses",
+        "difficulty_1_to_5": 3,
+        "diff": "M",
+        "exam_part": "A",
+        "prompt_text": "You ___ have checked the address; the parcel went to the wrong house.",
+        "options_json": {
+          "A": "must",
+          "B": "can",
+          "C": "might",
+          "D": "should"
+        },
+        "correct_option": "D",
+        "explanation_text": "'Should have' plus a past participle criticises a past failure to act."
+      },
+      {
+        "id": "t2_bi_grammar_tenses_q5",
+        "syllabus_node_id": "t2_bi_grammar_tenses",
+        "difficulty_1_to_5": 4,
+        "diff": "H",
+        "exam_part": "A",
+        "prompt_text": "No sooner ___ the announcement than the pupils cheered.",
+        "options_json": {
+          "A": "had the teacher made",
+          "B": "the teacher had made",
+          "C": "did the teacher make",
+          "D": "the teacher made"
+        },
+        "correct_option": "A",
+        "explanation_text": "'No sooner' at the start requires inversion: 'had the teacher made'."
+      },
+      {
+        "id": "t2_bi_reported_passive_q1",
+        "syllabus_node_id": "t2_bi_reported_passive",
+        "difficulty_1_to_5": 1,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "\"I need more time,\" said Lim. Lim said that he ___ more time.",
+        "options_json": {
+          "A": "was needing",
+          "B": "needed",
+          "C": "needs",
+          "D": "need"
+        },
+        "correct_option": "B",
+        "explanation_text": "Present simple 'need' shifts back to past simple 'needed' after a past reporting verb."
+      },
+      {
+        "id": "t2_bi_reported_passive_q2",
+        "syllabus_node_id": "t2_bi_reported_passive",
+        "difficulty_1_to_5": 2,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "The classroom ___ swept every evening by the duty pupils.",
+        "options_json": {
+          "A": "was",
+          "B": "are",
+          "C": "is",
+          "D": "were"
+        },
+        "correct_option": "C",
+        "explanation_text": "A routine in the present takes the present simple passive 'is swept' with a singular subject."
+      },
+      {
+        "id": "t2_bi_reported_passive_q3",
+        "syllabus_node_id": "t2_bi_reported_passive",
+        "difficulty_1_to_5": 3,
+        "diff": "M",
+        "exam_part": "A",
+        "prompt_text": "\"Will you join the trip?\" the teacher asked. The teacher asked whether I ___ join the trip.",
+        "options_json": {
+          "A": "can",
+          "B": "may",
+          "C": "will",
+          "D": "would"
+        },
+        "correct_option": "D",
+        "explanation_text": "'Will' shifts back to 'would' when a question is reported with a past reporting verb."
+      },
+      {
+        "id": "t2_bi_reported_passive_q4",
+        "syllabus_node_id": "t2_bi_reported_passive",
+        "difficulty_1_to_5": 3,
+        "diff": "M",
+        "exam_part": "A",
+        "prompt_text": "The broken window ___ before the inspection next week.",
+        "options_json": {
+          "A": "must be repaired",
+          "B": "must repair",
+          "C": "must repairing",
+          "D": "must been repaired"
+        },
+        "correct_option": "A",
+        "explanation_text": "A modal passive is 'modal + be + past participle': 'must be repaired'."
+      },
+      {
+        "id": "t2_bi_reported_passive_q5",
+        "syllabus_node_id": "t2_bi_reported_passive",
+        "difficulty_1_to_5": 4,
+        "diff": "H",
+        "exam_part": "A",
+        "prompt_text": "The pupils were made ___ the hall after the concert.",
+        "options_json": {
+          "A": "cleaning",
+          "B": "to clean",
+          "C": "cleaned",
+          "D": "clean"
+        },
+        "correct_option": "B",
+        "explanation_text": "After the passive of 'make', the infinitive keeps 'to': 'were made to clean'."
+      },
+      {
+        "id": "t2_bi_vocab_phrasal_q1",
+        "syllabus_node_id": "t2_bi_vocab_phrasal",
+        "difficulty_1_to_5": 1,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "The teacher praised Aminah because her answers were ___ and easy to follow.",
+        "options_json": {
+          "A": "narrow",
+          "B": "cheap",
+          "C": "clear",
+          "D": "noisy"
+        },
+        "correct_option": "C",
+        "explanation_text": "Answers that are easy to follow are 'clear'; the other adjectives do not describe explanation quality."
+      },
+      {
+        "id": "t2_bi_vocab_phrasal_q2",
+        "syllabus_node_id": "t2_bi_vocab_phrasal",
+        "difficulty_1_to_5": 2,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Please ___ your shoes before entering the house.",
+        "options_json": {
+          "A": "take after",
+          "B": "take up",
+          "C": "take in",
+          "D": "take off"
+        },
+        "correct_option": "D",
+        "explanation_text": "'Take off' means to remove clothing or footwear."
+      },
+      {
+        "id": "t2_bi_vocab_phrasal_q3",
+        "syllabus_node_id": "t2_bi_vocab_phrasal",
+        "difficulty_1_to_5": 2,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "The school decided to ___ the old benches rather than throw them away.",
+        "options_json": {
+          "A": "recycle",
+          "B": "reduce",
+          "C": "remove",
+          "D": "refuse"
+        },
+        "correct_option": "A",
+        "explanation_text": "'Recycle' means to process used items so they can be used again, unlike simply removing them."
+      },
+      {
+        "id": "t2_bi_vocab_phrasal_q4",
+        "syllabus_node_id": "t2_bi_vocab_phrasal",
+        "difficulty_1_to_5": 3,
+        "diff": "M",
+        "exam_part": "A",
+        "prompt_text": "The meeting was ___ because the chairperson had lost her voice.",
+        "options_json": {
+          "A": "called for",
+          "B": "called off",
+          "C": "called on",
+          "D": "called up"
+        },
+        "correct_option": "B",
+        "explanation_text": "'Call off' means to cancel."
+      },
+      {
+        "id": "t2_bi_vocab_phrasal_q5",
+        "syllabus_node_id": "t2_bi_vocab_phrasal",
+        "difficulty_1_to_5": 4,
+        "diff": "H",
+        "exam_part": "A",
+        "prompt_text": "The head teacher's speech was ___; even the youngest pupils understood her message.",
+        "options_json": {
+          "A": "ambiguous",
+          "B": "elaborate",
+          "C": "straightforward",
+          "D": "tedious"
+        },
+        "correct_option": "C",
+        "explanation_text": "If the youngest pupils understood it, the speech was 'straightforward' — simple and clear."
+      },
+      {
+        "id": "t2_bi_error_editing_q1",
+        "syllabus_node_id": "t2_bi_error_editing",
+        "difficulty_1_to_5": 1,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Which sentence about the basket of mangoes is correct?",
+        "options_json": {
+          "A": "The basket of mangoes be on the table.",
+          "B": "The basket of mangoes were on the table.",
+          "C": "The basket of mangoes are on the table.",
+          "D": "The basket of mangoes was on the table."
+        },
+        "correct_option": "D",
+        "explanation_text": "The head of the subject is 'the basket' (singular), so the verb is 'was'."
+      },
+      {
+        "id": "t2_bi_error_editing_q2",
+        "syllabus_node_id": "t2_bi_error_editing",
+        "difficulty_1_to_5": 2,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Read the text: 'Wear a cap. ___, drink plenty of water.' Which connector fits best?",
+        "options_json": {
+          "A": "Also",
+          "B": "Unless",
+          "C": "Although",
+          "D": "Instead"
+        },
+        "correct_option": "A",
+        "explanation_text": "'Also' adds a second related instruction."
+      },
+      {
+        "id": "t2_bi_error_editing_q3",
+        "syllabus_node_id": "t2_bi_error_editing",
+        "difficulty_1_to_5": 3,
+        "diff": "M",
+        "exam_part": "A",
+        "prompt_text": "Which sentence with \"Either ... or\" has the correct verb?",
+        "options_json": {
+          "A": "Either the monitors or the teacher are having the keys.",
+          "B": "Either the monitors or the teacher has the keys.",
+          "C": "Either the monitors or the teacher have the keys.",
+          "D": "Either the monitors or the teacher have keys."
+        },
+        "correct_option": "B",
+        "explanation_text": "With 'either ... or', the verb agrees with the nearer subject 'the teacher', which is singular."
+      },
+      {
+        "id": "t2_bi_error_editing_q4",
+        "syllabus_node_id": "t2_bi_error_editing",
+        "difficulty_1_to_5": 3,
+        "diff": "M",
+        "exam_part": "A",
+        "prompt_text": "Read the text: 'The canteen was closed for cleaning. ___, pupils ate their lunch in the hall.' Which connector fits best?",
+        "options_json": {
+          "A": "Besides",
+          "B": "Whereas",
+          "C": "Therefore",
+          "D": "Unless"
+        },
+        "correct_option": "C",
+        "explanation_text": "'Therefore' shows that eating in the hall was the result of the canteen closing."
+      },
+      {
+        "id": "t2_bi_error_editing_q5",
+        "syllabus_node_id": "t2_bi_error_editing",
+        "difficulty_1_to_5": 4,
+        "diff": "H",
+        "exam_part": "A",
+        "prompt_text": "Which sentence correctly uses \"Neither of\" with a verb?",
+        "options_json": {
+          "A": "Neither of the answers were correct.",
+          "B": "Neither of the answers are correct.",
+          "C": "Neither of the answer were correct.",
+          "D": "Neither of the answers was correct."
+        },
+        "correct_option": "D",
+        "explanation_text": "'Neither of' is treated as singular and takes 'was' in formal written English."
+      },
+      {
+        "id": "t2_bi_reading_q1",
+        "syllabus_node_id": "t2_bi_reading",
+        "difficulty_1_to_5": 1,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Read the notice:\n\"The swimming pool will be closed for maintenance on Monday and Tuesday. It reopens on Wednesday at 9 a.m.\"\nWhen does the pool reopen?",
+        "options_json": {
+          "A": "Wednesday at 9 a.m.",
+          "B": "Tuesday",
+          "C": "Monday at 9 a.m.",
+          "D": "Thursday at 9 a.m."
+        },
+        "correct_option": "A",
+        "explanation_text": "The notice states reopening is on Wednesday at 9 a.m."
+      },
+      {
+        "id": "t2_bi_reading_q2",
+        "syllabus_node_id": "t2_bi_reading",
+        "difficulty_1_to_5": 2,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Read the text:\n\"Jia Hui read the exam timetable twice, then set three alarms on her phone.\"\nWhat does this suggest about Jia Hui?",
+        "options_json": {
+          "A": "She dislikes exams.",
+          "B": "She is anxious about being late.",
+          "C": "She has lost her phone.",
+          "D": "She is careless."
+        },
+        "correct_option": "B",
+        "explanation_text": "Reading the timetable twice and setting three alarms point to worry about missing the exam."
+      },
+      {
+        "id": "t2_bi_reading_q3",
+        "syllabus_node_id": "t2_bi_reading",
+        "difficulty_1_to_5": 2,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Read the text:\n\"The school garden produced 12 kilograms of vegetables in March. This was twice the February harvest, mainly because of the new compost.\"\nWhat was the February harvest?",
+        "options_json": {
+          "A": "12 kilograms",
+          "B": "24 kilograms",
+          "C": "6 kilograms",
+          "D": "3 kilograms"
+        },
+        "correct_option": "C",
+        "explanation_text": "If 12 kg is twice February's amount, February produced 6 kg."
+      },
+      {
+        "id": "t2_bi_reading_q4",
+        "syllabus_node_id": "t2_bi_reading",
+        "difficulty_1_to_5": 3,
+        "diff": "M",
+        "exam_part": "A",
+        "prompt_text": "Read the text:\n\"The coach told the players they had played well, but he kept the team sheet in his hand and did not sign it.\"\nWhat can be inferred?",
+        "options_json": {
+          "A": "He was fully satisfied with the team.",
+          "B": "He wanted to stop coaching.",
+          "C": "He had lost the team sheet.",
+          "D": "He had not yet decided on the final line-up."
+        },
+        "correct_option": "D",
+        "explanation_text": "Keeping the sheet and not signing it suggests the final selection is not settled, despite the praise."
+      },
+      {
+        "id": "t2_bi_reading_q5",
+        "syllabus_node_id": "t2_bi_reading",
+        "difficulty_1_to_5": 4,
+        "diff": "H",
+        "exam_part": "A",
+        "prompt_text": "Read the passage:\n\"The new library rule allows pupils to borrow six books instead of three. Borrowing rose in the first month, then returned to its previous level. The librarian noted that many pupils borrowed six but read only two.\"\nWhat is the best conclusion?",
+        "options_json": {
+          "A": "Borrowing increased without a lasting rise in reading.",
+          "B": "Pupils read more books than before.",
+          "C": "The library should reduce the limit to one book.",
+          "D": "The rule failed because pupils stopped borrowing."
+        },
+        "correct_option": "A",
+        "explanation_text": "Borrowing returned to its old level and many pupils read only two of six, so the rule raised borrowing but not reading."
+      },
+      {
+        "id": "t2_bi_writing_q1",
+        "syllabus_node_id": "t2_bi_writing",
+        "difficulty_1_to_5": 1,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "You want to thank a teacher who helped you. Which message is most appropriate?",
+        "options_json": {
+          "A": "To teacher, thanks for the help and stuff.",
+          "B": "Dear Mrs Chan, thank you for helping me with my essay. Your comments helped me improve it.",
+          "C": "Thanks a lot for everything, teacher!",
+          "D": "U helped me so much, thx!"
+        },
+        "correct_option": "B",
+        "explanation_text": "A thank-you to a teacher should be polite, specific about the help, and well formed."
+      },
+      {
+        "id": "t2_bi_writing_q2",
+        "syllabus_node_id": "t2_bi_writing",
+        "difficulty_1_to_5": 2,
+        "diff": "L",
+        "exam_part": "A",
+        "prompt_text": "Which sentence is the best topic sentence for a paragraph about saving money?",
+        "options_json": {
+          "A": "In conclusion, money is useful.",
+          "B": "My brother bought a game.",
+          "C": "Saving a small amount each week teaches useful habits.",
+          "D": "For example, I saved RM5 last week."
+        },
+        "correct_option": "C",
+        "explanation_text": "It states the paragraph's main idea; the others are details or a conclusion."
+      },
+      {
+        "id": "t2_bi_writing_q3",
+        "syllabus_node_id": "t2_bi_writing",
+        "difficulty_1_to_5": 3,
+        "diff": "M",
+        "exam_part": "A",
+        "prompt_text": "Which message keeps an appropriate formal register for a school notice?",
+        "options_json": {
+          "A": "Bring your report cards Friday, guys!",
+          "B": "Report cards! Friday! Don't forget!",
+          "C": "All students must bring their report cards on Friday. No exceptions, ok?",
+          "D": "All students are required to bring their report cards on Friday."
+        },
+        "correct_option": "D",
+        "explanation_text": "Formal notices use full, impersonal sentences without slang or informal tags."
+      },
+      {
+        "id": "t2_bi_writing_q4",
+        "syllabus_node_id": "t2_bi_writing",
+        "difficulty_1_to_5": 3,
+        "diff": "M",
+        "exam_part": "A",
+        "prompt_text": "Which closing best fits a formal letter of complaint?",
+        "options_json": {
+          "A": "Yours faithfully,",
+          "B": "Bye for now,",
+          "C": "Later!",
+          "D": "Thanks a million,"
+        },
+        "correct_option": "A",
+        "explanation_text": "A formal complaint ends 'Yours faithfully' when the name is unknown."
+      },
+      {
+        "id": "t2_bi_writing_q5",
+        "syllabus_node_id": "t2_bi_writing",
+        "difficulty_1_to_5": 4,
+        "diff": "H",
+        "exam_part": "A",
+        "prompt_text": "A pupil's report has these sentences: (1) In response to the survey, the school placed three bins near the canteen. (2) A month after the bins were installed, litter had decreased by half. (3) A survey showed pupils wanted more bins nearby. Which order presents the evidence, the action and its result?",
+        "options_json": {
+          "A": "(1), (3), (2)",
+          "B": "(3), (1), (2)",
+          "C": "(2), (3), (1)",
+          "D": "(2), (1), (3)"
+        },
+        "correct_option": "B",
+        "explanation_text": "The survey identifies the need (3), the school responds (1), and the later measurement shows the result (2)."
+      }
+    ]
+  };
+});

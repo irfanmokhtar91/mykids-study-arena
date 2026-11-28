@@ -201,7 +201,9 @@
             { id: "grammar_tenses", title: "Grammar: Tenses, Modals & Conditionals", titleEn: "Grammar: Tenses, Modals & Conditionals" },
             { id: "reported_passive", title: "Reported Speech & Passive Voice", titleEn: "Reported Speech & Passive Voice" },
             { id: "vocab_phrasal", title: "Vocabulary & Phrasal Verbs", titleEn: "Vocabulary & Phrasal Verbs" },
-            { id: "error_editing", title: "Error Identification & Text Completion", titleEn: "Error Identification & Text Completion" }
+            { id: "error_editing", title: "Error Identification & Text Completion", titleEn: "Error Identification & Text Completion" },
+            { id: "reading", title: "Reading Comprehension", titleEn: "Reading Comprehension" },
+            { id: "writing", title: "Writing", titleEn: "Writing" }
           ]
         },
         {

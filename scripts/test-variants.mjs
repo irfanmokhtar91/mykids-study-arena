@@ -1435,6 +1435,14 @@ test("18d. every t2_sejarah and t2_geografi pool item maps to a real curriculum 
   }
 });
 
+test("T2 language practice pools build mixed sessions and retries", () => {
+  for (const subject of ["bm", "bi"]) {
+    const items = require("../js/data/pools/t2_" + subject + ".js");
+    const units = [...new Set(items.map(item => item.unit))];
+    assertPoolSessionAndRetry("t2_" + subject, items, units.slice(0, 4), "language-" + subject);
+  }
+});
+
 const failed = results.filter((r) => !r.ok);
 console.log(
   failed.length === 0

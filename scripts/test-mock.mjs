@@ -381,5 +381,40 @@ const t2W2Bank = {
 const sampleT2W2Ids = ["t2sj-B01", "t2sj-C01", "t2ge-B01", "t2ge-C01", "t2ge-C04"];
 eq("Parent MarkingUI.findItem resolves all T2 Wave 2 structured items", sampleT2W2Ids.map((id) => Boolean(parentCtx.App.MarkingUI.findItem(id))), [true, true, true, true, true]);
 
+for (const subject of ["bm", "bi"]) {
+  const bp = B.find("t2", subject);
+  const bank = {
+    getStructured: pool => parentCtx.App.Data.structured[pool].ITEMS,
+    getObjectiveSets: pool => parentCtx.App.Data.mockObjective[pool].SETS
+  };
+  for (const paper of bp.papers) {
+    const built = M.buildPaper(bp, paper.id, bank, "wave3");
+    const answers = {};
+    const marks = {};
+    const incomplete = M.buildPaper(bp, paper.id, {
+      ...bank,
+      getObjectiveSets: pool => bank.getObjectiveSets(pool).flatMap(set => [
+        { ...set, status: "draft" },
+        { ...set, items: set.items.slice(1) },
+        { ...set, items: [...set.items, set.items[0]] }
+      ])
+    }, "wave3");
+    for (const section of incomplete.sections.filter(s => s.kind === "objective")) {
+      eq(subject + " " + section.id + " rejects draft and wrong-sized sets", section.items.length, 0);
+    }
+    for (const [i, section] of built.sections.entries()) {
+      eq(subject + " " + paper.id + " " + section.id + " item count", section.items.length, paper.sections[i].count);
+      for (const it of section.items) {
+        if (it.type === "structured") {
+          eq("parent marking lookup " + it.id, Boolean(parentCtx.App.MarkingUI.findItem(it.id)), true);
+          marks[it.id] = mark(it, allSteps);
+        } else answers[it.id] = it.inputType === "word" ? it.answer : it.correctIndex;
+      }
+    }
+    const score = M.scorePaper(built, answers, marks);
+    eq(subject + " " + paper.id + " full score", [score.complete, score.markedEarned, score.pct], [true, paper.marks, 100]);
+  }
+}
+
 console.log(failed === 0 ? "MOCK_TESTS_PASSED" : `MOCK_TESTS_FAILED (${failed})`);
 process.exit(failed === 0 ? 0 : 1);
